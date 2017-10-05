@@ -38,11 +38,11 @@ public class Launcher_MetExplore4Galaxy {
     @Option(name="-fcol", usage="Number of the filtered column (if the filter option is choosen)")
     public int colFiltered = 0;
 
-    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (first case: 0; by default: 4).")
+    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5).")
     public int inchiColumn = 5;
 
-    @Option(name="-form", usage="List containing the number (separated by comma; ex: 0,1,2,3,4; first case: 0) of the InChi's layer concerned by the mapping (by default: all of them).")//TODO: implements this functionality
-    public String formulaColumn = "1,2,3,4,5,6,7";//TODO: catch the elements in an array of Integer with formulaColumn.split(",")
+    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for all layers selection, enter c,h,q,p,b,t,i,f,r).")//TODO: implements this functionality
+    public String inchiLayers = "c,h";//TODO: catch the elements in an array of Integer with formulaColumn.split(",")
 
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
@@ -52,6 +52,7 @@ public class Launcher_MetExplore4Galaxy {
         Launcher_MetExplore4Galaxy launch = new Launcher_MetExplore4Galaxy();
         MetExplore4Galaxy met = new MetExplore4Galaxy();
         CmdLineParser parser = new CmdLineParser(launch);
+        String[] inchiLayers = launch.inchiLayers.split(",");
 
 
         //CmdParsing
@@ -74,14 +75,13 @@ public class Launcher_MetExplore4Galaxy {
 
 
         //SBML parsing
-        JSBMLToBionetwork jsbml = new JSBMLToBionetwork(launch.sbml);//TODO: test function SBML
-        BioNetwork bionet = jsbml.getBioNetwork();
+        BioNetwork bionet = (new JSBMLToBionetwork(launch.sbml)).getBioNetwork();//TODO: test function SBML
 
         try{
 
             //Mapping
             HashMap <String, String[]> parsedFile = met.extractData(launch.inFile, launch.filter, (launch.colFiltered -1));
-            Set<BioPhysicalEntity> map = met.mapping(bionet, parsedFile, (launch.inchiColumn -1));
+            Set<BioPhysicalEntity> map = met.mapping(bionet, parsedFile, (launch.inchiColumn -1), inchiLayers);
 
             //PathwayEnrichment
             PathwayEnrichment enr = new PathwayEnrichment(bionet, map);
@@ -93,6 +93,8 @@ public class Launcher_MetExplore4Galaxy {
             }
 
             System.err.println(resultList.get(0).size() + " pathways are concerned among the network (on a total of " + bionet.getPathwayList().size() + ").");
+
+            //SaveFile
             met.writeOutput(resultList, map, launch.outFile);
        }
         catch (IOException e2){

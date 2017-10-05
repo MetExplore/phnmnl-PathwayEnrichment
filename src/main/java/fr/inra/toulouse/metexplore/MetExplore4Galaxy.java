@@ -43,20 +43,21 @@ public class MetExplore4Galaxy {
         return listMetabolites;
     }
 
-    public Set<BioPhysicalEntity> mapping(BioNetwork bn, HashMap <String, String[]> parsedFile, int inchiColumn){//TODO: mapping on more InChI layout
+    public Set<BioPhysicalEntity> mapping(BioNetwork bn, HashMap <String, String[]> parsedFile, int inchiColumn, String[] inchiLayers){//TODO: mapping on more InChI layout
 
         Set<BioPhysicalEntity> listMetabolites = new HashSet();
         HashMap <String, String[]> remainingMetabolites = parsedFile;
 
-        System.out.println("MetExplore's name\tInputFile's name");//TODO: write a second file with these mapping informations or put them into dictionnary or an attribute of a BioPhysicalEntity redefinition for the main file
+
+        System.out.println("MetExplore's name\tInputFile's name");//TODO: write a second file with these mapping informations or put them into dictionary or an attribute of a BioPhysicalEntity redefinition for the main file
         for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {//TODO-BUG: does a metabolite/entry match with only one bioentity? If no, otherwhise remove() is inadapted
-            for (String[] entry : parsedFile.values()) {//TODO: convert into an arrayList and sort the list alphabeticly
+            for (String[] entry : parsedFile.values()) {//TODO: convert into an arrayList and sort the list alphabetic
                 //System.out.println(bpe.getInchi() + " = " + entry[4]);
                 if (!(entry[inchiColumn]).equals("NA") && !(bpe.getInchi()).equals("NA") && !(bpe.getInchi()).equals("") && !(entry[inchiColumn]).equals("") ){
                     //InChI bpeInchi = new InChI(bpe.getInchi());
                     //InChI entryInchi = new InChI(entry[inchiColumn]);
-                    InChI4Galaxy bpeInchi = new InChI4Galaxy(bpe.getInchi(),false);
-                    InChI4Galaxy entryInchi = new InChI4Galaxy(entry[inchiColumn], false);
+                    InChI4Galaxy bpeInchi = new InChI4Galaxy(bpe.getInchi(), inchiLayers);
+                    InChI4Galaxy entryInchi = new InChI4Galaxy(entry[inchiColumn], inchiLayers);
                     if (bpeInchi.equals(entryInchi)) {
                         listMetabolites.add(bpe);
                         //remainingMetabolites.remove(entry[0]);
@@ -141,6 +142,7 @@ public class MetExplore4Galaxy {
         String inputFile = dir + "Galaxy15-[Biosigner_Multivariate_Univariate_Multivariate_variableMetadata.tsv].tabular";
         String sbml = dir + "recon2.v03_ext_noCompartment_noTransport.xml";
         String outputFile = dir + "output.tsv";
+        String[] inchiLayers = {"c","h"};
 
         //SBML parsing
         JSBMLToBionetwork jsbml = new JSBMLToBionetwork(sbml);
@@ -153,7 +155,7 @@ public class MetExplore4Galaxy {
 
            //Mapping
             HashMap <String, String[]> parsedFile = app.extractData(inputFile, false,-1);
-            Set<BioPhysicalEntity> map = app.mapping(bionet, parsedFile, 4);
+            Set<BioPhysicalEntity> map = app.mapping(bionet, parsedFile, 4, inchiLayers);
 
             //PathwayEnrichment
             PathwayEnrichment enr = new PathwayEnrichment(bionet, map);

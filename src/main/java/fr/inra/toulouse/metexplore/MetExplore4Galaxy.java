@@ -55,8 +55,8 @@ public class MetExplore4Galaxy {
                 if (!(entry[inchiColumn]).equals("NA") && !(bpe.getInchi()).equals("NA") && !(bpe.getInchi()).equals("") && !(entry[inchiColumn]).equals("") ){
                     //InChI bpeInchi = new InChI(bpe.getInchi());
                     //InChI entryInchi = new InChI(entry[inchiColumn]);
-                    InChI4Galaxy bpeInchi = new InChI4Galaxy(bpe.getInchi(),false);
-                    InChI4Galaxy entryInchi = new InChI4Galaxy(entry[inchiColumn], false);
+                    InChI bpeInchi = new InChI(bpe.getInchi());
+                    InChI entryInchi = new InChI(entry[inchiColumn]);
                     if (bpeInchi.equals(entryInchi)) {
                         listMetabolites.add(bpe);
                         //remainingMetabolites.remove(entry[0]);

@@ -17,7 +17,7 @@ public class Test_MetExplore4Galaxy extends TestCase {
     static String inputFile = "sacurineVariableMetadataEnhanced.tsv";
     //static String inputFile = dir + "Galaxy15-[Biosigner_Multivariate_Univariate_Multivariate_variableMetadata.tsv].tabular";
     static String dir = "/home/bmerlet/Documents/PathwayEnrichment/";
-    static String sbml = dir + "recon2.v03_ext_noCompartment_noTransport.xml";
+    static String sbml = dir + "recon2.v03_ext_noCompartment_noTransport_v2.xml";
     static String outputFile = dir + "output.tsv";
     static BufferedWriter dummyFile;
 
@@ -29,7 +29,7 @@ public class Test_MetExplore4Galaxy extends TestCase {
             try {
                 bionet = (new JSBMLToBionetwork(sbml)).getBioNetwork();
                 met = new MetExplore4Galaxy();
-                createdDummyFile();
+                createdDummyFile("Taurine\tCHEBI:15891\tC2H7NO3S\tC(CS(O)(=O)=O)N\tInChI=1S/C2H7NO3S/c3-1-2-7(4,5)6/h1-3H2,(H,4,5,6)\tTaurine\t124,006693\t1,00727647\t125,01396947\tNA\t[(M-H)]-\t1\t0,88\t5\t2,6122895216\t0,6358457794\t0,2434055545\t387859,346882448\t11652,3712684191\t0,0300427755\t0,1234268278\t15891\tNA\ttaurine\n");
                 parsedFile = met.extractData(dir + "dummyFile.tsv", false, -1);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -37,14 +37,13 @@ public class Test_MetExplore4Galaxy extends TestCase {
         }
     }
 
-    protected void createdDummyFile(){
+    protected void createdDummyFile(String inputLine){
         try {
             File f = new File(dir + "dummyFile.tsv");
             f.createNewFile();
             dummyFile = new BufferedWriter(new FileWriter(f));
             dummyFile.write("variableMetadata\tdatabase_identifier\tchemical_formula\tsmiles\tinchi\tmetabolite_identification\tmass_to_charge\tmass_of_proton\tmass\tfragmentation\tmodifications\tcharge\tretention_time\treliability\tsample_mean\tsample_sd\tsample_CV\tpool_mean\tpool_sd\tpool_CV\tpoolCV_over_sampleCV\tchebi.id\tchemspider.id\tbiodb.compound.name\n");
-            dummyFile.write("Taurine\tCHEBI:15891\tC2H7NO3S\tC(CS(O)(=O)=O)N\tInChI=1S/C2H7NO3S/c3-1-2-7(4,5)6/h1-3H2,(H,4,5,6)\tTaurine\t124,006693\t1,00727647\t125,01396947\tNA\t[(M-H)]-\t1\t0,88\t5\t2,6122895216\t0,6358457794\t0,2434055545\t387859,346882448\t11652,3712684191\t0,0300427755\t0,1234268278\t15891\tNA\ttaurine\n");
-            //dummyFile.write("(2-methoxyethoxy)propanoic acid isomer\tCHEBI:67255\tC6H12O4\tCOCCOC(C)C(O)=O\tInChI=1S/C6H12O4/c1-5(6(7)8)10-4-3-9-2/h5H,3-4H2,1-2H3,(H,7,8)\t(2-methoxyethoxy)propanoic acid isomer\t147,065655\t1,00727647\t148,07293147\tNA\t[(M-H)]-\t1\t4,75\t4\t2,1374324398\t0,7609978352\t0,3560336322\t453243,359568937\t34664,1934521402\t0,0764803118\t0,2148120426\t67255\tNA\t2-(2-methoxyethoxy)propanoic acid\n");
+            dummyFile.write(inputLine);
             dummyFile.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -66,11 +65,30 @@ public class Test_MetExplore4Galaxy extends TestCase {
             }
     }
 
-    public void testMapping () {
-
+    public void testMappingWin () {
         Set<BioPhysicalEntity> expectedMap = new HashSet();
         expectedMap.add(bionet.getBioPhysicalEntityById("M_taur"));
         Set<BioPhysicalEntity> obtainedMap = met.mapping(bionet,parsedFile,4);
         assertEquals(expectedMap.iterator().next().getName(), obtainedMap.iterator().next().getName());
+    }
+
+    public void testMappingFail () {
+        createdDummyFile("Pantothenic acid\tCHEBI:7916\tC9H17NO5\tCC(C)(CO)C(O)C(=O)NCCC(O)=O\tInChI=1S/C9H17NO5/c1-9(2,5-11)7(14)8(15)10-4-3-6(12)13/h7,11,14H,3-5H2,1-2H3,(H,10,15)(H,12,13)\tPantothenic acid\t218,102478\t1,00727647\t219,10975447\tNA\t[(M-H)]-\t1\t4,77\t5\t3,5599610222\t0,2982536819\t0,0837800414\t3012837,77207209\t131428,160471926\t0,043622714\t0,5206814567\t7916\tNA\tpantothenic acid");
+        try {
+            parsedFile = met.extractData(dir + "dummyFile.tsv", false, -1);
+
+            Set<BioPhysicalEntity> expectedMap = new HashSet();
+            BioPhysicalEntity bpe = bionet.getBioPhysicalEntityById("M_pnto_R");
+            expectedMap.add(bpe);
+
+            Set<BioPhysicalEntity> obtainedMap = met.mapping(bionet, parsedFile, 4);
+            String[] valuesList = parsedFile.values().iterator().next();
+
+            assertFalse("InChI's parsed file: " + valuesList[4] + "\n InChI's MetExplore: " + bpe.getInchi(), obtainedMap.size() > 0);
+            System.out.println("InChI's parsed file: " + valuesList[4] + "\n InChI's MetExplore: " + bpe.getInchi());
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }

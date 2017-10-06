@@ -3,10 +3,9 @@ package fr.inra.toulouse.metexplore;
 import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioPathway;
 import parsebionet.biodata.BioPhysicalEntity;
+import parsebionet.biodata.BioRef;
 import parsebionet.io.JSBMLToBionetwork;
 import parsebionet.statistics.PathwayEnrichment;
-import parsebionet.utils.chemicalStructures.InChI;
-import com.sun.jersey.api.client.ClientResponse;
 
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -15,7 +14,12 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.File;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MetExplore4Galaxy {
 
@@ -47,31 +51,54 @@ public class MetExplore4Galaxy {
     public Set<BioPhysicalEntity> mapping(BioNetwork bn, HashMap <String, String[]> parsedFile, int inchiColumn, String[] inchiLayers){//TODO: mapping on more InChI layout
 
         Set<BioPhysicalEntity> listMetabolites = new HashSet();
-        HashMap <String, String[]> remainingMetabolites = parsedFile;
-
+        HashMap <String, String[]> remainingMetabolites = (HashMap <String, String[]>) parsedFile.clone();
+        Boolean chebiMapping;
 
         System.out.println("MetExplore's name\tInputFile's name");//TODO: write a second file with these mapping informations or put them into dictionary or an attribute of a BioPhysicalEntity redefinition for the main file
-        for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {//TODO-BUG: does a metabolite/entry match with only one bioentity? If no, otherwhise remove() is inadapted
+        for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {
             for (String[] entry : parsedFile.values()) {//TODO: convert into an arrayList and sort the list alphabetic
-                //System.out.println(bpe.getInchi() + " = " + entry[4]);
 
-                if (!(entry[inchiColumn]).equals("NA") && !(bpe.getInchi()).equals("NA") && !(bpe.getInchi()).equals("") && !(entry[inchiColumn]).equals("") ){
-                    //InChI bpeInchi = new InChI(bpe.getInchi());
-                    //InChI entryInchi = new InChI(entry[inchiColumn]);
-                    InChI4Galaxy bpeInchi = new InChI4Galaxy(bpe.getInchi(), inchiLayers);
-                    InChI4Galaxy entryInchi = new InChI4Galaxy(entry[inchiColumn], inchiLayers);
-                    if (bpeInchi.equals(entryInchi)) {
-                        listMetabolites.add(bpe);
-                        //remainingMetabolites.remove(entry[0]);
-                        System.out.println(bpe.getName() + " = " + entry[0]);
-                        //break;
+                chebiMapping = false;
+                if (!(entry[inchiColumn]).equals("NA") && !(bpe.getInchi()).equals("NA") && !(bpe.getInchi()).equals("") && !(entry[inchiColumn]).equals("") ) {
+
+                    for (Map.Entry<String, Set<BioRef>> ref : bpe.getRefs().entrySet()) {
+                        if (ref.getKey().equals("chebi")) {
+                            for (BioRef val : ref.getValue()) {
+                                if (entry[1].equals(val.id)) {
+                                    listMetabolites.add(bpe);
+                                    remainingMetabolites.remove(entry[0]);
+                                    chebiMapping = true;
+                                    System.out.println("**" + bpe.getName() + " = " + entry[0]);
+                                    System.out.println("**" + val.id + " = " + entry[1]);
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+
+                    if (!chebiMapping) {
+                        InChI4Galaxy bpeInchi = new InChI4Galaxy(bpe.getInchi(), inchiLayers);
+                        InChI4Galaxy entryInchi = new InChI4Galaxy(entry[inchiColumn], inchiLayers);
+                        if (bpeInchi.equals(entryInchi)) {
+                            listMetabolites.add(bpe);
+                            remainingMetabolites.remove(entry[0]);
+                            System.out.println(bpe.getName() + " = " + entry[0]);
+                            System.out.println(bpe.getInchi() + " = " + entry[4]);
+                            //System.out.println("***");
+                        }
                     }
                 }
             }
         }
-        System.err.println(listMetabolites.size() + " elements have been mapped (against " + remainingMetabolites.size() + " non-mapped).\n");
-        return listMetabolites;
+        System.err.println(listMetabolites.size() + " elements have been mapped (" + round((double)remainingMetabolites.size()/parsedFile.size()*100) + "% non-mapped).\n");
+        System.out.println("\n\n\n\n\n###########################");
+        for (String[] entry : remainingMetabolites.values()){
+           System.out.println(entry[0] + "\t" + entry[1] + "\t" + entry[4]);
+        }
+            return listMetabolites;
     }
+
 
     public void writeOutput(ArrayList<HashMap<BioPathway, Double>> resultList, Set<BioPhysicalEntity> map, String outputFile) throws IOException{
         BufferedWriter f = new BufferedWriter(new FileWriter(new File(outputFile)));
@@ -142,7 +169,7 @@ public class MetExplore4Galaxy {
         long startTime = System.nanoTime();
         String dir = "/home/bmerlet/Documents/PathwayEnrichment/";
         String inputFile = dir + "Galaxy15-[Biosigner_Multivariate_Univariate_Multivariate_variableMetadata.tsv].tabular";
-        String sbml = dir + "recon2.v03_ext_noCompartment_noTransport.xml";
+        String sbml = dir + "recon2.v03_ext_noCompartment_noTransport_v2.xml";
         String outputFile = dir + "output.tsv";
         String[] inchiLayers = {"c","h"};
 

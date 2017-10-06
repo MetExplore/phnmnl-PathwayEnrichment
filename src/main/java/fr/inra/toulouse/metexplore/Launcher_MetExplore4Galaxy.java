@@ -42,7 +42,7 @@ public class Launcher_MetExplore4Galaxy {
     public int inchiColumn = 5;
 
     @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for all layers selection, enter c,h,q,p,b,t,i,f,r).")//TODO: implements this functionality
-    public String inchiLayers = "c,h";//TODO: catch the elements in an array of Integer with formulaColumn.split(",")
+    public String inchiLayers = "";
 
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
@@ -85,13 +85,13 @@ public class Launcher_MetExplore4Galaxy {
 
             //PathwayEnrichment
             PathwayEnrichment enr = new PathwayEnrichment(bionet, map);
+            System.err.println("Pathway enrichment in progress...");
             ArrayList<HashMap<BioPathway, Double>> resultList = new ArrayList<HashMap<BioPathway, Double> >();
 
             resultList.add(enr.computeEnrichment());
             for (int i = 0; i < 3; i++) {
                 resultList.add(enr.computeEnrichment(i));
             }
-
             System.err.println(resultList.get(0).size() + " pathways are concerned among the network (on a total of " + bionet.getPathwayList().size() + ").");
 
             //SaveFile

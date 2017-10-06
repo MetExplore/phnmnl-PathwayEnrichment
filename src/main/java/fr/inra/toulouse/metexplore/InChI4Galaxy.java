@@ -32,19 +32,58 @@ public class InChI4Galaxy extends ChemicalStructure {
 
     public InChI4Galaxy(String inchiStringValue, String[] inchiLayers){
         this.inchiString = inchiStringValue;
-        this.setLayers(inchiLayers);
+        this.setBoolean(inchiLayers);
     }
 
     public InChI4Galaxy(String inchiStringValue) {
         this.inchiString = inchiStringValue;
         String[] inchiLayers = {"c","h"};
-        this.setLayers(inchiLayers);
+        this.setBoolean(inchiLayers);
     }
 
-    private void setLayers(String[] inchiLayers) {
+    public void setBoolean (String[] inchiLayers){
+
+        Boolean[] boolInchiLayers = {false,false,false,false,false,false,false,false,false};
+
+        for (String i : inchiLayers) {
+            if (i != null){
+                switch (i) {
+                    case "c":
+                        boolInchiLayers[0] = true;
+                        break;
+                    case "h":
+                        boolInchiLayers[1] = true;
+                        break;
+                    case "q":
+                        boolInchiLayers[2] = true;
+                        break;
+                    case "p":
+                        boolInchiLayers[3] = true;
+                        break;
+                    case "b":
+                        boolInchiLayers[4] = true;
+                        break;
+                    case "t":
+                        boolInchiLayers[5] = true;
+                        break;
+                    case "i":
+                        boolInchiLayers[6] = true;
+                        break;
+                    case "f":
+                        boolInchiLayers[7] = true;
+                        break;
+                    case "r":
+                        boolInchiLayers[8] = true;
+                        break;
+                }
+            }
+        }
+        this.setLayers(boolInchiLayers);
+    }
+
+    private void setLayers(Boolean[] boolInchiLayers) {
 
         String trunckedInchi = this.getInchiString();
-        int nbLayers = inchiLayers.length;
 
         if (!trunckedInchi.startsWith("InChI=")) {
             this.setValidInchi(false);
@@ -75,7 +114,7 @@ public class InChI4Galaxy extends ChemicalStructure {
                     return;
                 }
 
-                if (nbLayers >= 9) {
+                if (boolInchiLayers[8]) {
                     connect = new InchiLayer('r', tmp[1]);
                     this.setReconnectedLayer(connect);
                 }
@@ -89,7 +128,7 @@ public class InChI4Galaxy extends ChemicalStructure {
                     return;
                 }
 
-                if (nbLayers >= 8) {
+                if (boolInchiLayers[7]) {
                     connect = new InchiLayer('f', tmp[1]);
                     this.setFixedLayer(connect);
                 }
@@ -103,7 +142,7 @@ public class InChI4Galaxy extends ChemicalStructure {
                     return;
                 }
 
-                if (nbLayers >= 7) {
+                if (boolInchiLayers[6]) {
                     connect = new InchiLayer('i', tmp[1]);
                     this.setIsotopicLayer(connect);
                 }
@@ -117,7 +156,7 @@ public class InChI4Galaxy extends ChemicalStructure {
                     return;
                 }
 
-                if (nbLayers >= 6) {
+                if (boolInchiLayers[5]) {
                     connect = new InchiLayer('t', tmp[1]);
                     this.setTetraStereoLayer(connect);
                 }
@@ -131,7 +170,7 @@ public class InChI4Galaxy extends ChemicalStructure {
                     return;
                 }
 
-                if (nbLayers >= 5) {
+                if (boolInchiLayers[4]) {
                     connect = new InchiLayer('b', tmp[1]);
                     this.setDbStereoLayer(connect);
                 }
@@ -144,7 +183,7 @@ public class InChI4Galaxy extends ChemicalStructure {
                     return;
                 }
 
-                if (nbLayers >= 4) {
+                if (boolInchiLayers[3]) {
                     connect = new InchiLayer('p', tmp[1]);
                     this.setProtonationLayer(connect);
                 }
@@ -160,7 +199,7 @@ public class InChI4Galaxy extends ChemicalStructure {
                 }
 
 
-                if (nbLayers >= 3) {
+                if (boolInchiLayers[2]) {
                     connect = new InchiLayer('q', tmp[1]);
                     this.setChargeLayer(connect);
                 }
@@ -176,7 +215,7 @@ public class InChI4Galaxy extends ChemicalStructure {
                 }
 
 
-                if (nbLayers >= 2) {
+                if (boolInchiLayers[1]) {
                     connect = new InchiLayer('h', tmp[1]);
                     this.sethLayer(connect);
                 }
@@ -190,8 +229,10 @@ public class InChI4Galaxy extends ChemicalStructure {
                     return;
                 }
 
-                connect = new InchiLayer('c', tmp[1]);
-                this.setConnectivity(connect);
+                if (boolInchiLayers[0]) {
+                    connect = new InchiLayer('c', tmp[1]);
+                    this.setConnectivity(connect);
+                }
                 trunckedInchi = tmp[0];
             }
 

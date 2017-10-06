@@ -6,6 +6,7 @@ import parsebionet.biodata.BioPhysicalEntity;
 import parsebionet.io.JSBMLToBionetwork;
 import parsebionet.statistics.PathwayEnrichment;
 import parsebionet.utils.chemicalStructures.InChI;
+import com.sun.jersey.api.client.ClientResponse;
 
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -53,6 +54,7 @@ public class MetExplore4Galaxy {
         for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {//TODO-BUG: does a metabolite/entry match with only one bioentity? If no, otherwhise remove() is inadapted
             for (String[] entry : parsedFile.values()) {//TODO: convert into an arrayList and sort the list alphabetic
                 //System.out.println(bpe.getInchi() + " = " + entry[4]);
+
                 if (!(entry[inchiColumn]).equals("NA") && !(bpe.getInchi()).equals("NA") && !(bpe.getInchi()).equals("") && !(entry[inchiColumn]).equals("") ){
                     //InChI bpeInchi = new InChI(bpe.getInchi());
                     //InChI entryInchi = new InChI(entry[inchiColumn]);

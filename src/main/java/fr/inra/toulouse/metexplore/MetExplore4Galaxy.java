@@ -48,7 +48,7 @@ public class MetExplore4Galaxy {
         return listMetabolites;
     }
 
-    public Set<BioPhysicalEntity> mapping(BioNetwork bn, HashMap <String, String[]> parsedFile, int inchiColumn, String[] inchiLayers){//TODO: mapping on more InChI layout
+    public Set<BioPhysicalEntity> mapping(BioNetwork bn, HashMap <String, String[]> parsedFile, int inchiColumn, String[] inchiLayers){
 
         Set<BioPhysicalEntity> listMetabolites = new HashSet();
         HashMap <String, String[]> remainingMetabolites = (HashMap <String, String[]>) parsedFile.clone();
@@ -73,11 +73,15 @@ public class MetExplore4Galaxy {
                                     break;
                                 }
                             }
+                            System.out.println("cou1");
                             break;
                         }
+                        System.out.println(ref.getKey());
                     }
-
-                    if (!chebiMapping) {
+                    System.out.println("cou2");
+                    if (chebiMapping) {
+                        break;
+                    }else{
                         InChI4Galaxy bpeInchi = new InChI4Galaxy(bpe.getInchi(), inchiLayers);
                         InChI4Galaxy entryInchi = new InChI4Galaxy(entry[inchiColumn], inchiLayers);
                         if (bpeInchi.equals(entryInchi)) {
@@ -88,6 +92,7 @@ public class MetExplore4Galaxy {
                             //System.out.println("***");
                         }
                     }
+                    System.out.println("cou3");
                 }
             }
         }
@@ -98,7 +103,6 @@ public class MetExplore4Galaxy {
         }
             return listMetabolites;
     }
-
 
     public void writeOutput(ArrayList<HashMap<BioPathway, Double>> resultList, Set<BioPhysicalEntity> map, String outputFile) throws IOException{
         BufferedWriter f = new BufferedWriter(new FileWriter(new File(outputFile)));
@@ -113,10 +117,10 @@ public class MetExplore4Galaxy {
 
         for (Map.Entry<BioPathway, Double> entry : result.entrySet()) {
             BioPathway path = entry.getKey();
-            String printed = entry.getKey().getName() + "\t" + round((double)entry.getValue()) + "\t";
+            String printed = entry.getKey().getName() + "\t" + roundPval((double)entry.getValue()) + "\t";
 
             for (int i = 0; i < 3; i++) {
-                printed += round((double) iteratorList.get(i).next()) + "\t";
+                printed += roundPval((double) iteratorList.get(i).next()) + "\t";
             }
 
             int j = 0;
@@ -136,15 +140,14 @@ public class MetExplore4Galaxy {
         }
     }
 
-    public static String round(double value) {
+    public static String roundPval(double value) {
         if(value < 0.01){
             String tmp = (String.valueOf(value));
             String[] splitted = tmp.split("E");
             double head = Double.parseDouble(splitted[0]);
 
-            head =  (double) Math.round(head * 100)/ 100;
             try{
-                return  (String.valueOf(head) + "E" + splitted[1] +" ");
+                return  (String.valueOf(round(head)) + "E" + splitted[1] +" ");
             }catch (ArrayIndexOutOfBoundsException e){
                 splitted = tmp.split("\\.");
                 int j = 0;
@@ -156,10 +159,12 @@ public class MetExplore4Galaxy {
                     }
                 }
                 double tail = Double.parseDouble(splitted[1].substring(j, j+1) + "." + splitted[1].substring(j + 1));
-                tmp = String.valueOf((double) Math.round(tail * 100)/ 100);
-                return (tmp + " E-" + String.valueOf(j + 1));
+                return (round(tail) + " E-" + String.valueOf(j + 1));
             }
         }
+        return round(value);
+    }
+    public static String round(double value) {
         return String.valueOf((double) Math.round(value * 100) / 100);
     }
 

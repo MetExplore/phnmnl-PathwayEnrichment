@@ -41,7 +41,7 @@ public class Launcher_MetExplore4Galaxy {
     @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5).")
     public int inchiColumn = 5;
 
-    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for all layers selection, enter c,h,q,p,b,t,i,f,r).")//TODO: implements this functionality
+    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for all layers selection, enter c,h,q,p,b,t,i,f,r).")
     public String inchiLayers = "";
 
     @SuppressWarnings("deprecation")

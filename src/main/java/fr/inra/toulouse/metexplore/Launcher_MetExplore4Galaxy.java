@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashMap;
 
+import static java.lang.System.exit;
+
 public class Launcher_MetExplore4Galaxy {
 
     @Option(name="-h", usage="Prints this help.")
@@ -24,7 +26,7 @@ public class Launcher_MetExplore4Galaxy {
     @Option(name="-o", usage="Output file name  (by default: output.tsv).")
     String outFile = "output.tsv";
 
-    @Option(name="-sbml", usage="Sbml file name.")
+    @Option(name="-s", usage="Sbml file name.")
     public String sbml = "recon2.v03_ext_noCompartment_noTransport_v2.xml";
 
     @Option(name="-i", usage="[Required] Input file in tsv file format.")
@@ -32,14 +34,14 @@ public class Launcher_MetExplore4Galaxy {
     public String inFile = "sacurineVariableMetadataEnhanced.tsv";
     //public String inFile ;
 
-    @Option(name="-f", usage="Choose to filter some columns  (by default: false).")
-    public Boolean filter = false;
-
-    @Option(name="-fcol", usage="Number of the filtered column (if the filter option is choosen)")
+    @Option(name="-f", usage="Number of the filtered column (if the filter option is choosen)")
     public int colFiltered = 0;
 
     @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5).")
     public int inchiColumn = 5;
+
+    @Option(name="chebi", usage="Number of the file's column containing the chebi data (by default: 5).")
+    public int chebiColumn = 2;
 
     @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for all layers selection, enter c,h,q,p,b,t,i,f,r).")
     public String inchiLayers = "";
@@ -62,14 +64,14 @@ public class Launcher_MetExplore4Galaxy {
             if(launch.phelp){
                 System.out.println("Application Usage:");
                 parser.printUsage(System.out);
-                System.exit(0);
+                exit(0);
             }
 
         } catch (CmdLineException e) {
 
             System.out.println("Application Usage:");
             parser.printUsage(System.out);
-            System.exit(0);
+            exit(0);
 
         }
 
@@ -80,8 +82,8 @@ public class Launcher_MetExplore4Galaxy {
         try{
 
             //Mapping
-            HashMap <String, String[]> parsedFile = met.extractData(launch.inFile, launch.filter, (launch.colFiltered -1));
-            Set<BioPhysicalEntity> map = met.mapping(bionet, parsedFile, (launch.inchiColumn -1), inchiLayers);
+            HashMap <String, String[]> parsedFile = met.extractData(launch.inFile, (launch.colFiltered -1));
+            Set<BioPhysicalEntity> map = met.mapping(bionet, parsedFile, (launch.chebiColumn -1), (launch.inchiColumn -1), inchiLayers);
 
             //PathwayEnrichment
             PathwayEnrichment enr = new PathwayEnrichment(bionet, map);

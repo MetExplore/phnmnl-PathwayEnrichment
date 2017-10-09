@@ -1,15 +1,24 @@
 package fr.inra.toulouse.metexplore;
 
 import junit.framework.TestCase;
+import org.junit.BeforeClass;
 import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioPathway;
 import parsebionet.biodata.BioPhysicalEntity;
 import parsebionet.io.JSBMLToBionetwork;
 import parsebionet.statistics.PathwayEnrichment;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 public class Test_MetExplore4Galaxy extends TestCase {
 
@@ -22,11 +31,15 @@ public class Test_MetExplore4Galaxy extends TestCase {
     static BufferedWriter dummyFile;
     static Set<BioPhysicalEntity> map = new HashSet();
     static Set<BioPhysicalEntity> expectedMap = new HashSet();
+    static String[] inchiLayers = new String[8];
 
+    //@BeforeClass
     protected void setUp() throws Exception {
 
         super.setUp();
         if (met == null) {
+            inchiLayers[0] = "c";
+            inchiLayers[1] = "h";
             bionet = (new JSBMLToBionetwork(sbml)).getBioNetwork();
             met = new MetExplore4Galaxy();
             createdDummyFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n");
@@ -64,7 +77,7 @@ public class Test_MetExplore4Galaxy extends TestCase {
 
     public void setMappingComparaison (String bpe){
         expectedMap.add(bionet.getBioPhysicalEntityById(bpe));
-        map = met.mapping(bionet,parsedFile,4);
+        map = met.mapping(bionet,parsedFile,4, inchiLayers);
     }
 
     public void testMappingWin () {
@@ -72,7 +85,21 @@ public class Test_MetExplore4Galaxy extends TestCase {
         assertEquals(expectedMap.iterator().next().getName(), map.iterator().next().getName());
     }
 
-    public void testMappingFail () {
+    public void testMappingFail1 () {
+        inchiLayers[0]="";
+        setMappingComparaison("M_tststeroneglc");
+        assertTrue(expectedMap.iterator().next().getName() == map.iterator().next().getName());
+        inchiLayers[0]="c";
+    }
+
+    public void testMappingWin2 () {
+        createdDummyFile("Taurine\tCHEBI:15891\tC2H7NO3S\tC(CS(O)(=O)=O)N\tInChI=1S/C2H7NO3S/c3-1-2-7(4,5)6/h1-3H2,(H,4,5,6)\tTaurine\t124,006693\t1,00727647\t125,01396947\tNA\t[(M-H)]-\t1\t0,88\t5\t2,6122895216\t0,6358457794\t0,2434055545\t387859,346882448\t11652,3712684191\t0,0300427755\t0,1234268278\t15891\tNA\ttaurine");
+        setMappingComparaison("M_taur");
+        assertEquals(expectedMap.iterator().next().getName(), map.iterator().next().getName());
+    }
+
+
+    public void testMappingFail2 () {
         createdDummyFile("Pantothenic acid\tCHEBI:7916\tC9H17NO5\tCC(C)(CO)C(O)C(=O)NCCC(O)=O\tInChI=1S/C9H17NO5/c1-9(2,5-11)7(14)8(15)10-4-3-6(12)13/h7,11,14H,3-5H2,1-2H3,(H,10,15)(H,12,13)\tPantothenic acid\t218,102478\t1,00727647\t219,10975447\tNA\t[(M-H)]-\t1\t4,77\t5\t3,5599610222\t0,2982536819\t0,0837800414\t3012837,77207209\t131428,160471926\t0,043622714\t0,5206814567\t7916\tNA\tpantothenic acid");
         setMappingComparaison("M_pnto_R");
 
@@ -80,7 +107,7 @@ public class Test_MetExplore4Galaxy extends TestCase {
         String[] valuesList = parsedFile.values().iterator().next();
         String msgFail = "InChI's parsed file: " + valuesList[4] + "\n InChI's MetExplore: " + bpe.getInchi();
 
-        assertFalse(msgFail, map.size() > 0);
+        assertTrue(msgFail, map.size() > 0);
         System.out.println(msgFail);
     }
 

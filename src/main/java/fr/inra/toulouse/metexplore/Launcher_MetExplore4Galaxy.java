@@ -30,17 +30,18 @@ public class Launcher_MetExplore4Galaxy {
     public String sbml = "recon2.v03_ext_noCompartment_noTransport_v2.xml";
 
     @Option(name="-i", usage="[Required] Input file in tsv file format.")
-    //public String inFile = "Galaxy15-[Biosigner_Multivariate_Univariate_Multivariate_variableMetadata.tsv].tabular";
-    public String inFile = "sacurineVariableMetadataEnhanced.tsv";
+    public String inFile = "Galaxy15-[Biosigner_Multivariate_Univariate_Multivariate_variableMetadata.tsv].tabular";
+    //public String inFile = "sacurineVariableMetadataEnhanced.tsv";
     //public String inFile ;
 
     @Option(name="-f", usage="Number of the filtered column (if the filter option is choosen)")
-    public int colFiltered = 0;
+    public int colFiltered = -1;
+    //public int colFiltered = 30;
 
     @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5).")
     public int inchiColumn = 5;
 
-    @Option(name="chebi", usage="Number of the file's column containing the chebi data (by default: 5).")
+    @Option(name="-chebi", usage="Number of the file's column containing the chebi data (by default: 5).")
     public int chebiColumn = 2;
 
     @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for all layers selection, enter c,h,q,p,b,t,i,f,r).")

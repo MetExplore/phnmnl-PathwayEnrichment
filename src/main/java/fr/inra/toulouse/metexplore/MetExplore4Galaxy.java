@@ -55,7 +55,7 @@ public class MetExplore4Galaxy {
         }
         if (listMetabolites.size() < 1 ){
             System.err.println("File badly formatted");
-            exit(1);
+            //exit(1);
         }
        return listMetabolites;
     }
@@ -67,11 +67,11 @@ public class MetExplore4Galaxy {
         Boolean chebiMapping;
 
         System.out.println("MetExplore's name\tInputFile's name");//TODO: write a second file with these mapping informations or put them into dictionary or an attribute of a BioPhysicalEntity redefinition for the main file
-        for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {
-            for (String[] entry : parsedFile.values()) {//TODO: convert into an arrayList and sort the list alphabetic
 
+        for (String[] entry : parsedFile.values()) {//TODO: convert into an arrayList and sort the list alphabetic
+            for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {
                 chebiMapping = false;
-                if (!(entry[inchiColumn]).equals("NA") && !(bpe.getInchi()).equals("NA") && !(bpe.getInchi()).equals("") && !(entry[inchiColumn]).equals("") ) {
+                if (!(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals("")) ) {
 
                     for (Map.Entry<String, Set<BioRef>> ref : bpe.getRefs().entrySet()) {
                         if (ref.getKey().equals("chebi")) {
@@ -80,7 +80,7 @@ public class MetExplore4Galaxy {
                                     listMetabolites.add(bpe);
                                     remainingMetabolites.remove(entry[0]);
                                     chebiMapping = true;
-                                    System.out.println("**" + bpe.getName() + " = " + entry[0]);
+                                    System.out.println(bpe.getName() + " = " + entry[0]);
                                     //System.out.println("**" + val.id + " = " + entry[chebiColumn]);
                                     break;
                                 }
@@ -89,23 +89,22 @@ public class MetExplore4Galaxy {
                         }
                         //System.out.println(ref.getKey());
                     }
-                    if (chebiMapping) {
-                        break;
-                    }else{
-                        InChI4Galaxy bpeInchi = new InChI4Galaxy(bpe.getInchi(), inchiLayers);
-                        InChI4Galaxy entryInchi = new InChI4Galaxy(entry[inchiColumn], inchiLayers);
-                        if (bpeInchi.equals(entryInchi)) {
-                            listMetabolites.add(bpe);
-                            remainingMetabolites.remove(entry[0]);
-                            System.out.println(bpe.getName() + " = " + entry[0]);
-                            //System.out.println(bpe.getInchi() + " = " + entry[inchiColumn]);
-                            //System.out.println("***");
-                        }
+                }
+
+                if (chebiMapping) break;
+                else{
+                    if (!(entry[inchiColumn]).equals("NA") && !(bpe.getInchi()).equals("NA") && !(bpe.getInchi()).equals("") && !(entry[inchiColumn]).equals("")
+                            && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(entry[inchiColumn], inchiLayers))) {
+                        listMetabolites.add(bpe);
+                        remainingMetabolites.remove(entry[0]);
+                        System.out.println(bpe.getName() + " = " + entry[0]);
+                        //System.out.println(bpe.getInchi() + " = " + entry[inchiColumn]);
+                        //System.out.println("***");
                     }
                 }
             }
         }
-        System.err.println(listMetabolites.size() + " elements have been mapped (" + round((double)remainingMetabolites.size()/parsedFile.size()*100) + "% non-mapped).\n");
+        System.err.println((parsedFile.size() - remainingMetabolites.size()) + " metabolites have been mapped (on " + parsedFile.size() + ").\n");
         //System.out.println("\n\n\n\n\n###########################");
         //for (String[] entry : remainingMetabolites.values()){
         //   System.out.println(entry[0] + "\t" + entry[inchiColumn] + "\t" + entry[chebiColumn]);
@@ -149,7 +148,7 @@ public class MetExplore4Galaxy {
         }
     }
 
-    public static String roundPval(double value) {
+    public String roundPval(double value) {
         if(value < 0.01){
             String tmp = (String.valueOf(value));
             String[] splitted = tmp.split("E");

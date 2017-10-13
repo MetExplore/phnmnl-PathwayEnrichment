@@ -43,7 +43,7 @@ public class MetExplore4Galaxy {
                 String[] values = line.replaceAll("\"","").split("\t");
                 try {
                     if (filtered ==  false || values[filteredColumns] != ""){
-                        listMetabolites.put(values[0], values);
+                        listMetabolites.put(String.valueOf(i), values);
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
                 }
@@ -61,7 +61,9 @@ public class MetExplore4Galaxy {
     }
 
     public Set<BioPhysicalEntity> mapping(BioNetwork bn, String outputFile1, HashMap <String, String[]> parsedFile, int chebiColumn, int inchiColumn, String[] inchiLayers){
+
         Set<BioPhysicalEntity> listMetabolites = new HashSet();
+        int i = 1;
 
         try {
             File fo1 = new File(outputFile1);
@@ -72,9 +74,9 @@ public class MetExplore4Galaxy {
             HashMap<String, String[]> remainingMetabolites = (HashMap<String, String[]>) parsedFile.clone();
             Boolean chebiMapping;
 
-            f.write("Mapped\tMetExplore's name\tInputFile's name\n");
+            f.write("Mapped\tInputFile's name\tMetExplore's name\n");
 
-            for (String[] entry : parsedFile.values()) {//TODO: convert into an arrayList and sort the list alphabetic
+            for (String[] entry : parsedFile.values()) {
                 for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {
                     chebiMapping = false;
                     if (!(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals(""))) {
@@ -84,37 +86,31 @@ public class MetExplore4Galaxy {
                                 for (BioRef val : ref.getValue()) {
                                     if (entry[chebiColumn].equals(val.id)) {
                                         listMetabolites.add(bpe);
-                                        remainingMetabolites.remove(entry[0]);
+                                        remainingMetabolites.remove(String.valueOf(i));
                                         chebiMapping = true;
                                         f.write( "true\t" + entry[0] + "\t" + bpe.getName() + "\n");
-                                        //System.out.println("**" + val.id + " = " + entry[chebiColumn]);
                                         break;
                                     }
                                 }
                                 break;
                             }
-                            //System.out.println(ref.getKey());
                         }
                     }
 
-                    if (chebiMapping) break;
-                    else {
-                        if (!(entry[inchiColumn]).equals("NA") && !(bpe.getInchi()).equals("NA") && !(bpe.getInchi()).equals("") && !(entry[inchiColumn]).equals("")
+                    if (!chebiMapping) {
+                        if (!(entry[inchiColumn]).equals("NA") && !(entry[inchiColumn]).equals("")
                                 && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(entry[inchiColumn], inchiLayers))) {
                             listMetabolites.add(bpe);
-                            remainingMetabolites.remove(entry[0]);
+                            remainingMetabolites.remove(String.valueOf(i));
                             f.write("true\t" + entry[0] + "\t" + bpe.getName() + "\n");
-                            //System.out.println(bpe.getInchi() + " = " + entry[inchiColumn]);
-                            //System.out.println("***");
                         }
                     }
                 }
+                ++i;
             }
             System.err.println((parsedFile.size() - remainingMetabolites.size()) + " metabolites have been mapped (on " + parsedFile.size() + ").\n");
-            //System.out.println("\n\n\n\n\n###########################");
             for (String[] entry : remainingMetabolites.values()){
                 f.write("false\t" + entry[0] +"\n");
-                //   System.out.println(entry[0] + "\t" + entry[inchiColumn] + "\t" + entry[chebiColumn]);
             }
             f.close();
         }catch (IOException e){
@@ -176,7 +172,7 @@ public class MetExplore4Galaxy {
             double head = Double.parseDouble(splitted[0]);
 
             try{
-                return  (String.valueOf(round(head)) + "E" + splitted[1] +" ");
+                return  (String.valueOf(round(head)) + " E" + splitted[1] +" ");
             }catch (ArrayIndexOutOfBoundsException e){
                 splitted = tmp.split("\\.");
                 int j = 0;
@@ -204,7 +200,7 @@ public class MetExplore4Galaxy {
         } else {
             long min = elapsedTime / 60000000000L;
             long sec = elapsedTime / 1000000000L - (min * 60);
-            System.err.println("Time to run the process :" + min + "min " + sec + "s");
+            System.err.println("Time to run the process : " + min + "min " + sec + "s");
         }
     }
 
@@ -212,11 +208,10 @@ public class MetExplore4Galaxy {
 
         //Parameters
         long startTime = System.nanoTime();
-        String dir = "/home/bmerlet/Documents/PathwayEnrichment/";
-        String inputFile = dir + "Galaxy15-[Biosigner_Multivariate_Univariate_Multivariate_variableMetadata.tsv].tabular";
-        String sbml = dir + "recon2.v03_ext_noCompartment_noTransport_v2.xml";
-        String outputFile1 = dir + "output1.tsv";
-        String outputFile2 = dir + "output2.tsv";
+        String inputFile = "data/sacurineVariableMetadataEnhanced.tsv";
+        String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
+        String outputFile1 = "mapping.tsv";
+        String outputFile2 = "pathwayEnrichment.tsv";
         String[] inchiLayers = {"c","h"};
         int correction = 1;
 

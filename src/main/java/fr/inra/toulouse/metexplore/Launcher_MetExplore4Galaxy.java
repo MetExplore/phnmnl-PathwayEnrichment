@@ -23,16 +23,13 @@ public class Launcher_MetExplore4Galaxy {
     String outFile2 = "pathwayEnrichment.tsv";
 
     @Option(name="-s", usage="Sbml file name.")
-    public String sbml = "recon2.v03_ext_noCompartment_noTransport_v2.xml";
+    public String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
 
     @Option(name="-i", usage="[Required] Input file in tsv file format.")
-    //public String inFile = "Galaxy15-[Biosigner_Multivariate_Univariate_Multivariate_variableMetadata.tsv].tabular";
-    public String inFile = "sacurineVariableMetadataEnhanced.tsv";
-    //public String inFile ;
+    public String inFile ;
 
     @Option(name="-f", usage="Number of the filtered column (by default: 0 for none)")
     public int colFiltered = -1;
-    //public int colFiltered = 30;
 
     @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5).")
     public int inchiColumn = 5;

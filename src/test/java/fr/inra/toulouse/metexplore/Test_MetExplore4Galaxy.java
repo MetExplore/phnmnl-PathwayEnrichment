@@ -36,7 +36,6 @@ public class Test_MetExplore4Galaxy extends TestCase {
             inchiLayers[1] = "h";
             bionet = (new JSBMLToBionetwork("data/recon2.v03_ext_noCompartment_noTransport_v2.xml")).getBioNetwork();
             met = new MetExplore4Galaxy();
-            createdDummyFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tNA\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n");
         }
     }
 
@@ -55,18 +54,19 @@ public class Test_MetExplore4Galaxy extends TestCase {
     }
 
     public void testExtractData() {
-            HashMap<String, String[]> obtainedParsing = parsedFile;
+        createdDummyFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tNA\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n");
 
-            String[] expectedArray = {"Testosterone glucuronide","CHEBI:28835","C25H36O8","[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O","NA","Testosterone glucuronide","463,2329","1,00727647","464,24017647","NA","[(M-H)]-","1","7,9","4","2,1475578771","0,5701078279","0,265467969","178149,617939526","12351,5841321731","0,0693326445","0,2611714128","28835","NA","testosterone 17-glucosiduronic acid"};
-            HashMap<String, String[]> expectedParsing = new HashMap<String, String[]>();
-            expectedParsing.put("Testosterone glucuronide", expectedArray);
+        HashMap<String, String[]> obtainedParsing = parsedFile;
+        String[] expectedArray = {"Testosterone glucuronide","CHEBI:28835","C25H36O8","[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O","NA","Testosterone glucuronide","463,2329","1,00727647","464,24017647","NA","[(M-H)]-","1","7,9","4","2,1475578771","0,5701078279","0,265467969","178149,617939526","12351,5841321731","0,0693326445","0,2611714128","28835","NA","testosterone 17-glucosiduronic acid"};
+        HashMap<String, String[]> expectedParsing = new HashMap<String, String[]>();
+        expectedParsing.put("Testosterone glucuronide", expectedArray);
 
-            String[] expectedLine = expectedParsing.values().iterator().next();
-            String[] obtainedLine = obtainedParsing.values().iterator().next();
+        String[] expectedLine = expectedParsing.values().iterator().next();
+        String[] obtainedLine = obtainedParsing.values().iterator().next();
 
-            for(int i = 0 ; i < obtainedLine.length; i++){
-                    assertEquals(expectedLine[i], obtainedLine[i]);
-            }
+        for(int i = 0 ; i < obtainedLine.length; i++){
+                assertEquals(expectedLine[i], obtainedLine[i]);
+        }
     }
 
     public void setMappingComparaison (String bpe) {
@@ -76,6 +76,7 @@ public class Test_MetExplore4Galaxy extends TestCase {
     }
 
     public void testMappingCHEBIMap () throws SecurityException {
+        createdDummyFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tNA\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n");
         setMappingComparaison("M_tststeroneglc");
         assertEquals(expectedMap.iterator().next().getName(), map.iterator().next().getName());
     }

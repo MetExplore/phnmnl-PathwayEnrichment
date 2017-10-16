@@ -1,51 +1,50 @@
 package fr.inra.toulouse.metexplore;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-
-import parsebionet.biodata.BioNetwork;
-import parsebionet.biodata.BioPathway;
-import parsebionet.biodata.BioPhysicalEntity;
-import parsebionet.io.JSBMLToBionetwork;
-import parsebionet.statistics.PathwayEnrichment;
-
 import java.io.IOException;
-
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
+import parsebionet.biodata.BioNetwork;
+import parsebionet.biodata.BioPhysicalEntity;
+import parsebionet.io.JSBMLToBionetwork;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 import static java.lang.System.exit;
+import org.kohsuke.args4j.CmdLineException;
 
 public class Launcher_MetExplore4Galaxy {
 
     @Option(name="-h", usage="Prints this help.")
     public boolean phelp = false;
 
-    @Option(name="-o", usage="Output file name  (by default: output.tsv).")
-    String outFile = "output.tsv";
+    @Option(name="-o1", usage="Output file name for mapping result (by default: mapping.tsv).")
+    String outFile1 = "mapping.tsv";
+
+    @Option(name="-o2", usage="Output file name for pathway enrichment result (by default: pathwayEnrichment.tsv).")
+    String outFile2 = "pathwayEnrichment.tsv";
 
     @Option(name="-s", usage="Sbml file name.")
-    public String sbml = "recon2.v03_ext_noCompartment_noTransport_v2.xml";
+    public String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
 
-    @Option(name="-i", usage="[Required] Input file in tsv file format.")
-    public String inFile = "Galaxy15-[Biosigner_Multivariate_Univariate_Multivariate_variableMetadata.tsv].tabular";
-    //public String inFile = "sacurineVariableMetadataEnhanced.tsv";
-    //public String inFile ;
+    @Option(name="-i", usage="[REQUIRED] Input file in tsv file format.")
+    public String inFile ;
 
-    @Option(name="-f", usage="Number of the filtered column (if the filter option is choosen)")
+    @Option(name="-f", usage="Number of the filtered column (by default: 0 for none)")
     public int colFiltered = -1;
-    //public int colFiltered = 30;
 
-    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5).")
+    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5; 0 for none).")
     public int inchiColumn = 5;
 
-    @Option(name="-chebi", usage="Number of the file's column containing the chebi data (by default: 5).")
+    @Option(name="-chebi", usage="Number of the file's column containing the chebi data (by default: 2; 0 for none).")
     public int chebiColumn = 2;
 
-    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for all layers selection, enter c,h,q,p,b,t,i,f,r).")
-    public String inchiLayers = "";
+    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
+    public String inchiLayers = "c,h";
+
+    @Option(name="-c", usage="Test correction (by default: Bonferoni; enter 2 for Benjamini-Hochberg correction and 3 for Holm-Bonferroni one).")
+    public int correction = 1;
+
 
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
@@ -55,63 +54,57 @@ public class Launcher_MetExplore4Galaxy {
         Launcher_MetExplore4Galaxy launch = new Launcher_MetExplore4Galaxy();
         MetExplore4Galaxy met = new MetExplore4Galaxy();
         CmdLineParser parser = new CmdLineParser(launch);
-        String[] inchiLayers = launch.inchiLayers.split(",");
-
 
         //CmdParsing
         try {
             parser.parseArgument(args);
 
-            if(launch.phelp){
-                System.out.println("Application Usage:");
+            if (launch.phelp) {
+                System.out.println("Options:");
                 parser.printUsage(System.out);
                 exit(0);
             }
 
+            if(launch.inFile==null){
+                throw new CmdLineException("-i parameter required");
+            }
+
+            if (launch.chebiColumn < 1 && launch.inchiColumn < 1) {
+                throw new CmdLineException("-chebi and -inchi parameters cannot be both setted at < 1");
+            }
+
+            if (launch.correction < 1 || launch.correction > 3) {
+                throw new CmdLineException("-c parameter must be setted at 1, 2 or 3");
+            }
+
+            if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", launch.inchiLayers)) {
+                throw new CmdLineException("-l parameter badly formatted");
+            }
+
         } catch (CmdLineException e) {
-
-            System.out.println("Application Usage:");
-            parser.printUsage(System.out);
-            exit(0);
-
+            if(e.getMessage().equals("Option \"-l\" takes an operand")){
+                launch.inchiLayers="";
+            }else {
+                System.err.println(e.getMessage());
+                System.out.println("Options:");
+                parser.printUsage(System.out);
+                exit(1);
+            }
         }
-
-
-        //SBML parsing
-        BioNetwork bionet = (new JSBMLToBionetwork(launch.sbml)).getBioNetwork();//TODO: test function SBML
+        String[] inchiLayers = launch.inchiLayers.replaceAll(" ","").split(",");
+        BioNetwork bionet = (new JSBMLToBionetwork(launch.sbml)).getBioNetwork();
 
         try{
 
-            //Mapping
+            //Pathway Enrichment
             HashMap <String, String[]> parsedFile = met.extractData(launch.inFile, (launch.colFiltered -1));
-            Set<BioPhysicalEntity> map = met.mapping(bionet, parsedFile, (launch.chebiColumn -1), (launch.inchiColumn -1), inchiLayers);
+            Set<BioPhysicalEntity> map = met.mapping(bionet, launch.outFile1, parsedFile, (launch.chebiColumn -1), (launch.inchiColumn -1), inchiLayers);
+            met.writeOutput(met.pathwayEnrichment (bionet, map, launch.correction), map, launch.outFile2);
 
-            //PathwayEnrichment
-            PathwayEnrichment enr = new PathwayEnrichment(bionet, map);
-            System.err.println("Pathway enrichment in progress...");
-            ArrayList<HashMap<BioPathway, Double>> resultList = new ArrayList<HashMap<BioPathway, Double> >();
-
-            resultList.add(enr.computeEnrichment());
-            for (int i = 0; i < 3; i++) {
-                resultList.add(enr.computeEnrichment(i));
-            }
-            System.err.println(resultList.get(0).size() + " pathways are concerned among the network (on a total of " + bionet.getPathwayList().size() + ").");
-
-            //SaveFile
-            met.writeOutput(resultList, map, launch.outFile);
-       }
-        catch (IOException e2){
+        } catch (IOException e2){
             e2.printStackTrace();
         }
 
-
-        long elapsedTime = System.nanoTime() - startTime;
-        if (elapsedTime / 1000000000L == 0L) {
-            System.err.println("Time to run the process in miliseconde :" + elapsedTime / 1000000L);
-        } else {
-            System.err.println("Time to run the process in seconde :" + elapsedTime / 1000000000L);
-        }
-
+        met.runTime(System.nanoTime() - startTime);
     }
 }
-

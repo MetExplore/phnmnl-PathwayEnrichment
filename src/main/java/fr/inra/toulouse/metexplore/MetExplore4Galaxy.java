@@ -72,37 +72,39 @@ public class MetExplore4Galaxy {
 
 
             HashMap<String, String[]> remainingMetabolites = (HashMap<String, String[]>) parsedFile.clone();
-            Boolean chebiMapping;
+            Boolean inchiMapping;
 
             f.write("Mapped\tInputFile's name\tMetExplore's name\n");
 
             for (String[] entry : parsedFile.values()) {
                 for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {
-                    chebiMapping = false;
-                    if (!(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals(""))) {
-
-                        for (Map.Entry<String, Set<BioRef>> ref : bpe.getRefs().entrySet()) {
-                            if (ref.getKey().equals("chebi")) {
-                                for (BioRef val : ref.getValue()) {
-                                    if (entry[chebiColumn].equals(val.id)) {
-                                        listMetabolites.add(bpe);
-                                        remainingMetabolites.remove(String.valueOf(i));
-                                        chebiMapping = true;
-                                        f.write( "true\t" + entry[0] + "\t" + bpe.getName() + "\n");
-                                        break;
-                                    }
-                                }
-                                break;
-                            }
-                        }
+                    inchiMapping = false;
+                    if (!(entry[inchiColumn]).equals("NA") && !(entry[inchiColumn]).equals("")
+                            && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(entry[inchiColumn], inchiLayers))
+                            && (inchiColumn > 0) ) {
+                        listMetabolites.add(bpe);
+                        remainingMetabolites.remove(String.valueOf(i));
+                        f.write("true\t" + entry[0] + "\t" + bpe.getName() + "\n");
+                        inchiMapping = true;
                     }
 
-                    if (!chebiMapping) {
-                        if (!(entry[inchiColumn]).equals("NA") && !(entry[inchiColumn]).equals("")
-                                && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(entry[inchiColumn], inchiLayers))) {
-                            listMetabolites.add(bpe);
-                            remainingMetabolites.remove(String.valueOf(i));
-                            f.write("true\t" + entry[0] + "\t" + bpe.getName() + "\n");
+                    if (!inchiMapping) {
+
+                        if (!(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals("")) && (chebiColumn > 0) ) {
+
+                            for (Map.Entry<String, Set<BioRef>> ref : bpe.getRefs().entrySet()) {
+                                if (ref.getKey().equals("chebi")) {
+                                    for (BioRef val : ref.getValue()) {
+                                        if (entry[chebiColumn].equals(val.id)) {
+                                            listMetabolites.add(bpe);
+                                            remainingMetabolites.remove(String.valueOf(i));
+                                            f.write( "true\t" + entry[0] + "\t" + bpe.getName() + "\n");
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
                         }
                     }
                 }

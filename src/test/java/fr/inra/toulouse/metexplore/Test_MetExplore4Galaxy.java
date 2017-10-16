@@ -156,4 +156,25 @@ public class Test_MetExplore4Galaxy extends TestCase {
         }
         fd.delete();
     }
+
+//    public String[][] parameters(){
+//        String[][] parameters = {
+//                {""},
+//                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-chebi", "0", "-inchi", "0"},
+//                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-l"},
+//                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-c", "0"},
+//                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-l", "ch"},
+//                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-l", "ch"}
+//        };
+//        return parameters;
+//    }
+//
+//    public void testParameters(){
+//
+//        Launcher_MetExplore4Galaxy launch = new Launcher_MetExplore4Galaxy();
+//        for (String[] p : parameters()){
+//                launch.main(p);
+//        }
+//        assertTrue(true);
+//    }
 }

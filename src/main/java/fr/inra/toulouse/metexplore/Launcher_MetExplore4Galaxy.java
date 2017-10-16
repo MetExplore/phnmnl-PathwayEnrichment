@@ -3,6 +3,8 @@ package fr.inra.toulouse.metexplore;
 import java.io.IOException;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.regex.Pattern;
+
 import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioPhysicalEntity;
 import parsebionet.io.JSBMLToBionetwork;
@@ -25,23 +27,24 @@ public class Launcher_MetExplore4Galaxy {
     @Option(name="-s", usage="Sbml file name.")
     public String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
 
-    @Option(name="-i", usage="[Required] Input file in tsv file format.")
+    @Option(name="-i", usage="[REQUIRED] Input file in tsv file format.")
     public String inFile ;
 
     @Option(name="-f", usage="Number of the filtered column (by default: 0 for none)")
     public int colFiltered = -1;
 
-    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5).")
+    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5; 0 for none).")
     public int inchiColumn = 5;
 
-    @Option(name="-chebi", usage="Number of the file's column containing the chebi data (by default: 2).")
+    @Option(name="-chebi", usage="Number of the file's column containing the chebi data (by default: 2; 0 for none).")
     public int chebiColumn = 2;
 
-    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for all layers selection, enter c,h,q,p,b,t,i,f,r).")
+    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
     public String inchiLayers = "c,h";
 
-    @Option(name="-c", usage="Test correction (by default: Bonferoni; other options: enter 2 for Benjamini-Hochberg correction and 3 for Holm-Bonferroni one).")
+    @Option(name="-c", usage="Test correction (by default: Bonferoni; enter 2 for Benjamini-Hochberg correction and 3 for Holm-Bonferroni one).")
     public int correction = 1;
+
 
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
@@ -51,27 +54,44 @@ public class Launcher_MetExplore4Galaxy {
         Launcher_MetExplore4Galaxy launch = new Launcher_MetExplore4Galaxy();
         MetExplore4Galaxy met = new MetExplore4Galaxy();
         CmdLineParser parser = new CmdLineParser(launch);
-        String[] inchiLayers = launch.inchiLayers.split(",");
-
 
         //CmdParsing
         try {
             parser.parseArgument(args);
 
-            if(launch.phelp){
+            if (launch.phelp) {
                 System.out.println("Options:");
                 parser.printUsage(System.out);
                 exit(0);
             }
 
+            if(launch.inFile==null){
+                throw new CmdLineException("-i parameter required");
+            }
+
+            if (launch.chebiColumn < 1 && launch.inchiColumn < 1) {
+                throw new CmdLineException("-chebi and -inchi parameters cannot be both setted at < 1");
+            }
+
+            if (launch.correction < 1 || launch.correction > 3) {
+                throw new CmdLineException("-c parameter must be setted at 1, 2 or 3");
+            }
+
+            if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", launch.inchiLayers)) {
+                throw new CmdLineException("-l parameter badly formatted");
+            }
+
         } catch (CmdLineException e) {
-
-            System.out.println("Options:");
-            parser.printUsage(System.out);
-            exit(0);
-
+            if(e.getMessage().equals("Option \"-l\" takes an operand")){
+                launch.inchiLayers="";
+            }else {
+                System.err.println(e.getMessage());
+                System.out.println("Options:");
+                parser.printUsage(System.out);
+                exit(1);
+            }
         }
-
+        String[] inchiLayers = launch.inchiLayers.replaceAll(" ","").split(",");
         BioNetwork bionet = (new JSBMLToBionetwork(launch.sbml)).getBioNetwork();
 
         try{
@@ -88,4 +108,3 @@ public class Launcher_MetExplore4Galaxy {
         met.runTime(System.nanoTime() - startTime);
     }
 }
-

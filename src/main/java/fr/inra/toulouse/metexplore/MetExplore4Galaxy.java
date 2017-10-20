@@ -29,30 +29,27 @@ public class MetExplore4Galaxy {
 
         Boolean filtered = true;
 
-        if(filteredColumns < 1 ){
-            filtered = false;
-        }
+        if(filteredColumns < 1 ) filtered = false;
 
         HashMap <String, String[]> listMetabolites = new HashMap<String, String[]>();
         BufferedReader f = new BufferedReader(new FileReader(new File(inputFile)));
         String line;
-        int i = 0;
+        int i = 0; int j = 0;
 
         while ((line = f.readLine()) != null) {
             if (i != 0) {
                 String[] values = line.replaceAll("\"","").split("\t");
                 try {
                     if (filtered ==  false || values[filteredColumns] != ""){
-                        listMetabolites.put(String.valueOf(i), values);
+                        listMetabolites.put(String.valueOf(j), values);
+                        ++j;
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
                 }
             }
             ++i;
         }
-        if (f != null) {
-            f.close();
-        }
+        if (f != null) f.close();
         if (listMetabolites.size() < 1 ){
             System.err.println("File badly formatted");
             exit(1);
@@ -63,32 +60,31 @@ public class MetExplore4Galaxy {
     public Set<BioPhysicalEntity> mapping(BioNetwork bn, String outputFile1, HashMap <String, String[]> parsedFile, int chebiColumn, int inchiColumn, String[] inchiLayers){
 
         Set<BioPhysicalEntity> listMetabolites = new HashSet();
-        int i = 1;
+        int i = 0;
 
         try {
             File fo1 = new File(outputFile1);
             fo1.createNewFile();
             BufferedWriter f = new BufferedWriter(new FileWriter(fo1));
 
-
             HashMap<String, String[]> remainingMetabolites = (HashMap<String, String[]>) parsedFile.clone();
-            Boolean inchiMapping;
+            Boolean mapping = false; Boolean mappingBpe = false;
 
             f.write("Mapped\tInputFile's name\tMetExplore's name\n");
 
             for (String[] entry : parsedFile.values()) {
+                mapping = false;
                 for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {
-                    inchiMapping = false;
+                    mappingBpe = false;
                     if (!(entry[inchiColumn]).equals("NA") && !(entry[inchiColumn]).equals("")
                             && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(entry[inchiColumn], inchiLayers))
                             && (inchiColumn > 0) ) {
                         listMetabolites.add(bpe);
-                        remainingMetabolites.remove(String.valueOf(i));
                         f.write("true\t" + entry[0] + "\t" + bpe.getName() + "\n");
-                        inchiMapping = true;
+                        mappingBpe = true; mapping= true;
                     }
 
-                    if (!inchiMapping) {
+                    if (!mappingBpe) {
 
                         if (!(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals("")) && (chebiColumn > 0) ) {
 
@@ -97,8 +93,8 @@ public class MetExplore4Galaxy {
                                     for (BioRef val : ref.getValue()) {
                                         if (entry[chebiColumn].equals(val.id)) {
                                             listMetabolites.add(bpe);
-                                            remainingMetabolites.remove(String.valueOf(i));
                                             f.write( "true\t" + entry[0] + "\t" + bpe.getName() + "\n");
+                                            mappingBpe = true; mapping=true;
                                             break;
                                         }
                                     }
@@ -108,9 +104,10 @@ public class MetExplore4Galaxy {
                         }
                     }
                 }
+                if (mapping) remainingMetabolites.remove(String.valueOf(i));
                 ++i;
             }
-            System.err.println((parsedFile.size() - remainingMetabolites.size()) + " metabolites have been mapped (on " + parsedFile.size() + ").\n");
+            System.err.println((parsedFile.size() - remainingMetabolites.size()) + " metabolites have been mapped (on " + parsedFile.size() + ").");
             for (String[] entry : remainingMetabolites.values()){
                 f.write("false\t" + entry[0] +"\n");
             }
@@ -118,7 +115,7 @@ public class MetExplore4Galaxy {
         }catch (IOException e){
             e.printStackTrace();
         }
-            return listMetabolites;
+        return listMetabolites;
     }
 
     public ArrayList<HashMap<BioPathway, Double>> pathwayEnrichment (BioNetwork bn, Set<BioPhysicalEntity> map, int correction) {
@@ -154,7 +151,6 @@ public class MetExplore4Galaxy {
 
             for (BioPhysicalEntity bpe : map) {
                 if (path.getListOfInvolvedMetabolite().containsValue(bpe)) {
-
                    printed += (j == 0) ? bpe.getName() : "; " + bpe.getName();
                    j++;
                 }

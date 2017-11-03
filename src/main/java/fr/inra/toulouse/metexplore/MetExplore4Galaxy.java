@@ -25,6 +25,20 @@ import static java.lang.System.exit;
 
 public class MetExplore4Galaxy {
 
+    private BufferedWriter f3;
+
+    public MetExplore4Galaxy(String outputFile3){
+       try {
+           if (outputFile3 != "") {
+               File fo3 = new File(outputFile3);
+               fo3.createNewFile();
+               this.f3 = new BufferedWriter(new FileWriter(fo3));
+           }
+       }catch (IOException e){
+        e.printStackTrace();
+        }
+    }
+
     public HashMap <String, String[]>  extractData(String inputFile, Integer filteredColumns) throws IOException {
 
         Boolean filtered = true;
@@ -57,7 +71,7 @@ public class MetExplore4Galaxy {
        return listMetabolites;
     }
 
-    public Set<BioPhysicalEntity> mapping(BioNetwork bn, String outputFile1, HashMap <String, String[]> parsedFile, int chebiColumn, int inchiColumn, String[] inchiLayers){
+    public Set<BioPhysicalEntity> mapping(BioNetwork bn, String outputFile1, String outputFile3, HashMap <String, String[]> parsedFile, int chebiColumn, int inchiColumn, String[] inchiLayers){
 
         Set<BioPhysicalEntity> listMetabolites = new HashSet();
         int i = 0;
@@ -70,30 +84,29 @@ public class MetExplore4Galaxy {
             HashMap<String, String[]> remainingMetabolites = (HashMap<String, String[]>) parsedFile.clone();
             Boolean mapping = false; Boolean mappingBpe = false;
 
-            f.write("Mapped\tInputFile's name\tMetExplore's name\n");
+            f.write("Mapped\tInputFile's name\tSBML's name\tInfile's val\tSBML's val\n");
 
             for (String[] entry : parsedFile.values()) {
                 mapping = false;
                 for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {
                     mappingBpe = false;
-                    if (!(entry[inchiColumn]).equals("NA") && !(entry[inchiColumn]).equals("")
-                            && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(entry[inchiColumn], inchiLayers))
-                            && (inchiColumn > 0) ) {
+                    if ((inchiColumn > 0) && !(entry[inchiColumn]).equals("NA") && !(entry[inchiColumn]).equals("")
+                            && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(entry[inchiColumn], inchiLayers))) {
                         listMetabolites.add(bpe);
-                        f.write("true\t" + entry[0] + "\t" + bpe.getName() + "\n");
+                        f.write("true\t" + entry[0] + "\t" + bpe.getName() + "\t" + entry[inchiColumn] + "\t" + bpe.getInchi() + "\n");
                         mappingBpe = true; mapping= true;
                     }
 
                     if (!mappingBpe) {
 
-                        if (!(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals("")) && (chebiColumn > 0) ) {
+                        if ((chebiColumn > 0) && !(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals(""))) {
 
                             for (Map.Entry<String, Set<BioRef>> ref : bpe.getRefs().entrySet()) {
                                 if (ref.getKey().equals("chebi")) {
                                     for (BioRef val : ref.getValue()) {
                                         if (entry[chebiColumn].equals(val.id)) {
                                             listMetabolites.add(bpe);
-                                            f.write( "true\t" + entry[0] + "\t" + bpe.getName() + "\n");
+                                            f.write( "true\t" + entry[0] + "\t" + bpe.getName() + "\t" + entry[chebiColumn] + "\t" + val.id + "\n");
                                             mappingBpe = true; mapping=true;
                                             break;
                                         }
@@ -107,7 +120,11 @@ public class MetExplore4Galaxy {
                 if (mapping) remainingMetabolites.remove(String.valueOf(i));
                 ++i;
             }
-            System.err.println((parsedFile.size() - remainingMetabolites.size()) + " metabolites have been mapped (on " + parsedFile.size() + ").");
+            String printingMessage = (parsedFile.size() - remainingMetabolites.size()) + " metabolites have been mapped (on " + parsedFile.size() + ").";
+            System.out.println(printingMessage);
+            if (outputFile3 != "") {
+                this.f3.write(printingMessage);
+            }
             for (String[] entry : remainingMetabolites.values()){
                 f.write("false\t" + entry[0] +"\n");
             }
@@ -118,17 +135,28 @@ public class MetExplore4Galaxy {
         return listMetabolites;
     }
 
-    public ArrayList<HashMap<BioPathway, Double>> pathwayEnrichment (BioNetwork bn, Set<BioPhysicalEntity> map, int correction) {
+    public ArrayList<HashMap<BioPathway, Double>> pathwayEnrichment (BioNetwork bn, String outputFile3, Set<BioPhysicalEntity> map) {
 
         ArrayList<HashMap<BioPathway, Double>> resultList = new ArrayList<HashMap<BioPathway, Double>>();
-        System.err.println("Pathway enrichment in progress...");
+        System.out.println("Pathway enrichment in progress...");
         PathwayEnrichment enr = new PathwayEnrichment(bn, map);
+        HashMap<BioPathway, Double> res = enr.computeEnrichment();
 
-        resultList.add(enr.computeEnrichment());
-        resultList.add(enr.computeEnrichment(correction));
+        resultList.add(res);
+        resultList.add(enr.bonferroniCorrection(res));
+        resultList.add(enr.benjaminiHochbergCorrection(res));
 
-        System.err.println(resultList.get(0).size() + " pathways are concerned among the network (on " + bn.getPathwayList().size() + ").");
+        String printingMessage = resultList.get(0).size() + " pathways are concerned among the network (on " + bn.getPathwayList().size() + ").";
+        System.out.println(printingMessage);
 
+        if (outputFile3 != "") {
+            try{
+                this.f3.write("\n" + printingMessage);
+                this.f3.close();
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return resultList;
     }
 
@@ -138,14 +166,15 @@ public class MetExplore4Galaxy {
         fo2.createNewFile();
         BufferedWriter f = new BufferedWriter(new FileWriter(fo2));
 
-        f.write("Pathway enrichment\tFisher's p-value\tTest correction\tMapped metabolites\tNb of mapped\tCoverage (%)\n");
+        f.write("Pathway enrichment\tFisher's p-value\tBonferroni correction\tBenjamini-Hochberg correction\tMapped metabolites\tNb of mapped\tCoverage (%)\n");
         HashMap<BioPathway, Double> result = resultList.get(0);
-        Iterator itCorr = resultList.get(1).values().iterator();
+        Iterator itBonCorr = resultList.get(1).values().iterator();
+        Iterator itBenHocCorr = resultList.get(2).values().iterator();
 
         for (Map.Entry<BioPathway, Double> entry : result.entrySet()) {
             BioPathway path = entry.getKey();
-            String printed = entry.getKey().getName() + "\t" + roundPval((double)entry.getValue()) + "\t";
-            printed += roundPval((double) itCorr.next()) + "\t";
+            String printed = entry.getKey().getName() + "\t" + removeSciNot((double)entry.getValue()) + "\t";
+            printed += removeSciNot((double) itBonCorr.next()) + "\t" + removeSciNot((double) itBenHocCorr.next()) + "\t";
 
             int j = 0;
 
@@ -163,29 +192,19 @@ public class MetExplore4Galaxy {
         }
     }
 
-    public String roundPval(double value) {
-        if(value < 0.01){
-            String tmp = (String.valueOf(value));
+    public String removeSciNot(double value) {
+        String tmp = (String.valueOf(value));
+        if(value < 1e-10){
             String[] splitted = tmp.split("E");
-            double head = Double.parseDouble(splitted[0]);
-
-            try{
-                return  (String.valueOf(round(head)) + " E" + splitted[1] +" ");
-            }catch (ArrayIndexOutOfBoundsException e){
-                splitted = tmp.split("\\.");
-                int j = 0;
-                for (int i = 0 ; i < splitted[1].length(); i++){
-                    if(splitted[1].charAt(i) == '0'){
-                        j++;
-                    }else{
-                        break;
-                    }
-                }
-                double tail = Double.parseDouble(splitted[1].substring(j, j+1) + "." + splitted[1].substring(j + 1));
-                return (round(tail) + " E-" + String.valueOf(j + 1));
+            String power = splitted[1];
+            if(power.charAt(1) == '0') {
+                power = power.substring(2,power.length());
             }
+            else power = power.substring(1,power.length());
+            String[] number = splitted[0].split("\\.");
+            return "0." + (new String(new char[Integer.parseInt(power)-1]).replace("\0", "0")) + number[0] + number[1];
         }
-        return round(value);
+        return tmp;
     }
 
     public String round(double value) {
@@ -194,11 +213,11 @@ public class MetExplore4Galaxy {
 
     public void runTime(long elapsedTime){
         if (elapsedTime / 60000000000L == 0L) {
-            System.err.println("Time to run the process in seconde :" + elapsedTime / 1000000000L);
+            System.out.println("Time to run the process in seconde :" + elapsedTime / 1000000000L);
         } else {
             long min = elapsedTime / 60000000000L;
             long sec = elapsedTime / 1000000000L - (min * 60);
-            System.err.println("Time to run the process : " + min + "min " + sec + "s");
+            System.out.println("Time to run the process : " + min + "min " + sec + "s");
         }
     }
 
@@ -210,20 +229,20 @@ public class MetExplore4Galaxy {
         String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
         String outputFile1 = "mapping.tsv";
         String outputFile2 = "pathwayEnrichment.tsv";
+        String outputFile3 = "info.txt";
         String[] inchiLayers = {"c","h"};
-        int correction = 1;
 
         //SBML parsing
         BioNetwork bionet = (new JSBMLToBionetwork(sbml)).getBioNetwork();
         bionet.printBioNetworkSizeToOut();
 
-        MetExplore4Galaxy app = new MetExplore4Galaxy();
+        MetExplore4Galaxy app = new MetExplore4Galaxy(outputFile3);
         try{
 
             //Enrichment
             HashMap <String, String[]> parsedFile = app.extractData(inputFile, -1);
-            Set<BioPhysicalEntity> map = app.mapping(bionet, outputFile1, parsedFile, 1, 4, inchiLayers);
-            app.writeOutput(app.pathwayEnrichment (bionet, map, correction), map, outputFile2);
+            Set<BioPhysicalEntity> map = app.mapping(bionet, outputFile1, outputFile3, parsedFile, 1, 4, inchiLayers);
+            app.writeOutput(app.pathwayEnrichment (bionet, outputFile3, map), map, outputFile2);
        }
         catch (IOException e){
             e.printStackTrace();

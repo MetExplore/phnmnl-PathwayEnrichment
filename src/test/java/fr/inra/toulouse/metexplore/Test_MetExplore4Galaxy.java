@@ -3,7 +3,6 @@ package fr.inra.toulouse.metexplore;
 import junit.framework.TestCase;
 import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioPhysicalEntity;
-import parsebionet.io.JSBMLToBionetwork;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -34,8 +33,8 @@ public class Test_MetExplore4Galaxy extends TestCase {
         if (met == null) {
             inchiLayers[0] = "c";
             inchiLayers[1] = "h";
-            bionet = (new JSBMLToBionetwork("data/recon2.v03_ext_noCompartment_noTransport_v2.xml")).getBioNetwork();
-            met = new MetExplore4Galaxy();
+            bionet = (new JSBML2Bionetwork4Galaxy("data/recon2.v03_ext_noCompartment_noTransport_v2.xml")).getBioNetwork();
+            met = new MetExplore4Galaxy("info.txt");
         }
     }
 
@@ -72,7 +71,7 @@ public class Test_MetExplore4Galaxy extends TestCase {
     public void setMappingComparaison (String bpe) {
         expectedMap = new HashSet();
         expectedMap.add(bionet.getBioPhysicalEntityById(bpe));
-        map = met.mapping(bionet,"mapping.tsv", parsedFile,1,4, inchiLayers);
+        map = met.mapping(bionet,"mapping.tsv", "info.txt", parsedFile,1,4, inchiLayers);
     }
 
     public void testMappingCHEBIMap () throws SecurityException {
@@ -146,11 +145,11 @@ public class Test_MetExplore4Galaxy extends TestCase {
         createdDummyFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n");
         setMappingComparaison("M_tststeroneglc");
         try {
-            met.writeOutput(met.pathwayEnrichment (bionet, map, 1), map, outputFile);
+            met.writeOutput(met.pathwayEnrichment (bionet, "info.txt", map), map, outputFile);
             File fo = new File(outputFile);
             BufferedReader bo = new BufferedReader(new FileReader(fo));
             bo.readLine();
-            assertEquals(bo.readLine(), "Steroid metabolism\t0.02\t0.02\ttestosterone 3-glucosiduronic acid\t1\t1.67");
+            assertEquals(bo.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\ttestosterone 3-glucosiduronic acid\t1\t1.67");
             fo.delete();
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,7 +164,7 @@ public class Test_MetExplore4Galaxy extends TestCase {
 //                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-l"},
 //                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-c", "0"},
 //                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-l", "ch"},
-//                {"-i", "data/sacurineVariableMetadataEnhanced.tsv", "-l", "ch"}
+//                {"-i", "data/sacu/rineVariableMetadataEnhanced.tsv", "-l", "ch"}
 //        };
 //        return parameters;
 //    }

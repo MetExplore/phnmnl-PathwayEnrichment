@@ -51,7 +51,6 @@ public class Launcher_MetExplore4Galaxy {
         //Parameters
         long startTime = System.nanoTime();
         Launcher_MetExplore4Galaxy launch = new Launcher_MetExplore4Galaxy();
-        MetExplore4Galaxy met = new MetExplore4Galaxy(launch.outFile3);
         CmdLineParser parser = new CmdLineParser(launch);
 
         //CmdParsing
@@ -87,6 +86,7 @@ public class Launcher_MetExplore4Galaxy {
             }
         }
         String[] inchiLayers = launch.inchiLayers.replaceAll(" ","").split(",");
+        MetExplore4Galaxy met = new MetExplore4Galaxy(launch.outFile3);
         BioNetwork bionet = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
 
         try{

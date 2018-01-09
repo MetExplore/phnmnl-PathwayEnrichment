@@ -33,10 +33,13 @@ public class Launcher_MetExplore4Galaxy {
     public int colFiltered = -1;
 
     @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5; 0 for none).")
-    public int inchiColumn = 5;
+    public int inchiColumn = -1;
 
-    @Option(name="-chebi", usage="Number of the file's column containing the chebi data (by default: 0 for none).")
+    @Option(name="-chebi", usage="Number of the file's column containing the CHEBI data (by default: 0 for none).")
     public int chebiColumn = -1;
+
+    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier in the SBML file (by default: 0 for none).")
+    public int idSBMLColumn = 2;
 
     @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
     public String inchiLayers = "c,h";
@@ -64,8 +67,8 @@ public class Launcher_MetExplore4Galaxy {
                 throw new CmdLineException("-i parameter required");
             }
 
-            if (launch.chebiColumn < 1 && launch.inchiColumn < 1) {
-                throw new CmdLineException("-chebi and -inchi parameters cannot be both setted at < 1");
+            if (launch.chebiColumn < 1 && launch.inchiColumn < 1 && launch.idSBMLColumn < 1) {
+                throw new CmdLineException("-chebi, -inchi and idSBML parameters cannot be all setted at < 1. Choose at less one mapping criterion.");
             }
 
             if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", launch.inchiLayers)) {
@@ -90,7 +93,7 @@ public class Launcher_MetExplore4Galaxy {
         BioNetwork bionet = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
 
         try{
-            MetExplore4Galaxy met = new MetExplore4Galaxy(bionet,launch.inFile,launch.outFile1,launch.outFile2,launch.outFile3,(launch.chebiColumn -1),(launch.inchiColumn -1),(launch.colFiltered -1),inchiLayers);
+            MetExplore4Galaxy met = new MetExplore4Galaxy(bionet,launch.inFile,launch.outFile1,launch.outFile2,launch.outFile3,(launch.chebiColumn -1),(launch.inchiColumn -1),(launch.idSBMLColumn -1),(launch.colFiltered -1),inchiLayers);
             met.exec(startTime);
         }
         catch (IOException e){

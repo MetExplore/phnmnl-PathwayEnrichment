@@ -33,6 +33,7 @@ public class MetExplore4Galaxy {
     public String outputFile3;
     public int chebiColumn;
     public int inchiColumn;
+    public int idSBMLColumn;
     public int filteredColumns;
     public String[] inchiLayers;
     public BioNetwork bn;
@@ -45,7 +46,7 @@ public class MetExplore4Galaxy {
     public List<HashMap<BioPathway, Double>> pathwayEnrList = new ArrayList<HashMap<BioPathway, Double>>(); //list of pathway containing mapped metabolites, p-value and corrections values
 
 
-    public MetExplore4Galaxy(BioNetwork bn, String inputFile, String outputFile1, String outputFile2, String outputFile3, int chebiColumn, int inchiColumn, int filteredColumns, String[] inchiLayers) throws IOException{
+    public MetExplore4Galaxy(BioNetwork bn, String inputFile, String outputFile1, String outputFile2, String outputFile3, int chebiColumn, int inchiColumn, int idSBMLColumn, int filteredColumns, String[] inchiLayers) throws IOException{
        this.bn=bn;
        this.inputFile=inputFile;
        this.outputFile1=outputFile1;
@@ -53,6 +54,7 @@ public class MetExplore4Galaxy {
        this.outputFile3=outputFile3;
        this.chebiColumn=chebiColumn;
        this.inchiColumn=inchiColumn;
+       this.idSBMLColumn=idSBMLColumn;
        this.filteredColumns=filteredColumns;
        this.inchiLayers=inchiLayers;
        if (outputFile3 != "") {
@@ -76,7 +78,8 @@ public class MetExplore4Galaxy {
                 try {
                     if (filtered ==  false || values[filteredColumns] != ""){ //optional filtering on a specified column
                         if (inchiColumn > 0) parsedFile.put(values[0]+values[inchiColumn], values);//add to hashmap (key composed by the name and the InChI)
-                        else parsedFile.put(values[0]+values[chebiColumn], values); //key based on InChI by default
+                        else if(chebiColumn > 0) parsedFile.put(values[0]+values[chebiColumn], values); //key based on InChI by default
+                        else parsedFile.put(values[0]+values[idSBMLColumn], values);
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {//avoid errors with filtering functionality containing empty values
                 }
@@ -100,30 +103,41 @@ public class MetExplore4Galaxy {
             //Loop on each metabolite from the input file
             for (String[] entry : parsedFile.values()) {
                 mapping = false;
-                mappedBpe=new BioPhysicalEntity();;
+                mappedBpe = new BioPhysicalEntity();
                 occurences = 0;//identification of multiple mapping
 
                 //Loop for each metabolite from the SBML
                 for (BioPhysicalEntity bpe : bn.getPhysicalEntityList().values()) {
                     mappingBpe = false;
 
+                    //System.out.println(bpe.getId() + " = " + entry[idSBMLColumn]);
+                    //Mapping on metabolite identifier in the SBML
+                    // Discarding mapping on NA and blank values
+                    if ((idSBMLColumn > 0) && !(entry[idSBMLColumn]).equals("NA") && !(entry[idSBMLColumn]).equals("")
+                            && (bpe.getId().equals(entry[idSBMLColumn]))) {
+                        mappingElementList.add(new MappingElement(true,entry[0],bpe.getName(),bpe.getId(),entry[idSBMLColumn],bpe.getId()));
+                        mappingBpe = true; mapping = true; occurences++; mappedBpe = bpe;
+                    }
+
                     //Testing CHEBI mapping
                     //Discarding mapping on NA and blank values
-                    if ((chebiColumn > 0) && !(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals(""))) {
+                    if(!mappingBpe){
+                        if ((chebiColumn > 0) && !(entry[chebiColumn]).equals("NA") && !((entry[chebiColumn]).equals(""))) {
 
-                        //Loop on attribute of the metabolite from the SBML
-                        for (Map.Entry<String, Set<BioRef>> ref : bpe.getRefs().entrySet()) {
-                            if (ref.getKey().equals("chebi")) {//researching the one positioned on chebi
-                                //Sometimes different CHEBI can be associated
-                                for (BioRef val : ref.getValue()) {
-                                    if (entry[chebiColumn].equals(val.id)) {
-                                        //add a mappingElement to the List
-                                        mappingElementList.add(new MappingElement(true,entry[0],bpe.getName(),bpe.getId(),entry[chebiColumn],val.id ));
-                                        mappingBpe = true; mapping=true; occurences++; mappedBpe  = bpe;
-                                        break;
+                            //Loop on attribute of the metabolite from the SBML
+                            for (Map.Entry<String, Set<BioRef>> ref : bpe.getRefs().entrySet()) {
+                                if (ref.getKey().equals("chebi")) {//researching the one positioned on chebi
+                                    //Sometimes different CHEBI can be associated
+                                    for (BioRef val : ref.getValue()) {
+                                        if (entry[chebiColumn].equals(val.id)) {
+                                            //add a mappingElement to the List
+                                            mappingElementList.add(new MappingElement(true,entry[0],bpe.getName(),bpe.getId(),entry[chebiColumn],val.id ));
+                                            mappingBpe = true; mapping = true; occurences++; mappedBpe = bpe;
+                                            break;
+                                        }
                                     }
+                                    break;
                                 }
-                                break;
                             }
                         }
                     }
@@ -135,7 +149,7 @@ public class MetExplore4Galaxy {
                         if ((inchiColumn > 0) && !(entry[inchiColumn]).equals("NA") && !(entry[inchiColumn]).equals("")
                                 && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(entry[inchiColumn], inchiLayers))) {
                             mappingElementList.add(new MappingElement(true,entry[0],bpe.getName(),bpe.getId(),entry[inchiColumn],bpe.getInchi()));
-                            mapping= true; occurences++; mappedBpe  = bpe;
+                            mapping = true; occurences++; mappedBpe = bpe;
                         }
                     }
 
@@ -149,7 +163,8 @@ public class MetExplore4Galaxy {
 
                     //Remove the mapped metabolite from remaining list
                     if (inchiColumn > 0) remainingMetabolites.remove(entry[0]+entry[inchiColumn]);
-                    else remainingMetabolites.remove(entry[0]+entry[chebiColumn]);
+                    else if(chebiColumn > 0) remainingMetabolites.remove(entry[0]+entry[chebiColumn]);
+                    else remainingMetabolites.remove(entry[0]+entry[idSBMLColumn]);
 
                 }
             }

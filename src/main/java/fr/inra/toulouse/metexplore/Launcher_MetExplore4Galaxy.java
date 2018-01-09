@@ -1,12 +1,9 @@
 package fr.inra.toulouse.metexplore;
 
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import parsebionet.biodata.BioNetwork;
-import parsebionet.biodata.BioPhysicalEntity;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import static java.lang.System.exit;
@@ -24,7 +21,7 @@ public class Launcher_MetExplore4Galaxy {
     String outFile2 = "pathwayEnrichment.tsv";
 
     @Option(name="-o3", usage="Output file name for general information resulting from mapping and pathway enrichment results (by default: info.txt).")
-    String outFile3 = "";
+    String outFile3 = "info.txt";
 
     @Option(name="-s", usage="Sbml file name.")
     public String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
@@ -48,21 +45,21 @@ public class Launcher_MetExplore4Galaxy {
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
 
-        //Parameters
         long startTime = System.nanoTime();
         Launcher_MetExplore4Galaxy launch = new Launcher_MetExplore4Galaxy();
         CmdLineParser parser = new CmdLineParser(launch);
 
-        //CmdParsing
         try {
             parser.parseArgument(args);
 
+            //Print help
             if (launch.phelp) {
                 System.out.println("Options:");
                 parser.printUsage(System.out);
                 exit(0);
             }
 
+            //Error messages for bad parameters
             if(launch.inFile==null){
                 throw new CmdLineException("-i parameter required");
             }
@@ -75,6 +72,7 @@ public class Launcher_MetExplore4Galaxy {
                 throw new CmdLineException("-l parameter badly formatted");
             }
 
+        //Personalised error print for help
         } catch (CmdLineException e) {
             if(e.getMessage().equals("Option \"-l\" takes an operand")){
                 launch.inchiLayers="";
@@ -85,21 +83,18 @@ public class Launcher_MetExplore4Galaxy {
                 exit(1);
             }
         }
+
+        //Regex for inchiLayers parameter
         String[] inchiLayers = launch.inchiLayers.replaceAll(" ","").split(",");
-        MetExplore4Galaxy met = new MetExplore4Galaxy(launch.outFile3);
+        //Extract SBML
         BioNetwork bionet = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
 
         try{
-
-            //Pathway Enrichment
-            HashMap <String, String[]> parsedFile = met.extractData(launch.inFile, (launch.colFiltered -1));
-            Set<BioPhysicalEntity> map = met.mapping(bionet, launch.outFile1,launch.outFile3, parsedFile, (launch.chebiColumn -1), (launch.inchiColumn -1), inchiLayers);
-            met.writeOutput(met.pathwayEnrichment (bionet, launch.outFile3, map), map, launch.outFile2);
-
-        } catch (IOException e2){
-            e2.printStackTrace();
+            MetExplore4Galaxy met = new MetExplore4Galaxy(bionet,launch.inFile,launch.outFile1,launch.outFile2,launch.outFile3,(launch.chebiColumn -1),(launch.inchiColumn -1),(launch.colFiltered -1),inchiLayers);
+            met.exec(startTime);
         }
-
-        met.runTime(System.nanoTime() - startTime);
+        catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }

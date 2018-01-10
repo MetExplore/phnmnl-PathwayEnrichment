@@ -34,7 +34,7 @@ public class Test_MetExplore4Galaxy extends TestCase {
             inchiLayers[0] = "c";
             inchiLayers[1] = "h";
             bionet = (new JSBML2Bionetwork4Galaxy("data/recon2.v03_ext_noCompartment_noTransport_v2.xml")).getBioNetwork();
-            met = new MetExplore4Galaxy(bionet,"dummyFile.tsv", outputFile,outputFile,"",1,4,-1,inchiLayers);
+            met = new MetExplore4Galaxy(bionet,"dummyFile.tsv", outputFile,outputFile,"",0,1,4,-1, -1,inchiLayers);
         }
     }
 

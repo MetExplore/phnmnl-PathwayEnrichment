@@ -29,6 +29,9 @@ public class Launcher_MetExplore4Galaxy {
     @Option(name="-i", usage="[REQUIRED] Input file in tsv file format.")
     public String inFile ;
 
+    @Option(name="-name", usage="Number of the file's column containing the metabolite identifier in the SBML file (by default: 0 for none).")
+    public int nameColumn = 1;
+
     @Option(name="-f", usage="Number of the filtered column (by default: 0 for none)")
     public int colFiltered = -1;
 
@@ -93,7 +96,7 @@ public class Launcher_MetExplore4Galaxy {
         BioNetwork bionet = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
 
         try{
-            MetExplore4Galaxy met = new MetExplore4Galaxy(bionet,launch.inFile,launch.outFile1,launch.outFile2,launch.outFile3,(launch.chebiColumn -1),(launch.inchiColumn -1),(launch.idSBMLColumn -1),(launch.colFiltered -1),inchiLayers);
+            MetExplore4Galaxy met = new MetExplore4Galaxy(bionet,launch.inFile,launch.outFile1,launch.outFile2,launch.outFile3,(launch.nameColumn -1),(launch.chebiColumn -1),(launch.inchiColumn -1),(launch.idSBMLColumn -1),(launch.colFiltered -1),inchiLayers);
             met.exec(startTime);
         }
         catch (IOException e){

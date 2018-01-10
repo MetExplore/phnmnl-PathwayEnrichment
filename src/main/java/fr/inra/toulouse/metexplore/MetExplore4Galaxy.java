@@ -132,7 +132,7 @@ public class MetExplore4Galaxy {
                     //InChI mapping
                     if (!isMappedCurrentBpe) {
                         //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
-                            if ((inchiColumn > 0) && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(lineInFile[inchiColumn], inchiLayers)))
+                            if (mappingPreRequisite(lineInFile,inchiColumn) && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(lineInFile[inchiColumn], inchiLayers)))
                                 isMappedCurrentBpe = mapping4ID_INCHI(lineInFile,"InChI",bpe);
                     }
 
@@ -182,11 +182,8 @@ public class MetExplore4Galaxy {
             matchValueSbml = bpe.getInchi(); mappingColumnInfile = inchiColumn;
         }
 
-        if (mappingPreRequisite(lineInFile, mappingColumnInfile)) {
-            addMappingElement2List(lineInFile, bpe, mappingColumnInfile, matchValueSbml);
-            return true;
-        }
-        return false;
+        addMappingElement2List(lineInFile, bpe, mappingColumnInfile, matchValueSbml);
+        return true;
     }
 
     public void writeOutputMapping() throws IOException{

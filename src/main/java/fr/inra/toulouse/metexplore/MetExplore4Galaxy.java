@@ -99,14 +99,14 @@ public class MetExplore4Galaxy {
 
                     //Mapping on metabolite identifier associated with a bionetwork
                     try {
-                        if ((idSBMLColumn > 0) && (bpe.getId().equals(lineInFile[idSBMLColumn])))
+                        if (mappingPreRequisite(lineInFile, idSBMLColumn) && (bpe.getId().equals(lineInFile[idSBMLColumn])))
                             isMappedCurrentBpe = mapping4ID_INCHI(lineInFile,"ID",bpe);
                     } catch (ArrayIndexOutOfBoundsException e) {//avoid errors with idSBML column containing empty values
                     }
 
                     //CHEBI mapping
                     if(!isMappedCurrentBpe){
-                        if ( mappingPreRequisite(lineInFile,chebiColumn) && !((lineInFile[chebiColumn]).equals(""))) {
+                        if (mappingPreRequisite(lineInFile,chebiColumn)) {
 
                             //Loop on attribute of the metabolite from the SBML
                             for (Map.Entry<String, Set<BioRef>> key : bpe.getRefs().entrySet()) {

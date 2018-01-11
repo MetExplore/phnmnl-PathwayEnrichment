@@ -27,11 +27,10 @@ import static java.lang.System.exit;
 
 public class MetExplore4Galaxy {
 
-    public String inputFile, outputFileMapping, outputFilePathEnr, outputFileInfo;
+    public String inputFile, outputFileMapping, outputFilePathEnr, outputFileInfo, text4outputFileInfo="";
     public int nameColumn, chebiColumn, inchiColumn, idSBMLColumn, filteredColumn;
     public String[] inchiLayers;
     public BioNetwork bioNetwork;
-    public BufferedWriter f3;
     public HashMap <String, String[]> list_lineInFile= new HashMap<String, String[]>(); //input file after formating and filtering
     public HashMap<String, String[]> list_unmappedMetabolites = new HashMap<String, String[]>(); //list of non-mapped metabolites
     public Set <BioPhysicalEntity> list_mappingBpe = new HashSet<BioPhysicalEntity>(); //list of mapped metabolites used for analysis
@@ -52,11 +51,6 @@ public class MetExplore4Galaxy {
        this.idSBMLColumn=idSBMLColumn;
        this.filteredColumn=filteredColumn;
        this.inchiLayers=inchiLayers;
-       if (outputFileInfo != "") {
-           File fo3 = new File(outputFileInfo);
-           fo3.createNewFile();
-           this.f3 = new BufferedWriter(new FileWriter(fo3));
-       }
     }
 
     public void  extractData() throws IOException {
@@ -91,6 +85,7 @@ public class MetExplore4Galaxy {
             list_unmappedMetabolites = (HashMap<String, String[]>) list_lineInFile.clone();//will contain non-mapped metabolites
             int mappingOccurences, id = 1;
             BioPhysicalEntity mappedBpe;
+            String warningsDoublets="";
 
             //Loop on each metabolite from the input file
             for (String[] lineInFile : list_lineInFile.values()) {
@@ -150,7 +145,8 @@ public class MetExplore4Galaxy {
                         String nameInInputFile = (nameColumn >= 0 ) ? lineInFile[nameColumn]: 
                                 (idSBMLColumn >= 0 ) ? lineInFile[idSBMLColumn] :  
                                                         "line n°" + id + " from the input file";
-                        System.out.println("###Warning: There is " + mappingOccurences + " possible matches for " + nameInInputFile + ". Please, check the corresponding lines in the mapping output file. These duplicates will be discarded from the pathway analysis.");
+                        warningsDoublets="###Warning: There are " + mappingOccurences + " possible matches for " + nameInInputFile + ".\n";
+                        writeLog(warningsDoublets);
                     }
 
                     //Remove the mapped metabolite from unmapped list
@@ -158,7 +154,13 @@ public class MetExplore4Galaxy {
                 }
                 id++;
             }
+        if (warningsDoublets!="") writeLog("###Warning: Please, check the corresponding lines in the mapping output file. These duplicates will be discarded from the pathway analysis.\n");
         writeOutputMapping();
+    }
+
+    public void writeLog(String message){
+        System.out.println(message.replaceAll("\n", ""));
+        text4outputFileInfo+=message;
     }
 
     public void addMappingElement2List(String[] lineInFile, BioPhysicalEntity bpe, int mappingColumnInfile, String matchValueSbml){
@@ -193,14 +195,7 @@ public class MetExplore4Galaxy {
         BufferedWriter f = new BufferedWriter(new FileWriter(fo1));
 
         f.write("Mapped\tName (Input File)\tName (SBML)\tSBML ID\tMatched value (input File)\tMatched value (SBML)\n");
-
-        String printingMessage = (list_lineInFile.size() - list_unmappedMetabolites.size()) + " metabolites have been mapped (on " + list_lineInFile.size() + ").";
-        System.out.println(printingMessage);
-
-        //if "writing console output in a file" functionality is activated
-        if (outputFileInfo != "") {
-            this.f3.write(printingMessage);
-        }
+        writeLog((list_lineInFile.size() - list_unmappedMetabolites.size()) + " metabolites have been mapped (on " + list_lineInFile.size() + ").\n");
 
         //Add non-mapped metabolites to the mapping output file
         for (String[] unmappedMetabolites : list_unmappedMetabolites.values()) {
@@ -229,14 +224,8 @@ public class MetExplore4Galaxy {
         list_pathwayEnr.add(enr.bonferroniCorrection(result)); //obtaining Bonferroni q-values
         list_pathwayEnr.add(enr.benjaminiHochbergCorrection(result));//same for Benjamini Hochberg
 
-        String printingMessage = list_pathwayEnr.get(0).size() + " pathways are concerned among the bioNetwork (on " + bioNetwork.getPathwayList().size() + ").";
-        System.out.println(printingMessage);
+        writeLog(list_pathwayEnr.get(0).size() + " pathways are concerned among the bioNetwork (on " + bioNetwork.getPathwayList().size() + ").");
 
-        //if "writing console output in a file" functionality is activated
-        if (outputFileInfo != "") {
-            this.f3.write("\n" + printingMessage);
-            this.f3.close();
-        }
         writeOutputPathEnr();
     }
 
@@ -276,6 +265,16 @@ public class MetExplore4Galaxy {
         }
         if (f != null) {
             f.close();
+        }
+    }
+
+    public void writeOutputInfo() throws IOException {
+        if (outputFileInfo != "") {//if "writing console output in a file" functionality is activated
+            File f = new File(outputFileInfo);
+            f.createNewFile();
+            BufferedWriter b = new BufferedWriter(new FileWriter(f));
+            b.write(text4outputFileInfo);
+            b.close();
         }
     }
 
@@ -363,6 +362,7 @@ public class MetExplore4Galaxy {
         extractData();
         mapping();
         pathwayEnrichment();
+        writeOutputInfo();
         runTime(System.nanoTime() - startTime);
     }
 }

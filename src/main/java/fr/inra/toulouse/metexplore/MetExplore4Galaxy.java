@@ -13,15 +13,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.File;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Collections;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Comparator;
+import java.util.*;
 
 import static java.lang.System.exit;
 
@@ -30,7 +22,7 @@ public class MetExplore4Galaxy {
     public String inputFile, outputFileMapping, outputFilePathEnr, outputFileInfo, text4outputFileInfo="";
     public int nameColumn, chebiColumn, inchiColumn, idSBMLColumn, filteredColumn;
     public String[] inchiLayers;
-    public BioNetwork bioNetwork;
+    public BioNetwork network;
     public HashMap <String, String[]> list_lineInFile= new HashMap<String, String[]>(); //input file after formating and filtering
     public HashMap<String, String[]> list_unmappedMetabolites = new HashMap<String, String[]>(); //list of non-mapped metabolites
     public Set <BioPhysicalEntity> list_mappingBpe = new HashSet<BioPhysicalEntity>(); //list of mapped metabolites used for analysis
@@ -39,8 +31,8 @@ public class MetExplore4Galaxy {
     public List<HashMap<BioPathway, Double>> list_pathwayEnr = new ArrayList<HashMap<BioPathway, Double>>(); //list of pathway containing mapped metabolites, p-value and corrections values
 
 
-    public MetExplore4Galaxy(BioNetwork bioNetwork, String inputFile, String outputFileMapping, String outputFilePathEnr, String outputFileInfo, int nameColumn, int chebiColumn, int inchiColumn, int idSBMLColumn, int filteredColumn, String[] inchiLayers) throws IOException{
-       this.bioNetwork=bioNetwork;
+    public MetExplore4Galaxy(BioNetwork network, String inputFile, String outputFileMapping, String outputFilePathEnr, String outputFileInfo, int nameColumn, int chebiColumn, int inchiColumn, int idSBMLColumn, int filteredColumn, String[] inchiLayers) throws IOException{
+       this.network=network;
        this.inputFile=inputFile;
        this.outputFileMapping=outputFileMapping;
        this.outputFilePathEnr=outputFilePathEnr;
@@ -58,19 +50,18 @@ public class MetExplore4Galaxy {
         Boolean isFiltered = (filteredColumn >= 0 ) ? true : false;
         BufferedReader f = new BufferedReader(new FileReader(new File(inputFile)));
         String line;
-        int i = 0;
+        int id = 1;
 
+        f.readLine(); //skip the header
         while ((line = f.readLine()) != null) {//Loop on each lines from the input file
-            if (i != 0) {//exception on header
-                String[] tabuledLine = line.replaceAll("\"","").split("\t");//splitting by tabulation
-                try {
-                    if (isFiltered ==  false || tabuledLine[filteredColumn] != ""){ //optional filtering on a specified column
-                        list_lineInFile.put(""+i, tabuledLine);//add to hashmap
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {//avoid errors with filtering functionality containing empty values
+            String[] tabuledLine = line.replaceAll("\"","").split("\t");//splitting by tabulation
+            try {
+                if (isFiltered ==  false || tabuledLine[filteredColumn] != ""){ //optional filtering on a specified column
+                    list_lineInFile.put(""+id, tabuledLine);//add to hashmap
+                    id++;
                 }
+            } catch (ArrayIndexOutOfBoundsException e) {//avoid errors with filtering functionality containing empty values
             }
-            i++;
         }
         if (f != null) f.close();
         if (list_lineInFile.size() < 1 ){//no extraction = error generation
@@ -94,47 +85,44 @@ public class MetExplore4Galaxy {
                 mappingOccurences = 0;//identification of multiple mapping
 
                 //Loop for each metabolite from the SBML
-                for (BioPhysicalEntity bpe : bioNetwork.getPhysicalEntityList().values()) {
+                for (BioPhysicalEntity bpe : network.getPhysicalEntityList().values()) {
                     isMappedCurrentBpe = false;
 
                     //Mapping on metabolite identifier associated with a bionetwork
-                    try {
-                        if (mappingPreRequisite(lineInFile, idSBMLColumn) && (bpe.getId().equals(lineInFile[idSBMLColumn])))
-                            isMappedCurrentBpe = mapping4ID_INCHI(lineInFile,"ID",bpe);
-                    } catch (ArrayIndexOutOfBoundsException e) {//avoid errors with idSBML column containing empty values
+                    isMappedCurrentBpe = mapping4ID_INCHI(lineInFile,"ID",bpe);
+
+                    //InChI mapping
+                    if (!isMappedCurrentBpe) {
+                        isMappedCurrentBpe = mapping4ID_INCHI(lineInFile,"INCHI",bpe);
                     }
 
                     //CHEBI mapping
                     if(!isMappedCurrentBpe){
-                        if (mappingPreRequisite(lineInFile,chebiColumn)) {
+                        try{
+                            if (ifNotBlankValue(lineInFile,chebiColumn)) {
 
-                            //Loop on attribute of the metabolite from the SBML
-                            for (Map.Entry<String, Set<BioRef>> key : bpe.getRefs().entrySet()) {
-                                if (key.getKey().equals("chebi")) {//researching the one positioned on chebi
-                                    //Sometimes different CHEBI can be associated
-                                    for (BioRef val : key.getValue()) {
-                                        if (lineInFile[chebiColumn].equals(val.id)) {
-                                            //add a mappingElement to the List
-                                            addMappingElement2List(lineInFile,bpe,chebiColumn,val.id);
-                                            isMappedCurrentBpe = true; break;
-                                        }
-                                    } break;
+                                //Loop on attribute of the metabolite from the SBML
+                                for (Map.Entry<String, Set<BioRef>> key : bpe.getRefs().entrySet()) {
+                                    if (key.getKey().equals("chebi")) {//researching the one positioned on chebi
+                                        //Sometimes different CHEBI can be associated
+                                        for (BioRef val : key.getValue()) {
+                                            if (lineInFile[chebiColumn].equals(val.id)) {
+                                                //add a mappingElement to the List
+                                                addMappingElement2List(lineInFile,bpe,chebiColumn,val.id);
+                                                isMappedCurrentBpe = true; break;
+                                            }
+                                        } break;
+                                    }
                                 }
                             }
+                        }catch (ArrayIndexOutOfBoundsException e) {
+                            //avoid errors with an only column in the input file containing empty values
                         }
-                    }
-
-                    //InChI mapping
-                    if (!isMappedCurrentBpe) {
-                        //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
-                            if (mappingPreRequisite(lineInFile,inchiColumn) && (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(lineInFile[inchiColumn], inchiLayers)))
-                                isMappedCurrentBpe = mapping4ID_INCHI(lineInFile,"InChI",bpe);
                     }
 
                     if (isMappedCurrentBpe){
                         isMapped = true; mappingOccurences++; mappedBpe = bpe;
                     }
-
                 }
 
                 if (isMapped) {
@@ -142,10 +130,7 @@ public class MetExplore4Galaxy {
                     //Warning: in any case, the multiple matches will be written in the mapping output file (mappingElementList variable) (but not used in the analysis)
                     if(mappingOccurences == 1) list_mappingBpe.add(mappedBpe);
                     else {
-                        String nameInInputFile = (nameColumn >= 0 ) ? lineInFile[nameColumn]: 
-                                (idSBMLColumn >= 0 ) ? lineInFile[idSBMLColumn] :  
-                                                        "line n°" + id + " from the input file";
-                        warningsDoublets="###Warning: There are " + mappingOccurences + " possible matches for " + nameInInputFile + ".\n";
+                        warningsDoublets="###Warning: There are " + mappingOccurences + " possible matches for " + lineInFile[0] + ".\n";
                         writeLog(warningsDoublets);
                     }
 
@@ -158,34 +143,43 @@ public class MetExplore4Galaxy {
         writeOutputMapping();
     }
 
-    public void writeLog(String message){
-        System.out.println(message.replaceAll("\n", ""));
-        text4outputFileInfo+=message;
+    public Boolean mapping4ID_INCHI (String[] lineInFile, String mappingType, BioPhysicalEntity bpe) {
+        
+        String matchValueSbml;
+        int mappingColumnInfile;
+        Boolean ifEquals;
+
+        if (mappingType =="ID"){
+            matchValueSbml = bpe.getId();
+            mappingColumnInfile = idSBMLColumn;
+        }else{
+            matchValueSbml = bpe.getInchi();
+            mappingColumnInfile = inchiColumn;
+        }
+        try {
+            if (ifNotBlankValue(lineInFile, mappingColumnInfile)) {
+                ifEquals = (mappingType == "ID") ? bpe.getId().equals(lineInFile[idSBMLColumn]) :
+                        (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(lineInFile[inchiColumn], inchiLayers));
+                //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
+                if (ifEquals) {
+                    addMappingElement2List(lineInFile, bpe, mappingColumnInfile, matchValueSbml);
+                    return true;
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            //avoid errors with an only column in the input file containing empty values
+        }
+        return false;
+    }
+
+    public Boolean ifNotBlankValue(String[] lineInFile, int matchingColumnInFile){
+        //Test if mapping is allowed with this parameters and discard mapping on NA and blank values
+        return ((matchingColumnInFile >= 0) && !(lineInFile[matchingColumnInFile]).equals("NA") && !(lineInFile[matchingColumnInFile]).equals(""));
     }
 
     public void addMappingElement2List(String[] lineInFile, BioPhysicalEntity bpe, int mappingColumnInfile, String matchValueSbml){
         String nameInInputFile = (nameColumn >= 0) ? lineInFile[nameColumn] : "";
         list_mappingElement.add(new MappingElement(true,nameInInputFile,bpe.getName(),bpe.getId(),lineInFile[mappingColumnInfile],matchValueSbml));
-    }
-
-    public Boolean mappingPreRequisite(String[] lineInFile, int matchingColumnInFile){
-        //Discarding mapping on NA and blank values
-        return ((matchingColumnInFile >= 0) && !(lineInFile[matchingColumnInFile]).equals("NA") && !(lineInFile[matchingColumnInFile]).equals(""));
-    }
-
-    public Boolean mapping4ID_INCHI (String[] lineInFile, String mappingType, BioPhysicalEntity bpe) {
-
-        String matchValueSbml;
-        int mappingColumnInfile;
-
-        if (mappingType =="ID"){
-            matchValueSbml = bpe.getId(); mappingColumnInfile = idSBMLColumn;
-        }else{
-            matchValueSbml = bpe.getInchi(); mappingColumnInfile = inchiColumn;
-        }
-
-        addMappingElement2List(lineInFile, bpe, mappingColumnInfile, matchValueSbml);
-        return true;
     }
 
     public void writeOutputMapping() throws IOException{
@@ -199,10 +193,7 @@ public class MetExplore4Galaxy {
 
         //Add non-mapped metabolites to the mapping output file
         for (String[] unmappedMetabolites : list_unmappedMetabolites.values()) {
-            String nameInInputFile = (nameColumn >= 0) ? unmappedMetabolites[nameColumn] :
-                    (idSBMLColumn >= 0 ) ? unmappedMetabolites[idSBMLColumn] :
-                            unmappedMetabolites[0];
-            list_mappingElement.add(new MappingElement(false, nameInInputFile,"", "", "", ""));
+            list_mappingElement.add(new MappingElement(false, unmappedMetabolites[0],"", "", "", ""));
         }
 
         //Sorting by input file metabolites names (and by true/false mapping) and writing in output file
@@ -214,19 +205,67 @@ public class MetExplore4Galaxy {
         f.close();
     }
 
+    public class MappingElement{
+
+        public Boolean isMapped;
+        public String inFileName, sbmlName, ID, inFileVal, sbmlVal;
+
+
+        public MappingElement(Boolean isMapped, String inFileName, String sbmlName, String ID, String inFileVal, String sbmlVal){
+            this.isMapped=isMapped;
+            this.inFileName=inFileName;
+            this.sbmlName=sbmlName;
+            this.ID=ID;
+            this.inFileVal=inFileVal;
+            this.sbmlVal=sbmlVal;
+        }
+    }
+
+    public class MappedComparator implements Comparator <MappingElement> {
+        public int compare(MappingElement m1, MappingElement m2) {
+            if (m1.isMapped == m2.isMapped) return m1.inFileName.compareToIgnoreCase(m2.inFileName);
+            else if (m1.isMapped == true && m2.isMapped == false) return -1;
+            return 1;
+        }
+    }
+
     public void pathwayEnrichment() throws IOException{
 
         System.out.println("Pathway enrichment in progress...");
-        PathwayEnrichment enr = new PathwayEnrichment(bioNetwork, list_mappingBpe);
-        HashMap<BioPathway, Double> result = enr.computeEnrichment(); //obtaining p-values for mapped pathway
+        PathwayEnrichment pathEnr = new PathwayEnrichment(network, list_mappingBpe);
+        HashMap<BioPathway, Double> pathEnrWhitPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
+        
+        list_pathwayEnr.add(sortPathEnrByPval(pathEnrWhitPval));//benjaminiHochberg function sort biopath by pval, need to do the same to join with it
+        list_pathwayEnr.add(sortPathEnrByPval(pathEnr.bonferroniCorrection(pathEnrWhitPval))); //obtaining Bonferroni q-values
+        list_pathwayEnr.add(pathEnr.benjaminiHochbergCorrection(pathEnrWhitPval));//same for Benjamini Hochberg
 
-        list_pathwayEnr.add(result);
-        list_pathwayEnr.add(enr.bonferroniCorrection(result)); //obtaining Bonferroni q-values
-        list_pathwayEnr.add(enr.benjaminiHochbergCorrection(result));//same for Benjamini Hochberg
-
-        writeLog(list_pathwayEnr.get(0).size() + " pathways are concerned among the bioNetwork (on " + bioNetwork.getPathwayList().size() + ").");
-
+        writeLog(list_pathwayEnr.get(0).size() + " pathways are concerned among the network (on " + network.getPathwayList().size() + ").");
         writeOutputPathEnr();
+    }
+
+    public HashMap<BioPathway, Double> sortPathEnrByPval(HashMap<BioPathway, Double> disorderedPathEnr) {
+        ArrayList<BioPathway> orderedPath = new ArrayList(disorderedPathEnr.keySet());
+        Collections.sort(orderedPath, new pvalComparator(disorderedPathEnr));
+        HashMap<BioPathway, Double> orderedPathEnr = new HashMap();
+
+        for (int i = 0; i < orderedPath.size(); ++i) {
+            BioPathway path = (BioPathway) orderedPath.get(i);
+            double pval = (Double) disorderedPathEnr.get(path);
+            orderedPathEnr.put(path, pval);
+        }
+        return orderedPathEnr;
+    }
+
+    static class pvalComparator implements Comparator<BioPathway> {
+        HashMap<BioPathway, Double> pathEnr;
+        
+        public pvalComparator(HashMap<BioPathway, Double> pathEnr) {
+            this.pathEnr = pathEnr;
+        }
+
+        public int compare(BioPathway p1, BioPathway p2) {
+            return Double.compare((Double)this.pathEnr.get(p1), (Double)this.pathEnr.get(p2));
+        }
     }
 
     public void writeOutputPathEnr() throws IOException{
@@ -268,45 +307,6 @@ public class MetExplore4Galaxy {
         }
     }
 
-    public void writeOutputInfo() throws IOException {
-        if (outputFileInfo != "") {//if "writing console output in a file" functionality is activated
-            File f = new File(outputFileInfo);
-            f.createNewFile();
-            BufferedWriter b = new BufferedWriter(new FileWriter(f));
-            b.write(text4outputFileInfo);
-            b.close();
-        }
-    }
-
-    public class MappingElement implements Comparable <MappingElement>{
-
-        public Boolean isMapped;
-        public String inFileName, sbmlName, ID, inFileVal, sbmlVal;
-
-
-        public MappingElement(Boolean isMapped, String inFileName, String sbmlName, String ID, String inFileVal, String sbmlVal){
-            this.isMapped=isMapped;
-            this.inFileName=inFileName;
-            this.sbmlName=sbmlName;
-            this.ID=ID;
-            this.inFileVal=inFileVal;
-            this.sbmlVal=sbmlVal;
-        }
-
-        public int compareTo(MappingElement m){
-            return (this.inFileName).compareToIgnoreCase(m.inFileName);
-        }
-    }
-
-    public class MappedComparator implements Comparator <MappingElement> {
-
-        public int compare(MappingElement m1, MappingElement m2) {
-            if (m1.isMapped == m2.isMapped) return m1.inFileName.compareToIgnoreCase(m2.inFileName);
-            else if (m1.isMapped == true && m2.isMapped == false) return -1;
-            return 1;
-        }
-    }
-
     public class PathwayEnrichment4Galaxy implements Comparable <PathwayEnrichment4Galaxy>{
 
         public String pathName, mappedMetabolites, coverage;
@@ -330,6 +330,21 @@ public class MetExplore4Galaxy {
 
         public String toString(){
             return (this.pathName + "\t" + removeSciNot(this.p_value) + "\t" + removeSciNot(this.q_value_Bonf) + "\t" + removeSciNot(this.q_value_BenHoc) + "\t" + this.mappedMetabolites.toString() + "\t" + this.nb_mapped + "\t" + this.coverage + "\n");
+        }
+    }
+
+    public void writeLog(String message){
+        System.out.println(message.replaceAll("\n", ""));
+        text4outputFileInfo+=message;
+    }
+
+    public void writeOutputInfo() throws IOException {
+        if (outputFileInfo != "") {//if "writing console output in a file" functionality is activated
+            File f = new File(outputFileInfo);
+            f.createNewFile();
+            BufferedWriter b = new BufferedWriter(new FileWriter(f));
+            b.write(text4outputFileInfo);
+            b.close();
         }
     }
 

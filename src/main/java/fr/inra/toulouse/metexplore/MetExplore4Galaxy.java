@@ -233,19 +233,19 @@ public class MetExplore4Galaxy {
 
         System.out.println("Pathway enrichment in progress...");
         PathwayEnrichment pathEnr = new PathwayEnrichment(network, list_mappingBpe);
-        HashMap<BioPathway, Double> pathEnrWhitPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
+        HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         
-        list_pathwayEnr.add(sortPathEnrByPval(pathEnrWhitPval));//benjaminiHochberg function sort biopath by pval, need to do the same to join with it
-        list_pathwayEnr.add(sortPathEnrByPval(pathEnr.bonferroniCorrection(pathEnrWhitPval))); //obtaining Bonferroni q-values
-        list_pathwayEnr.add(pathEnr.benjaminiHochbergCorrection(pathEnrWhitPval));//same for Benjamini Hochberg
+        list_pathwayEnr.add(sortPathEnrByName(pathEnrWhithPval));//benjaminiHochberg function sorts biopath by pval, need to do the same here to join with it
+        list_pathwayEnr.add(sortPathEnrByName(pathEnr.bonferroniCorrection(pathEnrWhithPval))); //obtaining Bonferroni q-values
+        list_pathwayEnr.add(sortPathEnrByName(pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval)));//same for Benjamini Hochberg
 
         writeLog(list_pathwayEnr.get(0).size() + " pathways are concerned among the network (on " + network.getPathwayList().size() + ").");
         writeOutputPathEnr();
     }
 
-    public HashMap<BioPathway, Double> sortPathEnrByPval(HashMap<BioPathway, Double> disorderedPathEnr) {
+    public HashMap<BioPathway, Double> sortPathEnrByName(HashMap<BioPathway, Double> disorderedPathEnr) {
         ArrayList<BioPathway> orderedPath = new ArrayList(disorderedPathEnr.keySet());
-        Collections.sort(orderedPath, new pvalComparator(disorderedPathEnr));
+        Collections.sort(orderedPath, new nameComparator(disorderedPathEnr));
         HashMap<BioPathway, Double> orderedPathEnr = new HashMap();
 
         for (int i = 0; i < orderedPath.size(); ++i) {
@@ -256,15 +256,15 @@ public class MetExplore4Galaxy {
         return orderedPathEnr;
     }
 
-    static class pvalComparator implements Comparator<BioPathway> {
+    static class nameComparator implements Comparator<BioPathway> {
         HashMap<BioPathway, Double> pathEnr;
         
-        public pvalComparator(HashMap<BioPathway, Double> pathEnr) {
+        public nameComparator(HashMap<BioPathway, Double> pathEnr) {
             this.pathEnr = pathEnr;
         }
 
         public int compare(BioPathway p1, BioPathway p2) {
-            return Double.compare((Double)this.pathEnr.get(p1), (Double)this.pathEnr.get(p2));
+            return (p1.getName()).compareToIgnoreCase(p2.getName());            
         }
     }
 

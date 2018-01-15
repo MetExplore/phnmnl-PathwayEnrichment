@@ -234,38 +234,26 @@ public class MetExplore4Galaxy {
         System.out.println("Pathway enrichment in progress...");
         PathwayEnrichment pathEnr = new PathwayEnrichment(network, list_mappingBpe);
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
+        HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);
         
-        list_pathwayEnr.add(sortPathEnrByName(pathEnrWhithPval));//benjaminiHochberg function sorts biopath by pval, need to do the same here to join with it
-        list_pathwayEnr.add(sortPathEnrByName(pathEnr.bonferroniCorrection(pathEnrWhithPval))); //obtaining Bonferroni q-values
-        list_pathwayEnr.add(sortPathEnrByName(pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval)));//same for Benjamini Hochberg
+        list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnrWhithPval, pathEnrBenHoc));//benjaminiHochberg function sorts biopath by pval, need to do the same here to join with it
+        list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnr.bonferroniCorrection(pathEnrWhithPval), pathEnrBenHoc));
+        list_pathwayEnr.add(pathEnrBenHoc);//same for Benjamini Hochberg
 
         writeLog(list_pathwayEnr.get(0).size() + " pathways are concerned among the network (on " + network.getPathwayList().size() + ").");
         writeOutputPathEnr();
     }
 
-    public HashMap<BioPathway, Double> sortPathEnrByName(HashMap<BioPathway, Double> disorderedPathEnr) {
-        ArrayList<BioPathway> orderedPath = new ArrayList(disorderedPathEnr.keySet());
-        Collections.sort(orderedPath, new nameComparator(disorderedPathEnr));
+    public HashMap<BioPathway, Double> sortPathEnrByBenHocPath(HashMap<BioPathway, Double> disorderedPathEnr, HashMap<BioPathway, Double> pathEnrBenHoc) {
+        ArrayList<BioPathway> pathBenHoc = new ArrayList(pathEnrBenHoc.keySet());
         HashMap<BioPathway, Double> orderedPathEnr = new HashMap();
 
-        for (int i = 0; i < orderedPath.size(); ++i) {
-            BioPathway path = (BioPathway) orderedPath.get(i);
+        for (int i = 0; i < pathBenHoc.size(); ++i) {
+            BioPathway path = (BioPathway) pathBenHoc.get(i);
             double pval = (Double) disorderedPathEnr.get(path);
             orderedPathEnr.put(path, pval);
         }
         return orderedPathEnr;
-    }
-
-    static class nameComparator implements Comparator<BioPathway> {
-        HashMap<BioPathway, Double> pathEnr;
-        
-        public nameComparator(HashMap<BioPathway, Double> pathEnr) {
-            this.pathEnr = pathEnr;
-        }
-
-        public int compare(BioPathway p1, BioPathway p2) {
-            return (p1.getName()).compareToIgnoreCase(p2.getName());            
-        }
     }
 
     public void writeOutputPathEnr() throws IOException{

@@ -182,11 +182,16 @@ public class MetExplore4Galaxy {
     public void writeOutputMapping() throws IOException{
 
         File fo1 = new File(outputFileMapping);
-        fo1.createNewFile();
         BufferedWriter f = new BufferedWriter(new FileWriter(fo1));
+        int nbMappedMetabolites = list_lineInFile.size() - list_unmappedMetabolites.size();
+        double coverageInFile = (double) nbMappedMetabolites / (double) list_lineInFile.size();
+        double coverageSBML = (double) nbMappedMetabolites / (double) network.getPhysicalEntityList().size();
 
-        f.write("Mapped\tName (Input File)\tName (SBML)\tSBML ID\tMatched value (input File)\tMatched value (SBML)\n");
-        writeLog((list_lineInFile.size() - list_unmappedMetabolites.size()) + " metabolites have been mapped (on " + list_lineInFile.size() + ").\n");
+        //File header
+        f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value_(Input_File)\tMatched_value_(SBML)\n");
+
+        //Print on screen and writing in log
+        writeLog( nbMappedMetabolites + " metabolites have been mapped on " + list_lineInFile.size() + " in the fingerprint dataset (" + round(coverageInFile*100) + "%) and on " + network.getPhysicalEntityList().size() + " in the network ("+ round(coverageSBML*100) + "%).\n");
 
         //Add non-mapped metabolites to the mapping output file
         for (String[] unmappedMetabolites : list_unmappedMetabolites.values()) {
@@ -260,10 +265,11 @@ public class MetExplore4Galaxy {
         BufferedWriter f = new BufferedWriter(new FileWriter(fo2));
         List <PathwayEnrichment4Galaxy> list_pathwayEnr4Galaxy = new ArrayList<PathwayEnrichment4Galaxy>(); //list of pathway enrichment instantiation for sorting
         List <String> listPathwayMetabolites = new ArrayList<String>();
+        List <String> listPathwayMetabolitesID = new ArrayList<String>();
 
 
         f.write("Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
-        f.write("Nb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");       ;
+        f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
 
         HashMap<BioPathway, Double> result = list_pathwayEnr.get(0);//get pathway enrichment without corrections
         Iterator itBonCorr = list_pathwayEnr.get(1).values().iterator(); //Create a loop on Bonferonni values
@@ -271,6 +277,7 @@ public class MetExplore4Galaxy {
 
         for (Map.Entry<BioPathway, Double> pathEnrEntry : result.entrySet()) {//Loop on pathway enrichment without corrections
             listPathwayMetabolites = new ArrayList<String>();
+            listPathwayMetabolitesID = new ArrayList<String>();
             BioPathway path = pathEnrEntry.getKey();
 
             int j = 0; //number of mapped metabolites contained in a BioPathway
@@ -279,12 +286,13 @@ public class MetExplore4Galaxy {
             for (BioPhysicalEntity bpe : list_mappingBpe) {
                 if (path.getListOfInvolvedMetabolite().containsValue(bpe)) {
                    listPathwayMetabolites.add(bpe.getName());
+                   listPathwayMetabolitesID.add(bpe.getId());
                    j++;
                 }
             }
-            Collections.sort(listPathwayMetabolites);
+            //Collections.sort(listPathwayMetabolites);
             String coverage = round((double) j / (double) path.getListOfInvolvedMetabolite().size() * (double) 100);
-            PathwayEnrichment4Galaxy pathEnrElement = new PathwayEnrichment4Galaxy(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),(double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,j,coverage);
+            PathwayEnrichment4Galaxy pathEnrElement = new PathwayEnrichment4Galaxy(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),(double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage);
             pathEnrElement.settings4Galaxy(getFisherTestParameters(path, j));
             list_pathwayEnr4Galaxy.add(pathEnrElement);
         }
@@ -321,31 +329,32 @@ public class MetExplore4Galaxy {
         //unmapped metabolites in the pathway
         fisherTestParameters[1] = reactionInPathway.size() - nb_mapped;
         //remaining metabolites in the network
-        fisherTestParameters[2] = network.getBiochemicalReactionList().size() - (nb_mapped + fisherTestParameters[0] + fisherTestParameters[0]);
+        fisherTestParameters[2] = network.getBiochemicalReactionList().size() - (nb_mapped + fisherTestParameters[0] + fisherTestParameters[1]);
 
         return fisherTestParameters;
     }
 
     public class PathwayEnrichment4Galaxy implements Comparable <PathwayEnrichment4Galaxy> {
 
-        public String pathName, mappedMetabolites, coverage;
+        public String pathName, mappedMetabolites, mappedMetabolitesID, coverage;
         public double p_value, q_value_Bonf, q_value_BenHoc;
         public int nb_mapped, nb_unmappedInPathway, nb_unmappedInFingerprint, nb_remainingInNetwork;
 
         public PathwayEnrichment4Galaxy(String pathName, double p_value, double q_value_Bonf, double q_value_BenHoc,
-                                        List<String> mappedMetabolites, int nb_mapped, String coverage) {
+                                        List<String> mappedMetabolites, List<String> mappedMetabolitesID, int nb_mapped, String coverage) {
             this.pathName = pathName;
             this.p_value = p_value;
             this.q_value_Bonf = q_value_Bonf;
             this.q_value_BenHoc = q_value_BenHoc;
             this.mappedMetabolites = String.join(";", mappedMetabolites);
+            this.mappedMetabolitesID = String.join(";", mappedMetabolitesID);
             this.nb_mapped = nb_mapped;
             this.coverage = coverage;
         }
 
         public void settings4Galaxy(int[] fisherTestParameters){
-            this.nb_unmappedInPathway=fisherTestParameters[0];
-            this.nb_unmappedInFingerprint=fisherTestParameters[1];
+            this.nb_unmappedInPathway=fisherTestParameters[1];
+            this.nb_unmappedInFingerprint=fisherTestParameters[0];
             this.nb_remainingInNetwork=fisherTestParameters[2];
         }
 
@@ -354,7 +363,7 @@ public class MetExplore4Galaxy {
         }
 
         public String toString() {
-            String line  = this.pathName + "\t" + removeSciNot(this.p_value) + "\t" + removeSciNot(this.q_value_Bonf) + "\t" + removeSciNot(this.q_value_BenHoc) + "\t" + this.mappedMetabolites.toString() + "\t" + this.nb_mapped + "\t" + this.coverage;
+            String line  = this.pathName + "\t" + removeSciNot(this.p_value) + "\t" + removeSciNot(this.q_value_Bonf) + "\t" + removeSciNot(this.q_value_BenHoc) + "\t" + this.mappedMetabolites.toString() + "\t" + this.mappedMetabolitesID.toString() + "\t" + this.nb_mapped + "\t" + this.coverage;
             line += "\t" + this.nb_unmappedInPathway + "\t" + this.nb_unmappedInFingerprint + "\t" + this.nb_remainingInNetwork;
             return line + "\n";
         }

@@ -1,9 +1,6 @@
 package fr.inra.toulouse.metexplore;
 
-import parsebionet.biodata.BioNetwork;
-import parsebionet.biodata.BioPathway;
-import parsebionet.biodata.BioPhysicalEntity;
-import parsebionet.biodata.BioRef;
+import parsebionet.biodata.*;
 import parsebionet.statistics.PathwayEnrichment;
 
 import java.io.FileReader;
@@ -264,7 +261,10 @@ public class MetExplore4Galaxy {
         List <PathwayEnrichment4Galaxy> list_pathwayEnr4Galaxy = new ArrayList<PathwayEnrichment4Galaxy>(); //list of pathway enrichment instantiation for sorting
         List <String> listPathwayMetabolites = new ArrayList<String>();
 
-        f.write("Pathway enrichment\tFisher's p-value\tBonferroni correction\tBenjamini-Hochberg correction\tMapped metabolites\tNb of mapped\tCoverage (%)\n");
+
+        f.write("Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
+        f.write("Nb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");       ;
+
         HashMap<BioPathway, Double> result = list_pathwayEnr.get(0);//get pathway enrichment without corrections
         Iterator itBonCorr = list_pathwayEnr.get(1).values().iterator(); //Create a loop on Bonferonni values
         Iterator itBenHocCorr = list_pathwayEnr.get(2).values().iterator();//Same for Benjamini Hochberg
@@ -284,7 +284,9 @@ public class MetExplore4Galaxy {
             }
             Collections.sort(listPathwayMetabolites);
             String coverage = round((double) j / (double) path.getListOfInvolvedMetabolite().size() * (double) 100);
-            list_pathwayEnr4Galaxy.add(new PathwayEnrichment4Galaxy(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),(double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,j,coverage));
+            PathwayEnrichment4Galaxy pathEnrElement = new PathwayEnrichment4Galaxy(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),(double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,j,coverage);
+            pathEnrElement.settings4Galaxy(getFisherTestParameters(path, j));
+            list_pathwayEnr4Galaxy.add(pathEnrElement);
         }
         Collections.sort(list_pathwayEnr4Galaxy);
         for (int i=0;i< list_pathwayEnr4Galaxy.size();i++){
@@ -295,29 +297,66 @@ public class MetExplore4Galaxy {
         }
     }
 
-    public class PathwayEnrichment4Galaxy implements Comparable <PathwayEnrichment4Galaxy>{
+    static Set<BioChemicalReaction> getReaction(Set<? extends BioEntity> BioEntitySet) {
+
+        Set<BioChemicalReaction> reactionSet = new HashSet();
+        Iterator it = BioEntitySet.iterator();
+
+        while(it.hasNext()) {
+            BioPhysicalEntity m = (BioPhysicalEntity)it.next();
+            reactionSet.addAll(m.getReactionsAsProduct().values());
+            reactionSet.addAll(m.getReactionsAsSubstrate().values());
+        }
+        return reactionSet;
+
+    }
+
+    public int[] getFisherTestParameters(BioPathway pathway, int nb_mapped) {
+        Set<BioChemicalReaction> reactionSet=getReaction(list_mappingBpe);
+        Collection<BioChemicalReaction> reactionInPathway = pathway.getReactions().values();
+        int fisherTestParameters[] = new int[3];
+
+        //unmapped metabolites in the fingerprint
+        fisherTestParameters[0] = reactionSet.size() - nb_mapped;
+        //unmapped metabolites in the pathway
+        fisherTestParameters[1] = reactionInPathway.size() - nb_mapped;
+        //remaining metabolites in the network
+        fisherTestParameters[2] = network.getBiochemicalReactionList().size() - (nb_mapped + fisherTestParameters[0] + fisherTestParameters[0]);
+
+        return fisherTestParameters;
+    }
+
+    public class PathwayEnrichment4Galaxy implements Comparable <PathwayEnrichment4Galaxy> {
 
         public String pathName, mappedMetabolites, coverage;
         public double p_value, q_value_Bonf, q_value_BenHoc;
-        public int nb_mapped;
+        public int nb_mapped, nb_unmappedInPathway, nb_unmappedInFingerprint, nb_remainingInNetwork;
 
         public PathwayEnrichment4Galaxy(String pathName, double p_value, double q_value_Bonf, double q_value_BenHoc,
-                                        List <String> mappedMetabolites, int nb_mapped, String coverage){
-            this.pathName=pathName;
-            this.p_value=p_value;
-            this.q_value_Bonf=q_value_Bonf;
-            this.q_value_BenHoc=q_value_BenHoc;
-            this.mappedMetabolites=String.join(";",mappedMetabolites);
-            this.nb_mapped=nb_mapped;
-            this.coverage=coverage;
+                                        List<String> mappedMetabolites, int nb_mapped, String coverage) {
+            this.pathName = pathName;
+            this.p_value = p_value;
+            this.q_value_Bonf = q_value_Bonf;
+            this.q_value_BenHoc = q_value_BenHoc;
+            this.mappedMetabolites = String.join(";", mappedMetabolites);
+            this.nb_mapped = nb_mapped;
+            this.coverage = coverage;
+        }
+
+        public void settings4Galaxy(int[] fisherTestParameters){
+            this.nb_unmappedInPathway=fisherTestParameters[0];
+            this.nb_unmappedInFingerprint=fisherTestParameters[1];
+            this.nb_remainingInNetwork=fisherTestParameters[2];
         }
 
         public int compareTo(PathwayEnrichment4Galaxy p) {
             return (this.pathName).compareToIgnoreCase(p.pathName);
         }
 
-        public String toString(){
-            return (this.pathName + "\t" + removeSciNot(this.p_value) + "\t" + removeSciNot(this.q_value_Bonf) + "\t" + removeSciNot(this.q_value_BenHoc) + "\t" + this.mappedMetabolites.toString() + "\t" + this.nb_mapped + "\t" + this.coverage + "\n");
+        public String toString() {
+            String line  = this.pathName + "\t" + removeSciNot(this.p_value) + "\t" + removeSciNot(this.q_value_Bonf) + "\t" + removeSciNot(this.q_value_BenHoc) + "\t" + this.mappedMetabolites.toString() + "\t" + this.nb_mapped + "\t" + this.coverage;
+            line += "\t" + this.nb_unmappedInPathway + "\t" + this.nb_unmappedInFingerprint + "\t" + this.nb_remainingInNetwork;
+            return line + "\n";
         }
     }
 

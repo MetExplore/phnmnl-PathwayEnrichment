@@ -20,7 +20,7 @@ public class FilterbyBioData {
     @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway (by default: metabolites).")
     public int typeOfBioEntity = 1;
 
-    @Option(name = "-id", usage = "[REQUIRED] List containing the id of the object(s) in the network: separated by comma (e.g., M_taur,M_mal_L,M_pnto_R).")
+    @Option(name = "-id", usage = "[REQUIRED] List containing the id of the object(s) in the network: without space and separated by comma (e.g., M_taur,M_mal_L,M_pnto_R). For pathway, space must be substituted by escape (e.g., Alkaloid/synthesis).")
     public String selectedID;
 
     public BioNetwork network;
@@ -106,8 +106,10 @@ public class FilterbyBioData {
             exit(1);
         }
 
+        launch.selectedID=launch.selectedID.replaceAll("/"," "); //Allow space for pathway names
         launch.setParameters(launch.sbml, launch.selectedID);
         launch.filterBioEntityByID();
+
     }
 
     public void test(String[] args){
@@ -120,8 +122,8 @@ public class FilterbyBioData {
         for (String[] args : list_args) {
             test(args);
         }
-        //TODO: M_mal_L unrocognize
-        //TODO: Unknown
-        //TODO: space allowed for pathway
+        //TODO: M_mal_L unrecognized
+        //TODO: pathway name unrecognized
+        //TODO: space allowed for pathway: catch message with type 3 to check if / in substitution of space
     }
 }

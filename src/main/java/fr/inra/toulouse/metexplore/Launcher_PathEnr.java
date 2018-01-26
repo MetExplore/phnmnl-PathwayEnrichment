@@ -115,7 +115,7 @@ public class Launcher_PathEnr {
                     mappingColumns, (launch.colFiltered-1));
 
             Mapping mapping = new Mapping(network, fingerprint.list_metabolites, inchiLayers,
-                    launch.outFileMapping, launch.outFileInfo);
+                    launch.outFileMapping, false);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, mapping.list_mappedMetabolites,
                     launch.outFilePathEnr,launch.outFileInfo);
         }

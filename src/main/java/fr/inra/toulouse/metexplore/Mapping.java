@@ -15,26 +15,26 @@ import static java.lang.System.exit;
 public class Mapping {
     //Performs mapping on InChI, CHEBI, SBML_ID, PubChem_ID, SMILES, KEGG_ID and InChIKey
     
-    public String outFileMapping, outFileInfo, text4outputFileInfo="";
+    public String outFileMapping, text4outputFileInfo="";
     public String[] inchiLayers;
     public BioNetwork network;
-    public HashMap<String, String[]> list_fingerprint= new HashMap<String, String[]>(); //input file after formating and filtering
+    public HashMap<String, String[]> list_fingerprint; //input file after formating and filtering
     public HashMap<String, String[]> list_unmappedMetabolites = new HashMap<String, String[]>(); //list of non-mapped metabolites
     public Set<BioPhysicalEntity> list_mappedMetabolites = new HashSet<BioPhysicalEntity>(); //list of mapped metabolites used for analysis
     //Set type is used to avoid metabolites duplicates (no need to used Set now, could be refactored)
     public List<Mapping.MappingElement> list_mappingElement = new ArrayList<Mapping.MappingElement>(); //list of mapped metabolites used only for writing mapping output into a file
-    //public Boolean ifGalaxy = false;
+    public Boolean ifGalaxy;
     
     public Mapping (BioNetwork network, HashMap<String, String[]> list_fingerprint, String[] inchiLayers, String outFileMapping,
-                    String outFileInfo) throws IOException{
+                    Boolean ifGalaxy) throws IOException{
         this.network=network;
         this.list_fingerprint=list_fingerprint;
         this.inchiLayers=inchiLayers;
         this.outFileMapping=outFileMapping;
-        this.outFileInfo=outFileInfo;
+        this.ifGalaxy=ifGalaxy;
         
-        //if(!this.ifGalaxy) this.performMapping();
-        //else this.quickMapping();
+        if(!this.ifGalaxy) { System.out.println("here!");this.performMapping();}
+        else { System.out.println("nope!"); this.quickMapping();}
     }
 
     public void performMapping() throws IOException {
@@ -54,6 +54,7 @@ public class Mapping {
             isMapped = false;
             mappedBpe = new BioPhysicalEntity();
             mappingOccurrences = 0;//identification of multiple mapping
+            System.out.println(Arrays.toString(lineInFile));
 
             //Loop for each metabolite from the SBML
             for (BioPhysicalEntity bpe : network.getPhysicalEntityList().values()) {
@@ -107,6 +108,7 @@ public class Mapping {
             writeOutputInfo();
         }
         if (list_mappedMetabolites.size() == 0 ){
+            //TODO
             System.err.println("There is no match for this network. \nCommon mistakes: mapping parameters ");
             exit(1);
         }
@@ -184,14 +186,14 @@ public class Mapping {
         fo1.createNewFile();
         BufferedWriter f = new BufferedWriter(new FileWriter(fo1));
         int nbMappedMetabolites = list_fingerprint.size() - list_unmappedMetabolites.size();
-        double coverageInFile = nbMappedMetabolites / list_fingerprint.size();
-        double coverageSBML = nbMappedMetabolites / network.getPhysicalEntityList().size();
+        double coverageInFile = (double) nbMappedMetabolites / (double) list_fingerprint.size();
+        double coverageSBML = (double) nbMappedMetabolites / (double) network.getPhysicalEntityList().size();
 
         //File header
         f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value_(Input_File)\tMatched_value_(SBML)\n");
 
         //Print on screen and writing in log
-        writeLog( nbMappedMetabolites + " metabolites have been mapped on " + list_fingerprint.size() + "in the fingerprint dataset (" + round(coverageInFile) + ") and " + "in the network ( "+ round(coverageSBML) + ").\n");
+        writeLog( nbMappedMetabolites + " metabolites have been mapped on " + list_fingerprint.size() + " in the fingerprint dataset (" + round(coverageInFile*100) + "%) and on " + network.getPhysicalEntityList().size() + " in the network ("+ round(coverageSBML*100) + "%).\n");
 
         //Add non-mapped metabolites to the mapping output file
         for (String[] unmappedMetabolites : list_unmappedMetabolites.values()) {
@@ -208,13 +210,13 @@ public class Mapping {
     }
 
     public void writeOutputInfo() throws IOException {
-        //if (this.ifGalaxy) {//if "writing console output in a file" functionality is activated
-            File f = new File(outFileInfo);
+        if (this.ifGalaxy) {//if "writing console output in a file" functionality is activated
+            File f = new File("information.tsv");
             f.createNewFile();
             BufferedWriter b = new BufferedWriter(new FileWriter(f));
             b.write(text4outputFileInfo);
             b.close();
-        //}
+        }
     }
 
     public void quickMapping() {

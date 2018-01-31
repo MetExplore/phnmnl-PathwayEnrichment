@@ -33,8 +33,10 @@ public class Mapping {
         this.outFileMapping=outFileMapping;
         this.ifGalaxy=ifGalaxy;
         
-        if(!this.ifGalaxy) { System.out.println("here!");this.performMapping();}
-        else { System.out.println("nope!"); this.quickMapping();}
+        //if(!this.ifGalaxy) {
+            this.performMapping();
+    //}
+        //else { System.out.println("nope!"); this.quickMapping();}
     }
 
     public void performMapping() throws IOException {
@@ -54,7 +56,6 @@ public class Mapping {
             isMapped = false;
             mappedBpe = new BioPhysicalEntity();
             mappingOccurrences = 0;//identification of multiple mapping
-            System.out.println(Arrays.toString(lineInFile));
 
             //Loop for each metabolite from the SBML
             for (BioPhysicalEntity bpe : network.getPhysicalEntityList().values()) {
@@ -62,7 +63,7 @@ public class Mapping {
 
                 //Mapping on metabolite identifier associated with a bionetwork, InChI, SMILES and PubCHEM_ID
                 String[] associatedValueInSbml = {bpe.getId(), bpe.getInchi(), bpe.getSmiles(), bpe.getPubchemCID(), bpe.getMolecularWeight()};
-                int[] mappingColumnInfile = {1, 2, 4, 5, 7};
+                int[] mappingColumnInfile = {1, 2, 4, 5, 10};
                 for (int i = 0; i < associatedValueInSbml.length; i++){
                     if (!isMappedCurrentBpe) {
                         isMappedCurrentBpe = mapping4AttributesCase(lineInFile,associatedValueInSbml[i],mappingColumnInfile[i],bpe);
@@ -72,7 +73,7 @@ public class Mapping {
                 //Mapping on CHEBI, InChIKey or KEGG
                 String[] associatedValueInSbml2 = {"chebi", "inchikey", "kegg.compound", "hmdb", "chemspider"};
                 //TODO?: regex to take account for SBML diversity
-                int[] mappingColumnInfile2 = {3, 6, 8, 9, 10};
+                int[] mappingColumnInfile2 = {3, 6, 7, 8, 9};
                 for (int i = 0; i < associatedValueInSbml2.length; i++){
                     if(!isMappedCurrentBpe) {
                         isMappedCurrentBpe = mapping4BiorefCase(lineInFile, associatedValueInSbml2[i], mappingColumnInfile2[i], bpe);
@@ -115,16 +116,16 @@ public class Mapping {
     }
 
     public Boolean mapping4AttributesCase (String[] lineInFile, String associatedValueInSbml, int mappingColumnInfile, BioPhysicalEntity bpe) {
-    //Mapping case for values which are accessible directly through the attributes of 
+    //Mapping case for values which are accessible directly through the attributes of
         // BioPhysicalEntity
-        
+
         Boolean ifEquals;
 
         try {
             if (ifNotBlankValue(lineInFile, mappingColumnInfile)) {
                 ifEquals = (mappingColumnInfile == 2) ?
-                    (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(lineInFile[2], inchiLayers)) 
-                        : associatedValueInSbml.equals(lineInFile[mappingColumnInfile]);                        
+                    (new InChI4Galaxy(bpe.getInchi(), inchiLayers)).equals(new InChI4Galaxy(lineInFile[2], inchiLayers))
+                        : associatedValueInSbml.equals(lineInFile[mappingColumnInfile]);
                 //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
                 if (ifEquals) {
                     addMappingElement2List(lineInFile, bpe, mappingColumnInfile, associatedValueInSbml);
@@ -139,7 +140,7 @@ public class Mapping {
 
     public Boolean mapping4BiorefCase (String[] lineInFile, String associatedValueInSbml, int mappingColumnInfile, BioPhysicalEntity bpe) {
     //Mapping case for values which needs to be found into the BioRefs of the BioPhysicalEntity
-        
+
         try {
             if (ifNotBlankValue(lineInFile, mappingColumnInfile)) {
 
@@ -148,7 +149,7 @@ public class Mapping {
                     if (key.getKey().equals(associatedValueInSbml)) {//researching the one positioned on chebi
                         //Sometimes different values can be associated to one key
                         for (BioRef val : key.getValue()) {
-                            if (lineInFile[3].equals(val.id)) {
+                            if (lineInFile[mappingColumnInfile].equals(val.id)) {
                                 //add a mappingElement to the list
                                 addMappingElement2List(lineInFile, bpe, mappingColumnInfile, val.id);
                                 return true;
@@ -168,12 +169,11 @@ public class Mapping {
 
     public Boolean ifNotBlankValue(String[] lineInFile, int mappingColumnInfile){
         //Test if mapping is allowed with this parameters and discard mapping on NA and blank values
-        return ((mappingColumnInfile >= 0) && !(lineInFile[mappingColumnInfile]).equals("NA") && !(lineInFile[mappingColumnInfile]).equals(""));
+        return (!(lineInFile[mappingColumnInfile]).equals("NA") && !(lineInFile[mappingColumnInfile]).equals(""));
     }
 
     public void addMappingElement2List(String[] lineInFile, BioPhysicalEntity bpe, int mappingColumnInfile, String associatedValueInSbml){
         //Create a mappingElement and add it to the mapped metabolites list
-        
         list_mappingElement.add(new Mapping.MappingElement(true,lineInFile[0],bpe.getName(),bpe.getId(),lineInFile[mappingColumnInfile],associatedValueInSbml));
     }
 

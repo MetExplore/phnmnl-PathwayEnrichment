@@ -32,11 +32,9 @@ public class Mapping {
         this.inchiLayers=inchiLayers;
         this.outFileMapping=outFileMapping;
         this.ifGalaxy=ifGalaxy;
-        
-        //if(!this.ifGalaxy) {
-            this.performMapping();
-    //}
-        //else { System.out.println("nope!"); this.quickMapping();}
+
+        if(outFileMapping!="") this.performMapping();
+        else this.quickMapping();
     }
 
     public void performMapping() throws IOException {
@@ -56,6 +54,7 @@ public class Mapping {
             isMapped = false;
             mappedBpe = new BioPhysicalEntity();
             mappingOccurrences = 0;//identification of multiple mapping
+            //System.out.println(Arrays.toString(lineInFile));
 
             //Loop for each metabolite from the SBML
             for (BioPhysicalEntity bpe : network.getPhysicalEntityList().values()) {
@@ -110,7 +109,8 @@ public class Mapping {
         }
         if (list_mappedMetabolites.size() == 0 ){
             //TODO
-            System.err.println("There is no match for this network. \nCommon mistakes: mapping parameters ");
+            System.err.println("There is no match for this network. \nCommon mistakes: check mapping parameters or doublets which are discarded from the analysis.");
+            //TODO: catch error personalized for doublets
             exit(1);
         }
     }
@@ -220,8 +220,8 @@ public class Mapping {
     }
 
     public void quickMapping() {
-
         for (String[] metabolite : list_fingerprint.values()) {
+            //System.out.println(metabolite[1]);
             list_mappedMetabolites.add(network.getBioPhysicalEntityById(metabolite[1]));
         }
 

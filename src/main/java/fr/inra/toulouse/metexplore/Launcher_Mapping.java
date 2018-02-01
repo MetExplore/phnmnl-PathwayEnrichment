@@ -53,7 +53,7 @@ public class Launcher_Mapping {
     @Option(name="-kegg", usage="Number of the file's column containing the KEGG identifier (by default: 0 for none).")
     public int keggColumn = -1;
 
-    @Option(name="-hmd", usage="Number of the file's column containing the HMD identifier (by default: 0 for none).")
+    @Option(name="-hmdb", usage="Number of the file's column containing the HMD identifier (by default: 0 for none).")
     public int hmdColumn = -1;
 
     @Option(name="-chemspider", usage="Number of the file's column containing the ChemSpider identifier (by default: 0 for none).")
@@ -104,7 +104,8 @@ public class Launcher_Mapping {
 
             if (launch.chebiColumn < 1 && launch.inchiColumn < 1 && launch.idSBMLColumn < 1 &&
                     launch.smilesColumn < 1 && launch.pubchemColum < 1 && launch.inchikeysColumn < 1
-                    && launch.keggColumn < 1){
+                    && launch.keggColumn < 1 && launch.hmdColumn < 1 && launch.chemspiderColumn < 1
+                    && launch.weightColumn < 1){
                 throw new CmdLineException("Mapping parameters cannot be all set at < 1. Choose at less one criterion.");
             }
 

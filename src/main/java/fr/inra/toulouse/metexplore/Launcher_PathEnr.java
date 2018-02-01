@@ -17,11 +17,11 @@ public class Launcher_PathEnr {
     @Option(name="-o1", usage="Output file name for mapping result (by default: NONE).")
     String outFileMapping = "";
 
+    @Option(name="-gal", usage="Output file name for general information resulting from mapping and pathway enrichment results (by default: NONE).")
+    String galaxy;
+
     @Option(name="-o2", usage="Output file name for pathway enrichment result (by default: pathwayEnrichment.tsv).")
     String outFilePathEnr = "pathwayEnrichment.tsv";
-
-    @Option(name="-o3", usage="Output file name for general information resulting from mapping and pathway enrichment results (by default: NONE).")
-    String outFileInfo = "";
 
     @Option(name="-s", usage="SBML file name.")
     public String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
@@ -41,14 +41,35 @@ public class Launcher_PathEnr {
     @Option(name="-chebi", usage="Number of the file's column containing the CHEBI data (by default: 0 for none).")
     public int chebiColumn = -1;
 
-    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier in the SBML file (by default: 0 for none).")
+    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: 0 for none).")
     public int idSBMLColumn = 2;
+
+    @Option(name="-smiles", usage="Number of the file's column containing the SMILES data (by default: 0 for none).")
+    public int smilesColumn = -1;
+
+    @Option(name="-pubchem", usage="Number of the file's column containing the PubChem identifier (by default: 0 for none).")
+    public int pubchemColum = -1;
+
+    @Option(name="-inchikey", usage="Number of the file's column containing the InChIKey (by default: 0 for none).")
+    public int inchikeysColumn = -1;
+
+    @Option(name="-kegg", usage="Number of the file's column containing the KEGG identifier (by default: 0 for none).")
+    public int keggColumn = -1;
+
+    @Option(name="-hmdb", usage="Number of the file's column containing the HMD identifier (by default: 0 for none).")
+    public int hmdColumn = -1;
+
+    @Option(name="-chemspider", usage="Number of the file's column containing the ChemSpider identifier (by default: 0 for none).")
+    public int chemspiderColumn = -1;
+
+    @Option(name="-weight", usage="Number of the file's column containing the weigth of the metabolites (by default: 0 for none).")
+    public int weightColumn = -1;
 
     @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
     public String inchiLayers = "c,h";
 
     @Option(name="h=F", usage="Activate this option if the fingerprint dataset contains no header.")
-    public String header = "h=T";
+    public String header;
 
     @Option(name="-sep", usage="Activate this option if the fingerprint dataset contains no header.")
     public String separator = "\t";
@@ -64,6 +85,8 @@ public class Launcher_PathEnr {
     public static void main(String[] args) {
 
         long startTime = System.nanoTime();
+        Boolean ifHeader = true;//Take account of the header
+        Boolean ifGalaxy = false;//Galaxy compliance
         Launcher_PathEnr launch = new Launcher_PathEnr();
         CmdLineParser parser = new CmdLineParser(launch);
 
@@ -82,8 +105,11 @@ public class Launcher_PathEnr {
                 throw new CmdLineException("-i parameter required");
             }
 
-            if (launch.chebiColumn < 1 && launch.inchiColumn < 1 && launch.idSBMLColumn < 1) {
-                throw new CmdLineException("-chebi, -inchi and idSBML parameters cannot be all setted at < 1. Choose at less one mapping criterion.");
+            if (launch.chebiColumn < 1 && launch.inchiColumn < 1 && launch.idSBMLColumn < 1 &&
+                    launch.smilesColumn < 1 && launch.pubchemColum < 1 && launch.inchikeysColumn < 1
+                    && launch.keggColumn < 1 && launch.hmdColumn < 1 && launch.chemspiderColumn < 1
+                    && launch.weightColumn < 1){
+                throw new CmdLineException("Mapping parameters cannot be all set at < 1. Choose at less one criterion.");
             }
 
             if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", launch.inchiLayers)) {
@@ -92,7 +118,11 @@ public class Launcher_PathEnr {
 
             //Personalised error print for help
         } catch (CmdLineException e) {
-            if(e.getMessage().equals("Option \"-l\" takes an operand")){
+            if(e.getMessage().equals("No argument is allowed: h=F")) {
+                ifHeader = false;
+            }else if(e.getMessage().equals("Option \"-gal\" takes an operand")) {
+                ifGalaxy = true;
+            }else if(e.getMessage().equals("Option \"-l\" takes an operand")){
                 launch.inchiLayers="";
             }else {
                 System.err.println(e.getMessage());
@@ -104,24 +134,24 @@ public class Launcher_PathEnr {
 
         //Regex for inchiLayers parameter
         String[] inchiLayers = launch.inchiLayers.replaceAll(" ","").split(",");
-        //Take account of the header
-        Boolean ifHeader = (launch.header=="h=T") ? true : false;
         //Extract SBML
         BioNetwork network = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
-        int[] mappingColumns = {(launch.idSBMLColumn-1), (launch.inchiColumn-1), (launch.chebiColumn-1)};
+        int[] mappingColumns = {(launch.idSBMLColumn-1), (launch.inchiColumn-1), (launch.chebiColumn-1),
+                (launch.smilesColumn-1), (launch.pubchemColum-1), (launch.inchikeysColumn-1),
+                (launch.keggColumn-1), (launch.hmdColumn-1), (launch.chemspiderColumn-1), (launch.weightColumn-1)};
 
         try{
             Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,ifHeader, launch.separator, (launch.nameColumn-1),
                     mappingColumns, (launch.colFiltered-1));
 
             Mapping mapping = new Mapping(network, fingerprint.list_metabolites, inchiLayers,
-                    launch.outFileMapping, false);
+                    launch.outFileMapping, ifGalaxy);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, mapping.list_mappedMetabolites,
-                    launch.outFilePathEnr,launch.outFileInfo);
+                    launch.outFilePathEnr,ifGalaxy);
         }
         catch (IOException e){
             e.printStackTrace();
         }
-        launch.timeCalculation(startTime);
+        launch.timeCalculation(System.nanoTime() - startTime);
     }
 }

@@ -12,22 +12,22 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Test_PathEnr extends TestCase {
-    protected static String outputMappingFile, separator;
-    protected static int filteredColumn;
-    protected static Boolean ifHeader, ifGalaxy;
-    protected static String[] inchiLayers = {"c", "h", ""};
-    protected static int[] mappingColumn = {-1, 4, -1, -1, -1, -1, -1, -1, -1, -1};
-    protected static List<BioPhysicalEntity> expectedMap = new ArrayList<BioPhysicalEntity>();
+    protected String outputMappingFile, separator;
+    protected int filteredColumn;
+    protected Boolean ifHeader, ifGalaxy;
+    protected String[] inchiLayers;
+    protected int[] mappingColumn;
+    protected List<BioPhysicalEntity> expectedMappedMetabolite;
     //curl  http://metexplore.toulouse.inra.fr:8080/metExploreWebService/biosources/3223
     protected static BioNetwork network = (new JSBML2Bionetwork4Galaxy("data/recon2.v03_ext_noCompartment_noTransport_v2.xml")).getBioNetwork();
-    protected static Fingerprint fingerprint;
+    protected Fingerprint fingerprint;
     protected File file;
-    protected static Mapping mapping;
-    protected static fr.inra.toulouse.metexplore.PathwayEnrichment pathEnr;
-    //protected BioNetwork network = null;
+    protected BufferedReader buffer;
+    protected Mapping mapping;
+    protected fr.inra.toulouse.metexplore.PathwayEnrichment pathEnr;
 
     public void setUp() throws Exception {
-        //Initialization of the parameters before each tests
+    //Initialization of the parameters before each tests
         super.setUp();
         this.setSecurityManager();
         if (this.file != null) this.file.delete();
@@ -49,19 +49,22 @@ public class Test_PathEnr extends TestCase {
 
     public static void setSecurityManager(){
         System.setSecurityManager(new SecurityManager() {
-
             @Override
-            public void checkPermission(Permission perm)
-            {
-            }
-
+            public void checkPermission(Permission perm){}
             @Override
-            public void checkExit(int status)
-            {
+            public void checkExit(int status){
                 throw new SecurityException();
             }
-
         });
+    }
+
+    public void setBufferReader(String outFile) {
+        this.file = new File(outFile);
+        try{
+            this.buffer = new BufferedReader(new FileReader(this.file));
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     /**********setInChILayers**************/
@@ -71,26 +74,32 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void setInChILayers(String c, String h, String p) {
-        this.inchiLayers[0] = c;
-        this.inchiLayers[1] = h;
-        this.inchiLayers[2] = p;
+        String[] newInchiLayers = {c,h,p};
+        this.inchiLayers = newInchiLayers;
     }
 
     /************setMappingColumn************/
 
     public void setDefaultMappingColumn() {
-        this.setMappingColumn(-1, 4, -1);
+        int[] mappingColumnDefault = {-1, 4, -1, -1, -1, -1, -1, -1, -1, -1};
+        this.mappingColumn =  mappingColumnDefault;
     }
 
-    public void setMappingColumn(int idColumn, int inchiColumn, int chebiColumn) {
-        this.mappingColumn[0] = idColumn;
-        this.mappingColumn[1] = inchiColumn;
-        this.mappingColumn[2] = chebiColumn;
-    }
-
-    public void setMappingColumn2(int mappingType, int mappingColumn) {
-        this.mappingColumn[1] = -1;
+    public void setMappingColumn(int mappingType, int mappingColumn) {
+        this.mappingColumn[1] = -1; //Desactivate inchi mapping by default
         this.mappingColumn[mappingType] = mappingColumn;
+        /*mappingType:
+        0: id
+        1: inchi
+        2: chebi
+        3: smiles
+        4: pubchem
+        5: inchikey
+        6: kegg
+        7: hmdb
+        8: chemspider
+        9: weight
+         */
     }
 
     public void setMappingAllColumn() {
@@ -102,12 +111,14 @@ public class Test_PathEnr extends TestCase {
     /************setMapping************/
 
     public void setMapping(String bpe) {
-        this.expectedMap = new ArrayList<BioPhysicalEntity>();
-        this.expectedMap.add(this.network.getBioPhysicalEntityById(bpe));
+    //Extract the expected metabolite and process a mapping for comparison
+
+        this.expectedMappedMetabolite = new ArrayList<BioPhysicalEntity>();
+        this.expectedMappedMetabolite.add(this.network.getBioPhysicalEntityById(bpe));
         try {
             this.mapping = new Mapping(this.network, this.fingerprint.list_metabolites, this.inchiLayers, this.outputMappingFile, this.ifGalaxy);
             this.file = new File(this.outputMappingFile);
-            assertEquals(this.expectedMap.iterator().next().getName(), this.mapping.list_mappedMetabolites.iterator().next().getName());
+            assertEquals(this.expectedMappedMetabolite.iterator().next().getName(), this.mapping.list_mappedMetabolites.iterator().next().getName());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -126,7 +137,7 @@ public class Test_PathEnr extends TestCase {
     /***********createDummyFile*************/
 
     public void createDummyFile(String inputLine, String header){
-        //Create a dummy fingerprint dataset for tests
+    //Create a dummy fingerprint dataset for tests
 
         try {
             this.file = new File("dummyFile.tsv");
@@ -156,7 +167,7 @@ public class Test_PathEnr extends TestCase {
     /*************ExtractData***********/
 
     public void testExtractData() {
-        //Test that each possible mapping values are correctly extracted
+    //Test that each possible mapping values are correctly extracted
         this.setMappingAllColumn();
         this.createDummyFileWithMultipleColumns("nameMetabolite\tidSBML\tinchi\tchebi\tsmiles\tpubchemColum\tinchikeys\tkegg\thmd\tchemspider\tweight");
         String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchemColum","inchikeys","kegg","hmd","chemspider","weight"};
@@ -164,7 +175,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testSeparator() {
-        //Test that each possible mapping values are correctly extracted
+    //Test that each possible mapping values are correctly extracted
         this.setMappingAllColumn();
         this.separator=";";
         this.createDummyFileWithMultipleColumns("nameMetabolite;idSBML;inchi;chebi;smiles;pubchemColum;inchikeys;kegg;hmd;chemspider;weight");
@@ -173,16 +184,14 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testHeader() {
-        //Test that each possible mapping values are correctly extracted
+    //Test that each possible mapping values are correctly extracted
         this.ifHeader=false;
         this.createDummyFileWithOnlyColumn("M_taur");
         assertTrue(this.fingerprint.list_metabolites.size() == 2);
     }
 
-
-
     public void testFiltered () {
-        //Test that line(s) with empty values in the filtered column are discarded from the parsing
+    //Test that line(s) with empty values in the filtered column are discarded from the parsing
         this.filteredColumn=24;
         this.createDummyFileWithMultipleColumns("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\tplsda|randomforest|svm\n" +
                 "Pantothenic acid\tCHEBI:7916\tC9H17NO5\tCC(C)(CO)C(O)C(=O)NCCC(O)=O\tInChI=1S/C9H17NO5/c1-9(2,5-11)7(14)8(15)10-4-3-6(12)13/h7,11,14H,3-5H2,1-2H3,(H,10,15)(H,12,13)\tPantothenic acid\t218,102478\t1,00727647\t219,10975447\tNA\t[(M-H)]-\t1\t4,77\t5\t3,5599610222\t0,2982536819\t0,0837800414\t3012837,77207209\t131428,160471926\t0,043622714\t0,5206814567\t7916\tNA\tpantothenic acid");
@@ -197,15 +206,17 @@ public class Test_PathEnr extends TestCase {
 
     /************Mapping************/
 
+    /***InChI***/
+
     public void testMappingInChI () {
-        //Test the success of a mapping with on first two layers (c and h) of InChI from a dataset containing multiple columns
+    //Test the success of a mapping with on first two layers (c and h) of InChI from a dataset containing multiple columns
 
         this.setMapping4MultipleColumnFile("Taurine\tNA\tC2H7NO3S\tC(CS(O)(=O)=O)N\tInChI=1S/C2H7NO3S/c3-1-2-7(4,5)6/h1-3H2,(H,4,5,6)\tTaurine\t124,006693\t1,00727647\t125,01396947\tNA\t[(M-H)]-\t1\t0,88\t5\t2,6122895216\t0,6358457794\t0,2434055545\t387859,346882448\t11652,3712684191\t0,0300427755\t0,1234268278\t15891\tNA\ttaurine",
                 "M_taur");
     }
 
     public void testMappingLayerP () {
-        //Test the success of a mapping with an extra p layer on InChI String
+    //Test the success of a mapping with an extra p layer on InChI String
 
         //Positive test
         this.setInChILayers("c", "h", "p");
@@ -221,7 +232,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testMappingLayerFormula () {
-        //Test the success of a mapping with formula layer only on InChI String
+    //Test the success of a mapping with formula layer only on InChI String
 
         //Positive test
         this.setInChILayers("","","");
@@ -236,44 +247,82 @@ public class Test_PathEnr extends TestCase {
         }catch (SecurityException e){}//No match is expected
     }
 
+    /***Others***/
+
     public void testMappingCHEBI () {
-        //Test the success of a mapping with CHEBI
-        this.setMappingColumn(-1,-1,1);
+    //Test the success of a mapping with CHEBI
+        this.setMappingColumn(2,1);
         this.setMapping4MultipleColumnFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tNA\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n",
                 "M_tststeroneglc");
     }
 
     public void testMappingID () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
-        this.setMappingColumn(0,-1,-1);
+    //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        this.setMappingColumn(0,0);
         this.setMapping4OneColumnFile("M_taur", "M_taur");
+    }
+
+    public void testMappingHMDB () {
+        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        this.setMappingColumn(7,0);
+        this.setMapping4OneColumnFile("HMDB00251", "M_taur");
+    }
+
+    public void testMappingInchiKey () {
+        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        this.setMappingColumn(5,0);
+        this.setMapping4OneColumnFile("XOAAWQZATWQOTB-UHFFFAOYSA-N", "M_taur");
+    }
+
+    public void testMappingKegg () {
+        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        this.setMappingColumn(6,0);
+        this.setMapping4OneColumnFile("C00160", "M_glyclt");
     }
 
     /*************Writing output***********/
 
     public void testWriteOutputMapping() {
-        //Test the expected format of the output file obtained by mapping
+    //Test the expected format of the output file obtained by mapping
         this.setMapping4MultipleColumnFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n",
                 "M_tststeroneglc");
         try {
-            BufferedReader bo = new BufferedReader(new FileReader(this.outputMappingFile));
-            bo.readLine();
-            assertEquals(bo.readLine(), "true\tTestosterone glucuronide\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1");
+            this.buffer = new BufferedReader(new FileReader(this.outputMappingFile));
+            assertEquals(buffer.readLine(), "Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value_(Input_File)\tMatched_value_(SBML)");
+            assertEquals(buffer.readLine(), "true\tTestosterone glucuronide\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void testWriteOutputPathEnr() {
-        //Test the expected format of the output file obtained by pathway enrichment
+    //Test the expected format of the output file obtained by pathway enrichment
         this.setMapping4MultipleColumnFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n",
                 "M_tststeroneglc");
         try {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.mapping.list_mappedMetabolites, "pathwayEnr.tsv",this.ifGalaxy);
-            this.file = new File("pathwayEnr.tsv");
-            BufferedReader bo = new BufferedReader(new FileReader(this.file));
-            bo.readLine();
-            assertEquals(bo.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67");
+            setBufferReader("pathwayEnr.tsv");
+            assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
+            assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void testWriteOutput4Galaxy() {
+    //Test the expected format of the output files obtained with galaxy instantiation option
+        this.ifGalaxy=true;
+        this.outputMappingFile="";
+        this.setMappingColumn(0,1);
+        this.setMapping4OneColumnFile("Testosterone glucuronide\tM_tststeroneglc\n",
+                "M_tststeroneglc");
+        try {
+            this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.mapping.list_mappedMetabolites, "pathwayEnr.tsv",this.ifGalaxy);
+            setBufferReader("pathwayEnr.tsv");
+            assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network");
+            assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67\t75\t0\t4134");
+            setBufferReader("information.tsv");
+            assertEquals(buffer.readLine(),"1 pathways are concerned among the network (on 97 in the network).");
         } catch (IOException e) {
             e.printStackTrace();
         }

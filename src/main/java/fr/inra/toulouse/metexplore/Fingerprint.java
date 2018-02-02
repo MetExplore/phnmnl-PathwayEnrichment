@@ -59,7 +59,8 @@ public class Fingerprint {
 
             String[] lineInFile = line.replaceAll("\"", "").split(this.separator);//splitting by tabulation
             String[] lineFormatted = new String[11];
-            //if (verbose=true) System.out.println(Arrays.toString(lineInFile));            
+            //if (verbose=true)
+            //System.out.println(Arrays.toString(lineInFile));
 
             for (int i = 0; i < columnNumbers.length; i++) {
                 putValueIfExists(lineFormatted, lineInFile, i, columnNumbers[i]);
@@ -70,7 +71,8 @@ public class Fingerprint {
                     this.list_metabolites.put(""+ id, lineFormatted);//add to hashmap
                     id++;
                 }
-            } catch (ArrayIndexOutOfBoundsException e) {//avoid errors with filtering functionality containing empty values
+            } catch (ArrayIndexOutOfBoundsException e) {
+                //avoid errors with filtering functionality containing empty values
             }
         }
         if (fileBuffer != null) fileBuffer.close();

@@ -88,6 +88,7 @@ public class Mapping {
             if (isMapped) {
                 //If there is no doublets, add the mapped metabolite to the mapped metabolite list (mappingList variable) used for pathway enrichment
                 //Warning: in any case, the multiple matches will be written in the mapping output file (mappingElementList variable) (but not used in the analysis)
+                //System.out.println(mappedBpe.getName());
                 if(mappingOccurrences == 1) list_mappedMetabolites.add(mappedBpe);
                 else {
                     if (outFileMapping != "") {
@@ -109,8 +110,8 @@ public class Mapping {
         }
         if (list_mappedMetabolites.size() == 0 ){
             //TODO
-            System.err.println("There is no match for this network. \nCommon mistakes: check mapping parameters or doublets which are discarded from the analysis.");
-            //TODO: catch error personalized for doublets
+            if (warningsDoublets !="") System.err.println("There is multiple possible match for your whole list of metabolites. Please choose the ID of the desired metabolites among those proposed in the output file. Then you can re-run the analysis by adding them into a new column of your input dataset and enter the number of this added column into your program settings.");
+            else System.err.println("There is no match for this network. \nCommon mistakes: wrong type of mapping (by default on InChI only) or wrong number of column from the dataset. Please check your settings and rerun the analysis.");
             exit(1);
         }
     }
@@ -226,7 +227,7 @@ public class Mapping {
         }
 
         if (list_mappedMetabolites.size() == 0 ){
-            System.err.println("There is no match for this network. \nCommon mistakes: mapping parameters ");
+            System.err.println("No metabolite have been extracted from the network. \n Check the list the format of the list of ID provided by Mapping module.");
             exit(1);
         }
     }

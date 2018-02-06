@@ -306,7 +306,7 @@ public class Test_PathEnr extends TestCase {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_metabolites,this.mapping.list_mappedMetabolites, "pathwayEnr.tsv",this.ifGalaxy);
             setBufferReader("pathwayEnr.tsv");
             assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
-            assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67");
+            assertEquals(buffer.readLine(), "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -323,7 +323,7 @@ public class Test_PathEnr extends TestCase {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_metabolites,this.mapping.list_mappedMetabolites, "pathwayEnr.tsv",this.ifGalaxy);
             setBufferReader("pathwayEnr.tsv");
             assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network");
-            assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
+            assertEquals(buffer.readLine(), "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
             setBufferReader("information.tsv");
             assertEquals(buffer.readLine(),"1 pathways are concerned among the network (on 97 in the network).");
         } catch (IOException e) {

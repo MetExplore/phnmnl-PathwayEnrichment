@@ -8,35 +8,29 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-public class PathwayEnrichment {
-    public List<HashMap<BioPathway, Double>> list_pathwayEnr = new ArrayList<HashMap<BioPathway, Double>>(); //list of pathway containing mapped metabolites, p-value and corrections values
-    public BioNetwork network;
-    public Set <BioPhysicalEntity> list_mappedMetabolites;
-    public String outFilePathEnr, text4outputFileInfo="";
-    public Boolean ifGalaxy = false;
-    public int fingerprintSize;
-    
-    public PathwayEnrichment (BioNetwork network, int fingerprintSize, Set <BioPhysicalEntity> list_mappedMetabolites,
+public class PathwayEnrichment extends Omics{
+
+    protected List<HashMap<BioPathway, Double>> list_pathwayEnr = new ArrayList<HashMap<BioPathway, Double>>(); //list of pathway containing mapped metabolites, p-value and corrections values
+    protected String outFilePathEnr;
+
+    public PathwayEnrichment (BioNetwork network, HashMap<String, String[]> list_fingerprint, Set <BioPhysicalEntity> list_mappedMetabolites,
                               String outFilePathEnr, Boolean ifGalaxy) throws IOException {
-        this.network=network;
-        this.list_mappedMetabolites=list_mappedMetabolites;
+        super(ifGalaxy, list_fingerprint, list_mappedMetabolites, network);
         this.outFilePathEnr=outFilePathEnr;
-        this.ifGalaxy=ifGalaxy;
-        this.fingerprintSize=fingerprintSize;
         this.computeEnrichment();
     }
 
     public void computeEnrichment() throws IOException {
         System.out.println("Pathway enrichment in progress...");
-        parsebionet.statistics.PathwayEnrichment pathEnr = new parsebionet.statistics.PathwayEnrichment(network, list_mappedMetabolites);
+        parsebionet.statistics.PathwayEnrichment pathEnr = new parsebionet.statistics.PathwayEnrichment(this.network, this.list_mappedMetabolites);
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);
 
-        list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnrWhithPval, pathEnrBenHoc));//benjaminiHochberg function sorts biopath by pval,
+        this.list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnrWhithPval, pathEnrBenHoc));//benjaminiHochberg function sorts biopath by pval,
         // need to do the same here to join with it
-        list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnr.bonferroniCorrection(pathEnrWhithPval), pathEnrBenHoc));
-        list_pathwayEnr.add(pathEnrBenHoc);//same for Benjamini Hochberg
-        writeLog(list_pathwayEnr.get(0).size() + " pathways are concerned among the network (on " + network.getPathwayList().size() + " in the network).");
+        this.list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnr.bonferroniCorrection(pathEnrWhithPval), pathEnrBenHoc));
+        this.list_pathwayEnr.add(pathEnrBenHoc);//same for Benjamini Hochberg
+        writeLog(this.list_pathwayEnr.get(0).size() + " pathways are concerned among the network (on " + this.network.getPathwayList().size() + " in the network).");
         writeOutputPathEnr();
         writeOutputInfo();
     }
@@ -55,7 +49,7 @@ public class PathwayEnrichment {
 
     public void writeOutputPathEnr() throws IOException{
 
-        File fo2 = new File(outFilePathEnr);
+        File fo2 = new File(this.outFilePathEnr);
         fo2.createNewFile();
         BufferedWriter f = new BufferedWriter(new FileWriter(fo2));
         List <PathwayEnrichmentElement> list_pathwayEnrElement = new ArrayList<PathwayEnrichmentElement>(); //list of pathway enrichment instantiation for sorting
@@ -67,9 +61,9 @@ public class PathwayEnrichment {
         if (this.ifGalaxy)  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
         else f.write("\n");
 
-        HashMap<BioPathway, Double> result = list_pathwayEnr.get(0);//get pathway enrichment without corrections
-        Iterator itBonCorr = list_pathwayEnr.get(1).values().iterator(); //Create a loop on Bonferonni values
-        Iterator itBenHocCorr = list_pathwayEnr.get(2).values().iterator();//Same for Benjamini Hochberg
+        HashMap<BioPathway, Double> result = this.list_pathwayEnr.get(0);//get pathway enrichment without corrections
+        Iterator itBonCorr = this.list_pathwayEnr.get(1).values().iterator(); //Create a loop on Bonferonni values
+        Iterator itBenHocCorr = this.list_pathwayEnr.get(2).values().iterator();//Same for Benjamini Hochberg
 
         for (Map.Entry<BioPathway, Double> pathEnrEntry : result.entrySet()) {//Loop on pathway enrichment without corrections
             listPathwayMetabolites = new ArrayList<String>();
@@ -79,7 +73,7 @@ public class PathwayEnrichment {
             int j = 0; //number of mapped metabolites contained in a BioPathway
 
             //Extracting metabolites from the mapping list contained in BioPathway
-            for (BioPhysicalEntity bpe : list_mappedMetabolites) {
+            for (BioPhysicalEntity bpe : this.list_mappedMetabolites) {
                 if (path.getListOfInvolvedMetabolite().containsValue(bpe)) {
                     listPathwayMetabolites.add(bpe.getName());
                     listPathwayMetabolitesID.add(bpe.getId());
@@ -87,9 +81,9 @@ public class PathwayEnrichment {
                 }
             }
             //Collections.sort(listPathwayMetabolites);
-            String coverage = round((double) j / (double) path.getListOfInvolvedMetabolite().size() * (double) 100);
+            String coverage = this.writingComportment.round((double) j / (double) path.getListOfInvolvedMetabolite().size() * (double) 100);
             PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
-                    (double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage);
+                    (double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage, this.ifGalaxy);
             if (this.ifGalaxy) pathEnrElement.settings4Galaxy(getFisherTestParameters(path, j));
             list_pathwayEnrElement.add(pathEnrElement);
         }
@@ -122,82 +116,13 @@ public class PathwayEnrichment {
         int fisherTestParameters[] = new int[3];
 
         //unmapped metabolites in the fingerprint
-        fisherTestParameters[0] = this.fingerprintSize - nb_mapped;
+        fisherTestParameters[0] = this.list_fingerprint.size() - nb_mapped;
         //unmapped metabolites in the pathway
         fisherTestParameters[1] = metaboliteInPathway.size() - nb_mapped;
         //remaining metabolites in the network
         fisherTestParameters[2] = this.network.getPhysicalEntityList().size() - (nb_mapped + fisherTestParameters[0] + fisherTestParameters[1]);
 
         return fisherTestParameters;
-    }
-
-    public void writeOutputInfo() throws IOException {
-        if (this.ifGalaxy) {//if "writing console output in a file" functionality is activated
-            File f = new File("information.tsv");
-            f.createNewFile();
-            BufferedWriter b = new BufferedWriter(new FileWriter(f));
-            b.write(text4outputFileInfo);
-            b.close();
-        }
-    }
-
-    public void writeLog(String message) {
-        System.out.println(message.replaceAll("\n", ""));
-        text4outputFileInfo += message;
-    }
-
-    public String removeSciNot(double value) {
-        String tmp = (String.valueOf(value));
-        if (value < 1e-3) {
-            String[] splitting = tmp.split("E");
-            String power = splitting[1];
-            if (power.charAt(1) == '0') {//remove the O after the E if exists
-                power = power.substring(2, power.length());
-            } else power = power.substring(1, power.length());
-            String[] number = splitting[0].split("\\.");//obtain the integer and the decimal parts
-            return "0." + (new String(new char[Integer.parseInt(power) - 1]).replace("\0", "0")) + number[0] + number[1];
-        }
-        return tmp;
-    }
-
-    public String round(double value) {
-        return String.valueOf((double) Math.round(value * 100) / 100);
-    }
-
-    public class PathwayEnrichmentElement implements Comparable <PathwayEnrichmentElement> {
-
-        public String pathName, mappedMetabolites, mappedMetabolitesID, coverage;
-        public double p_value, q_value_Bonf, q_value_BenHoc;
-        public int nb_mapped, nb_unmappedInPathway, nb_unmappedInFingerprint, nb_remainingInNetwork;
-
-        public PathwayEnrichmentElement(String pathName, double p_value, double q_value_Bonf, double q_value_BenHoc,
-                                        List<String> mappedMetabolites, List<String> mappedMetabolitesID, int nb_mapped, String coverage) {
-            this.pathName = pathName;
-            this.p_value = p_value;
-            this.q_value_Bonf = q_value_Bonf;
-            this.q_value_BenHoc = q_value_BenHoc;
-            this.mappedMetabolites = String.join(";", mappedMetabolites);
-            this.mappedMetabolitesID = String.join(";", mappedMetabolitesID);
-            this.nb_mapped = nb_mapped;
-            this.coverage = coverage;
-        }
-
-        public void settings4Galaxy(int[] fisherTestParameters){
-            this.nb_unmappedInPathway=fisherTestParameters[1];
-            this.nb_unmappedInFingerprint=fisherTestParameters[0];
-            this.nb_remainingInNetwork=fisherTestParameters[2];
-        }
-
-        public int compareTo(PathwayEnrichmentElement p) {
-            return (this.pathName).compareToIgnoreCase(p.pathName);
-        }
-
-        public String toString() {
-           String line  = this.pathName + "\t" + removeSciNot(this.p_value) + "\t" + removeSciNot(this.q_value_Bonf) + "\t" + removeSciNot(this.q_value_BenHoc)
-                   + "\t" + this.mappedMetabolites.toString() + "\t" + this.mappedMetabolitesID.toString() + "\t" + this.nb_mapped + "\t" + this.coverage;
-            if (ifGalaxy) line += "\t" + this.nb_unmappedInPathway + "\t" + this.nb_unmappedInFingerprint + "\t" + this.nb_remainingInNetwork;
-            return line + "\n";
-        }
     }
 
 }

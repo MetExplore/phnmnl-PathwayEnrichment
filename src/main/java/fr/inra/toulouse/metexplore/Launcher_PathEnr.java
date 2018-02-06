@@ -12,68 +12,68 @@ import org.kohsuke.args4j.CmdLineException;
 public class Launcher_PathEnr {
 
     @Option(name="-h", usage="Prints this help.")
-    public boolean phelp = false;
+    protected boolean phelp = false;
 
     @Option(name="-o1", usage="Output file name for mapping result (by default: disabled).")
-    String outFileMapping = "";
+    protected String outFileMapping = "";
 
     @Option(name="-gal", usage="Formating output in a galaxy compliant way (by default: disabled).")
-    String galaxy;
+    protected String galaxy;
 
     @Option(name="-o2", usage="Output file name for pathway enrichment result (by default: pathwayEnrichment.tsv).")
-    String outFilePathEnr = "pathwayEnrichment.tsv";
+    protected String outFilePathEnr = "pathwayEnrichment.tsv";
 
     @Option(name="-s", usage="SBML file name (by default: Recon 2v02).")
-    public String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
+    protected String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
 
     @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
-    public String inFileFingerprint ;
+    protected String inFileFingerprint ;
 
     @Option(name="-name", usage="Number of the file's column containing the metabolite name (by default: 1st column).")
-    public int nameColumn = 1;
+    protected int nameColumn = 1;
 
     @Option(name="-f", usage="Number of the filtered column (by default: disabled)")
-    public int colFiltered = -1;
+    protected int colFiltered = -1;
 
     @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: disabled).")
-    public int inchiColumn = -1;
+    protected int inchiColumn = -1;
 
     @Option(name="-chebi", usage="Number of the file's column containing the CHEBI data (by default: disabled).")
-    public int chebiColumn = -1;
+    protected int chebiColumn = -1;
 
     @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: 2nd column).")
-    public int idSBMLColumn = 2;
+    protected int idSBMLColumn = 2;
 
     @Option(name="-smiles", usage="Number of the file's column containing the SMILES data (by default: disabled).")
-    public int smilesColumn = -1;
+    protected int smilesColumn = -1;
 
     @Option(name="-pubchem", usage="Number of the file's column containing the PubChem identifier (by default: disabled).")
-    public int pubchemColum = -1;
+    protected int pubchemColum = -1;
 
     @Option(name="-inchikey", usage="Number of the file's column containing the InChIKey (by default: disabled).")
-    public int inchikeysColumn = -1;
+    protected int inchikeysColumn = -1;
 
     @Option(name="-kegg", usage="Number of the file's column containing the KEGG identifier (by default: disabled).")
-    public int keggColumn = -1;
+    protected int keggColumn = -1;
 
     @Option(name="-hmdb", usage="Number of the file's column containing the HMD identifier (by default: disabled).")
-    public int hmdColumn = -1;
+    protected int hmdColumn = -1;
 
     @Option(name="-chemspider", usage="Number of the file's column containing the ChemSpider identifier (by default: disabled).")
-    public int chemspiderColumn = -1;
+    protected int chemspiderColumn = -1;
 
     @Option(name="-weight", usage="Number of the file's column containing the weigth of the metabolites (by default: disabled).")
-    public int weightColumn = -1;
+    protected int weightColumn = -1;
 
     @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
             " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
-    public String inchiLayers = "c,h";
+    protected String inchiLayers = "c,h";
 
     @Option(name="h=F", usage="Activate this option if the fingerprint dataset contains no header (by default: disabled).")
-    public String header;
+    protected String header;
 
     @Option(name="-sep", usage="Character used as separator in the dataset (by default: \\t for tab).")
-    public String separator = "\t";
+    protected String separator = "\t";
 
     public void timeCalculation(long elapsedTime){
         long min = elapsedTime / 60000000000L;
@@ -146,7 +146,7 @@ public class Launcher_PathEnr {
                     mappingColumns, (launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_metabolites, inchiLayers,
                     launch.outFileMapping, ifGalaxy);
-            PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_metabolites.size(), mapping.list_mappedMetabolites,
+            PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_metabolites, mapping.list_mappedMetabolites,
                     launch.outFilePathEnr,ifGalaxy);
         }
         catch (IOException e){

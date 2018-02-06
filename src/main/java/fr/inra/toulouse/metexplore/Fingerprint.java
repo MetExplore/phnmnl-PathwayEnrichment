@@ -11,11 +11,11 @@ import static java.lang.System.exit;
 
 public class Fingerprint {
 
-    public int nameColumn, chebiColumn, inchiColumn, idSBMLColumn, smilesColumn, pubchemColum;
-    public int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
-    public String separator, inFileFingerprint;
-    public Boolean ifHeader;
-    public HashMap<String, String[]> list_metabolites = new HashMap<String, String[]>(); //input file after formatting and filtering
+    protected int nameColumn, chebiColumn, inchiColumn, idSBMLColumn, smilesColumn, pubchemColum;
+    protected int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
+    protected String separator, inFileFingerprint;
+    protected Boolean ifHeader;
+    protected HashMap<String, String[]> list_metabolites = new HashMap<String, String[]>(); //input file after formatting and filtering
 
     //TODO: excel parsing
 

@@ -303,7 +303,7 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4MultipleColumnFile("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\n",
                 "M_tststeroneglc");
         try {
-            this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_metabolites.size(),this.mapping.list_mappedMetabolites, "pathwayEnr.tsv",this.ifGalaxy);
+            this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_metabolites,this.mapping.list_mappedMetabolites, "pathwayEnr.tsv",this.ifGalaxy);
             setBufferReader("pathwayEnr.tsv");
             assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
             assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67");
@@ -320,7 +320,7 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4OneColumnFile("Testosterone glucuronide\tM_tststeroneglc\n",
                 "M_tststeroneglc");
         try {
-            this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_metabolites.size(),this.mapping.list_mappedMetabolites, "pathwayEnr.tsv",this.ifGalaxy);
+            this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_metabolites,this.mapping.list_mappedMetabolites, "pathwayEnr.tsv",this.ifGalaxy);
             setBufferReader("pathwayEnr.tsv");
             assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network");
             assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");

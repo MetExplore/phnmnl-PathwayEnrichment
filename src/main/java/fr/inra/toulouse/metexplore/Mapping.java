@@ -104,14 +104,19 @@ public class Mapping {
         }
         if (outFileMapping != "") {
             if (warningsDoublets != "")
-                writeLog("###Warning: Please, check the corresponding lines in the mapping output file. These duplicates will be discarded from the pathway analysis.\n");
+                writeLog("###Warning: Please, check the corresponding lines in the mapping output file. " +
+                        "These duplicates will be discarded from the pathway analysis.\n");
             writeOutputMapping();
             writeOutputInfo();
         }
         if (list_mappedMetabolites.size() == 0 ){
             //TODO
-            if (warningsDoublets !="") System.err.println("There is multiple possible match for your whole list of metabolites. Please choose the ID of the desired metabolites among those proposed in the output file. Then you can re-run the analysis by adding them into a new column of your input dataset and enter the number of this added column into your program settings.");
-            else System.err.println("There is no match for this network. \nCommon mistakes: wrong type of mapping (by default on InChI only) or wrong number of column from the dataset. Please check your settings and rerun the analysis.");
+            if (warningsDoublets !="") System.err.println("There is multiple possible match for your whole list of metabolites. " +
+                    "Please choose the ID of the desired metabolites among those proposed in the output file. " +
+                    "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
+                    "enter the number of this added column into your program settings.");
+            else System.err.println("There is no match for this network. \nCommon mistakes: wrong type of mapping " +
+                    "(by default on InChI only) or wrong number of column from the dataset. Please check your settings and rerun the analysis.");
             exit(1);
         }
     }
@@ -194,7 +199,9 @@ public class Mapping {
         f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value_(Input_File)\tMatched_value_(SBML)\n");
 
         //Print on screen and writing in log
-        writeLog( nbMappedMetabolites + " metabolites have been mapped on " + list_fingerprint.size() + " in the fingerprint dataset (" + round(coverageInFile*100) + "%) and on " + network.getPhysicalEntityList().size() + " in the network ("+ round(coverageSBML*100) + "%).\n");
+        writeLog( nbMappedMetabolites + " metabolites have been mapped on " + list_fingerprint.size() + " in the fingerprint dataset ("
+                + round(coverageInFile*100) + "%) and on " + network.getPhysicalEntityList().size() + " in the network ("+
+                round(coverageSBML*100) + "%).\n");
 
         //Add non-mapped metabolites to the mapping output file
         for (String[] unmappedMetabolites : list_unmappedMetabolites.values()) {

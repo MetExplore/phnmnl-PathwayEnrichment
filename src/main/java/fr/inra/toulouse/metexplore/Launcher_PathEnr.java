@@ -14,64 +14,65 @@ public class Launcher_PathEnr {
     @Option(name="-h", usage="Prints this help.")
     public boolean phelp = false;
 
-    @Option(name="-o1", usage="Output file name for mapping result (by default: NONE).")
+    @Option(name="-o1", usage="Output file name for mapping result (by default: disabled).")
     String outFileMapping = "";
 
-    @Option(name="-gal", usage="Output file name for general information resulting from mapping and pathway enrichment results (by default: NONE).")
+    @Option(name="-gal", usage="Formating output in a galaxy compliant way (by default: disabled).")
     String galaxy;
 
     @Option(name="-o2", usage="Output file name for pathway enrichment result (by default: pathwayEnrichment.tsv).")
     String outFilePathEnr = "pathwayEnrichment.tsv";
 
-    @Option(name="-s", usage="SBML file name.")
+    @Option(name="-s", usage="SBML file name (by default: Recon 2v02).")
     public String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
 
     @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
     public String inFileFingerprint ;
 
-    @Option(name="-name", usage="Number of the file's column containing the metabolite name.")
+    @Option(name="-name", usage="Number of the file's column containing the metabolite name (by default: 1st column).")
     public int nameColumn = 1;
 
-    @Option(name="-f", usage="Number of the filtered column (by default: 0 for none)")
+    @Option(name="-f", usage="Number of the filtered column (by default: disabled)")
     public int colFiltered = -1;
 
-    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5; 0 for none).")
+    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: disabled).")
     public int inchiColumn = -1;
 
-    @Option(name="-chebi", usage="Number of the file's column containing the CHEBI data (by default: 0 for none).")
+    @Option(name="-chebi", usage="Number of the file's column containing the CHEBI data (by default: disabled).")
     public int chebiColumn = -1;
 
-    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: 0 for none).")
+    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: 2nd column).")
     public int idSBMLColumn = 2;
 
-    @Option(name="-smiles", usage="Number of the file's column containing the SMILES data (by default: 0 for none).")
+    @Option(name="-smiles", usage="Number of the file's column containing the SMILES data (by default: disabled).")
     public int smilesColumn = -1;
 
-    @Option(name="-pubchem", usage="Number of the file's column containing the PubChem identifier (by default: 0 for none).")
+    @Option(name="-pubchem", usage="Number of the file's column containing the PubChem identifier (by default: disabled).")
     public int pubchemColum = -1;
 
-    @Option(name="-inchikey", usage="Number of the file's column containing the InChIKey (by default: 0 for none).")
+    @Option(name="-inchikey", usage="Number of the file's column containing the InChIKey (by default: disabled).")
     public int inchikeysColumn = -1;
 
-    @Option(name="-kegg", usage="Number of the file's column containing the KEGG identifier (by default: 0 for none).")
+    @Option(name="-kegg", usage="Number of the file's column containing the KEGG identifier (by default: disabled).")
     public int keggColumn = -1;
 
-    @Option(name="-hmdb", usage="Number of the file's column containing the HMD identifier (by default: 0 for none).")
+    @Option(name="-hmdb", usage="Number of the file's column containing the HMD identifier (by default: disabled).")
     public int hmdColumn = -1;
 
-    @Option(name="-chemspider", usage="Number of the file's column containing the ChemSpider identifier (by default: 0 for none).")
+    @Option(name="-chemspider", usage="Number of the file's column containing the ChemSpider identifier (by default: disabled).")
     public int chemspiderColumn = -1;
 
-    @Option(name="-weight", usage="Number of the file's column containing the weigth of the metabolites (by default: 0 for none).")
+    @Option(name="-weight", usage="Number of the file's column containing the weigth of the metabolites (by default: disabled).")
     public int weightColumn = -1;
 
-    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
+    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
+            " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
     public String inchiLayers = "c,h";
 
-    @Option(name="h=F", usage="Activate this option if the fingerprint dataset contains no header.")
+    @Option(name="h=F", usage="Activate this option if the fingerprint dataset contains no header (by default: disabled).")
     public String header;
 
-    @Option(name="-sep", usage="Activate this option if the fingerprint dataset contains no header.")
+    @Option(name="-sep", usage="Character used as separator in the dataset (by default: \\t for tab).")
     public String separator = "\t";
 
     public void timeCalculation(long elapsedTime){
@@ -145,7 +146,7 @@ public class Launcher_PathEnr {
                     mappingColumns, (launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_metabolites, inchiLayers,
                     launch.outFileMapping, ifGalaxy);
-            PathwayEnrichment pathEnr = new PathwayEnrichment(network, mapping.list_mappedMetabolites,
+            PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_metabolites.size(), mapping.list_mappedMetabolites,
                     launch.outFilePathEnr,ifGalaxy);
         }
         catch (IOException e){

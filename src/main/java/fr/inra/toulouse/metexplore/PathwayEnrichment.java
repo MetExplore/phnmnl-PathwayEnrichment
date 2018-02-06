@@ -14,27 +14,28 @@ public class PathwayEnrichment {
     public Set <BioPhysicalEntity> list_mappedMetabolites;
     public String outFilePathEnr, text4outputFileInfo="";
     public Boolean ifGalaxy = false;
+    public int fingerprintSize;
     
-    public PathwayEnrichment (BioNetwork network, Set <BioPhysicalEntity> list_mappedMetabolites,
+    public PathwayEnrichment (BioNetwork network, int fingerprintSize, Set <BioPhysicalEntity> list_mappedMetabolites,
                               String outFilePathEnr, Boolean ifGalaxy) throws IOException {
         this.network=network;
         this.list_mappedMetabolites=list_mappedMetabolites;
         this.outFilePathEnr=outFilePathEnr;
         this.ifGalaxy=ifGalaxy;
+        this.fingerprintSize=fingerprintSize;
         this.computeEnrichment();
     }
 
     public void computeEnrichment() throws IOException {
-
         System.out.println("Pathway enrichment in progress...");
         parsebionet.statistics.PathwayEnrichment pathEnr = new parsebionet.statistics.PathwayEnrichment(network, list_mappedMetabolites);
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);
 
-        list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnrWhithPval, pathEnrBenHoc));//benjaminiHochberg function sorts biopath by pval, need to do the same here to join with it
+        list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnrWhithPval, pathEnrBenHoc));//benjaminiHochberg function sorts biopath by pval,
+        // need to do the same here to join with it
         list_pathwayEnr.add(sortPathEnrByBenHocPath(pathEnr.bonferroniCorrection(pathEnrWhithPval), pathEnrBenHoc));
         list_pathwayEnr.add(pathEnrBenHoc);//same for Benjamini Hochberg
-
         writeLog(list_pathwayEnr.get(0).size() + " pathways are concerned among the network (on " + network.getPathwayList().size() + " in the network).");
         writeOutputPathEnr();
         writeOutputInfo();
@@ -61,7 +62,8 @@ public class PathwayEnrichment {
         List <String> listPathwayMetabolites = new ArrayList<String>();
         List <String> listPathwayMetabolitesID = new ArrayList<String>();
 
-        f.write("Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
+        f.write("Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction\tMapped_metabolites\t" +
+                "Mapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
         if (this.ifGalaxy)  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
         else f.write("\n");
 
@@ -86,7 +88,8 @@ public class PathwayEnrichment {
             }
             //Collections.sort(listPathwayMetabolites);
             String coverage = round((double) j / (double) path.getListOfInvolvedMetabolite().size() * (double) 100);
-            PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),(double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage);
+            PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
+                    (double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage);
             if (this.ifGalaxy) pathEnrElement.settings4Galaxy(getFisherTestParameters(path, j));
             list_pathwayEnrElement.add(pathEnrElement);
         }
@@ -115,16 +118,15 @@ public class PathwayEnrichment {
     }
 
     public int[] getFisherTestParameters(BioPathway pathway, int nb_mapped) {
-        Set<BioChemicalReaction> reactionSet=getReaction(list_mappedMetabolites);
-        Collection<BioChemicalReaction> reactionInPathway = pathway.getReactions().values();
+        Collection<BioPhysicalEntity> metaboliteInPathway = pathway.getListOfInvolvedMetabolite().values();
         int fisherTestParameters[] = new int[3];
-        
+
         //unmapped metabolites in the fingerprint
-        fisherTestParameters[0] = reactionSet.size() - nb_mapped;
+        fisherTestParameters[0] = this.fingerprintSize - nb_mapped;
         //unmapped metabolites in the pathway
-        fisherTestParameters[1] = reactionInPathway.size() - nb_mapped;
+        fisherTestParameters[1] = metaboliteInPathway.size() - nb_mapped;
         //remaining metabolites in the network
-        fisherTestParameters[2] = network.getBiochemicalReactionList().size() - (nb_mapped + fisherTestParameters[0] + fisherTestParameters[1]);
+        fisherTestParameters[2] = this.network.getPhysicalEntityList().size() - (nb_mapped + fisherTestParameters[0] + fisherTestParameters[1]);
 
         return fisherTestParameters;
     }
@@ -191,7 +193,8 @@ public class PathwayEnrichment {
         }
 
         public String toString() {
-           String line  = this.pathName + "\t" + removeSciNot(this.p_value) + "\t" + removeSciNot(this.q_value_Bonf) + "\t" + removeSciNot(this.q_value_BenHoc) + "\t" + this.mappedMetabolites.toString() + "\t" + this.mappedMetabolitesID.toString() + "\t" + this.nb_mapped + "\t" + this.coverage;
+           String line  = this.pathName + "\t" + removeSciNot(this.p_value) + "\t" + removeSciNot(this.q_value_Bonf) + "\t" + removeSciNot(this.q_value_BenHoc)
+                   + "\t" + this.mappedMetabolites.toString() + "\t" + this.mappedMetabolitesID.toString() + "\t" + this.nb_mapped + "\t" + this.coverage;
             if (ifGalaxy) line += "\t" + this.nb_unmappedInPathway + "\t" + this.nb_unmappedInFingerprint + "\t" + this.nb_remainingInNetwork;
             return line + "\n";
         }

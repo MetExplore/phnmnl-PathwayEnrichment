@@ -15,7 +15,7 @@ public class Fingerprint {
     protected int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
     protected String separator, inFileFingerprint;
     protected Boolean ifHeader;
-    protected HashMap<String, String[]> list_metabolites = new HashMap<String, String[]>(); //input file after formatting and filtering
+    protected HashMap<String, String[]> list_entities = new HashMap<String, String[]>(); //input file after formatting and filtering
 
     //TODO: excel parsing
 
@@ -68,7 +68,7 @@ public class Fingerprint {
             try {
                 if (isFiltered == false || lineInFile[this.filteredColumn] != "") { //optional filtering on a specified column
                     //if (verbose=true) System.out.println(Arrays.toString(lineFormatted));
-                    this.list_metabolites.put(""+ id, lineFormatted);//add to hashmap
+                    this.list_entities.put(""+ id, lineFormatted);//add to hashmap
                     id++;
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
@@ -76,12 +76,12 @@ public class Fingerprint {
             }
         }
         if (fileBuffer != null) fileBuffer.close();
-        if (this.list_metabolites.size() < 1) {//no extraction = error generation
+        if (this.list_entities.size() < 1) {//no extraction = error generation
             System.err.println("File badly formatted");
             exit(1);
         }
 
-        /*for (String[] lineInFile : list_metabolites.values()) {
+        /*for (String[] lineInFile : list_entities.values()) {
             System.out.println(Arrays.toString(lineInFile));
         }*/
     }

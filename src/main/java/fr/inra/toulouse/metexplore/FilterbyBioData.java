@@ -17,7 +17,7 @@ public class FilterbyBioData {
     @Option(name = "-s", usage = "SBML file name.")
     public String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
 
-    @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway (by default: metabolites).")
+    @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
     public int typeOfBioEntity = 1;
 
     @Option(name = "-id", usage = "[REQUIRED] List containing the id of the object(s) in the network: without space and separated by comma (e.g., M_taur,M_mal_L,M_pnto_R). For pathway, space must be substituted by escape (e.g., Alkaloid/synthesis).")
@@ -95,8 +95,8 @@ public class FilterbyBioData {
                 exit(0);
             }
 
-            if (launch.typeOfBioEntity < 1 || launch.typeOfBioEntity > 3) {
-                throw new CmdLineException("Type of biological object must be 1, 2 or 3.");
+            if (launch.typeOfBioEntity < 1 || launch.typeOfBioEntity > 7) {
+                throw new CmdLineException("Type of biological object must be between 1 and 6.");
             }
 
         } catch (CmdLineException e) {

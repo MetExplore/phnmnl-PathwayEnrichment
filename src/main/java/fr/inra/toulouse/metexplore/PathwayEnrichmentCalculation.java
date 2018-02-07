@@ -2,6 +2,7 @@ package fr.inra.toulouse.metexplore;
 
 import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioPathway;
+import parsebionet.biodata.BioEntity;
 import parsebionet.biodata.BioPhysicalEntity;
 
 import java.util.*;
@@ -9,9 +10,9 @@ import java.util.*;
 public class PathwayEnrichmentCalculation extends parsebionet.statistics.PathwayEnrichment {
 
     BioNetwork network;
-    Set <BioPhysicalEntity> list_mappedMetabolites;
+    Set <BioEntity> list_mappedMetabolites;
 
-    protected PathwayEnrichmentCalculation(BioNetwork network, Set <BioPhysicalEntity> list_mappedMetabolites){
+    protected PathwayEnrichmentCalculation(BioNetwork network, Set <BioEntity> list_mappedMetabolites){
         super(network, list_mappedMetabolites);
         this.network = network;
         this.list_mappedMetabolites = list_mappedMetabolites;
@@ -78,9 +79,9 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
         return adjPvalues;
     }
 
-    public HashSet<BioPhysicalEntity> intersect(Collection<BioPhysicalEntity> set2) {
-        HashSet<BioPhysicalEntity> inter = new HashSet();
-        for (BioPhysicalEntity bpe: this.list_mappedMetabolites){
+    public HashSet<BioEntity> intersect(Collection<BioPhysicalEntity> set2) {
+        HashSet<BioEntity> inter = new HashSet();
+        for (BioEntity bpe: this.list_mappedMetabolites){
             if (set2.contains(bpe)) inter.add(bpe);
         }
         return inter;

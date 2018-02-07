@@ -1,7 +1,7 @@
 package fr.inra.toulouse.metexplore;
 
 import parsebionet.biodata.BioNetwork;
-import parsebionet.biodata.BioPhysicalEntity;
+import parsebionet.biodata.BioEntity;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,17 +16,17 @@ public abstract class Omics {
     protected Boolean ifGalaxy;
     protected String text4outputFileInfo;
     protected HashMap<String, String[]> list_fingerprint;//input file after formatting and filtering
-    protected Set<BioPhysicalEntity> list_mappedMetabolites; //list of mapped metabolites used for analysis
+    protected Set<BioEntity> list_mappedEntities; //list of mapped metabolites used for analysis
     //Set type is used to avoid metabolites duplicates (no need to used Set now, could be refactored)
     protected BioNetwork network;
     protected WritingComportment writingComportment;
 
     public Omics (Boolean ifGalaxy, HashMap<String, String[]> list_fingerprint,
-                       Set<BioPhysicalEntity> list_mappedMetabolites, BioNetwork network){
+                       Set<BioEntity> list_mappedEntities, BioNetwork network){
         this.ifGalaxy =ifGalaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
-        this.list_mappedMetabolites = list_mappedMetabolites;
+        this.list_mappedEntities = list_mappedEntities;
         this.network = network;
         this.writingComportment = new WritingComportment();
     }
@@ -36,7 +36,7 @@ public abstract class Omics {
         this.ifGalaxy =ifGalaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
-        this.list_mappedMetabolites = new HashSet<BioPhysicalEntity>();
+        this.list_mappedEntities = new HashSet<BioEntity>();
         this.network = network;
         this.writingComportment = new WritingComportment();
     }

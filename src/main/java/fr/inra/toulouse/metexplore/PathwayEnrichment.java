@@ -13,16 +13,22 @@ public class PathwayEnrichment extends Omics{
     protected List<HashMap<BioPathway, Double>> list_pathwayEnr = new ArrayList<HashMap<BioPathway, Double>>(); //list of pathway containing mapped metabolites, p-value and corrections values
     protected String outFilePathEnr;
 
-    public PathwayEnrichment (BioNetwork network, HashMap<String, String[]> list_fingerprint, Set <BioPhysicalEntity> list_mappedMetabolites,
+    public PathwayEnrichment (BioNetwork network, HashMap<String, String[]> list_fingerprint, Set <BioEntity> list_mappedEntities,
                               String outFilePathEnr, Boolean ifGalaxy) throws IOException {
-        super(ifGalaxy, list_fingerprint, list_mappedMetabolites, network);
+        super(ifGalaxy, list_fingerprint, list_mappedEntities, network);
         this.outFilePathEnr=outFilePathEnr;
         this.computeEnrichmentWithCorrections();
     }
 
     public void computeEnrichmentWithCorrections() throws IOException {
         System.out.println("Pathway enrichment in progress...");
-        PathwayEnrichmentCalculation pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedMetabolites);
+        parsebionet.statistics.PathwayEnrichment pathEnr;
+        BioEntity bpe = this.list_mappedEntities.iterator().next();
+        if(bpe instanceof BioChemicalReaction){
+            pathEnr = new parsebionet.statistics.PathwayEnrichment(this.network, this.list_mappedEntities);
+        }else {
+            pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities);
+        }
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);
 
@@ -74,7 +80,7 @@ public class PathwayEnrichment extends Omics{
             int j = 0; //number of mapped metabolites contained in a BioPathway
 
             //Extracting metabolites from the mapping list contained in BioPathway
-            for (BioPhysicalEntity bpe : this.list_mappedMetabolites) {
+            for (BioEntity bpe : this.list_mappedEntities) {
                 if (path.getListOfInvolvedMetabolite().containsValue(bpe)) {
                     listPathwayMetabolites.add(bpe.getName());
                     listPathwayMetabolitesID.add(bpe.getId());
@@ -104,7 +110,7 @@ public class PathwayEnrichment extends Omics{
         //nb of mapped in the pathway
         int a = nbMapped;
         //unmapped metabolites in the fingerprint
-        int b = this.list_mappedMetabolites.size() - a;
+        int b = this.list_mappedEntities.size() - a;
         //unmapped metabolites in the pathway
         int c = metaboliteInPathway.size() - a;
         //remaining metabolites in the network

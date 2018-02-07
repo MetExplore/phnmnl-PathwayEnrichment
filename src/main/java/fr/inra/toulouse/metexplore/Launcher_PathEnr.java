@@ -29,6 +29,9 @@ public class Launcher_PathEnr {
     @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
     protected String inFileFingerprint ;
 
+    @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
+    protected int bioEntityType = 1;
+
     @Option(name="-name", usage="Number of the file's column containing the metabolite name (by default: 1st column).")
     protected int nameColumn = 1;
 
@@ -117,6 +120,10 @@ public class Launcher_PathEnr {
                 throw new CmdLineException("-l parameter badly formatted");
             }
 
+            if (launch.bioEntityType < 1 || launch.bioEntityType > 7) {
+                throw new CmdLineException("Type of biological object must be between 1 and 6.");
+            }
+
             //Personalised error print for help
         } catch (CmdLineException e) {
             if(e.getMessage().equals("No argument is allowed: h=F")) {
@@ -144,9 +151,9 @@ public class Launcher_PathEnr {
         try{
             Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,ifHeader, launch.separator, (launch.nameColumn-1),
                     mappingColumns, (launch.colFiltered-1));
-            Mapping mapping = new Mapping(network, fingerprint.list_metabolites, inchiLayers,
-                    launch.outFileMapping, ifGalaxy);
-            PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_metabolites, mapping.list_mappedMetabolites,
+            Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers,
+                    launch.outFileMapping, ifGalaxy, launch.bioEntityType);
+            PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
                     launch.outFilePathEnr,ifGalaxy);
         }
         catch (IOException e){

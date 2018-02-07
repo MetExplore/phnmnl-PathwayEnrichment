@@ -17,7 +17,8 @@ public class Launcher_Mapping {
     @Option(name="-o1", usage="Output file name for mapping result (by default: mapping.tsv).")
     protected String outFileMapping = "mapping.tsv";
 
-    @Option(name="-gal", usage="Output file name for general information resulting from mapping and pathway enrichment results (by default: NONE).")
+    @Option(name="-gal", usage="Output file name for general information resulting from mapping and pathway enrichment" +
+            " results (by default: NONE).")
     protected String galaxy;
 
     @Option(name="-s", usage="SBML file name.")
@@ -26,7 +27,8 @@ public class Launcher_Mapping {
     @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
     protected String inFileFingerprint ;
 
-    @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
+    @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway," +
+            " 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
     protected int bioEntityType = 1;
 
     @Option(name="-name", usage="Number of the file's column containing the metabolite name.")
@@ -65,7 +67,9 @@ public class Launcher_Mapping {
     @Option(name="-weight", usage="Number of the file's column containing the weigth of the metabolites (by default: 0 for none).")
     protected int weightColumn = -1;
 
-    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
+    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer" +
+            " concerned by the mapping (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; " +
+            "for a mapping on formula layer only, enter the -l option with no parameter).")
     protected String inchiLayers = "c,h";
 
     @Option(name="h=F", usage="Activate this option if the fingerprint dataset contains no header.")

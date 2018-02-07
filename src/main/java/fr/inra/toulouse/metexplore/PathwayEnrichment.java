@@ -41,7 +41,6 @@ public class PathwayEnrichment extends Omics{
         writeOutputInfo();
     }
 
-
     public HashMap<BioPathway, Double> sortPathEnrByBenHocPath(HashMap<BioPathway, Double> disorderedPathEnr, HashMap<BioPathway, Double> pathEnrBenHoc) {
         ArrayList<BioPathway> pathBenHoc = new ArrayList(pathEnrBenHoc.keySet());
         HashMap<BioPathway, Double> orderedPathEnr = new HashMap();
@@ -81,14 +80,26 @@ public class PathwayEnrichment extends Omics{
 
             //Extracting metabolites from the mapping list contained in BioPathway
             for (BioEntity bpe : this.list_mappedEntities) {
-                if (path.getListOfInvolvedMetabolite().containsValue(bpe)) {
+                if (path.getReactions().containsValue(bpe) || path.getGenes().contains(bpe) ||
+                        path.getListOfInvolvedMetabolite().containsValue(bpe)) {
                     listPathwayMetabolites.add(bpe.getName());
                     listPathwayMetabolitesID.add(bpe.getId());
                     j++;
                 }
             }
             //Collections.sort(listPathwayMetabolites);
-            String coverage = this.writingComportment.round((double) j / (double) path.getListOfInvolvedMetabolite().size() * (double) 100);
+            int entityPerPathwaySize = 0;
+            BioEntity bpe = this.list_mappedEntities.iterator().next();
+            if(bpe instanceof BioChemicalReaction) {
+                entityPerPathwaySize = path.getReactions().size();
+            }else if(bpe instanceof BioGene) {
+                entityPerPathwaySize = path.getGenes().size();
+            }
+            else{
+                entityPerPathwaySize = path.getListOfInvolvedMetabolite().size();
+            }
+
+            String coverage = this.writingComportment.round((double) j / (double) entityPerPathwaySize * (double) 100);
             PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
                     (double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage, this.ifGalaxy);
             if (this.ifGalaxy) pathEnrElement.settings4Galaxy(this.getFisherTestParameters(path, j));

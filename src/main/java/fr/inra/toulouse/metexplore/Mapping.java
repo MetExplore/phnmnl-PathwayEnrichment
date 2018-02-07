@@ -152,7 +152,8 @@ public class Mapping extends Omics {
                         "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
                         "enter the number of this added column into your program settings.");
             else System.err.println("There is no match for this network. \nCommon mistakes: wrong type of mapping " +
-                    "(by default on InChI only) or wrong number of column from the dataset. Please check your settings" +
+                    "(by default on InChI only), wrong number of column from the dataset or wrong type of bioEntity." +
+                    " Please check your settings" +
                     " and rerun the analysis.");
             exit(1);
         }

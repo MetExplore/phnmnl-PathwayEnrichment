@@ -49,6 +49,8 @@ public class Test_PathEnr extends TestCase {
      *****************************/
 
     public static void setSecurityManager(){
+    //Allow to catch exit(1) when object is called in a main function (or by other object)
+        //but not when running this class as testunit
         System.setSecurityManager(new SecurityManager(){
 
             @Override
@@ -123,7 +125,6 @@ public class Test_PathEnr extends TestCase {
             this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.outputMappingFile,
                     this.ifGalaxy, this.bioEntityType);
             this.file = new File(this.outputMappingFile);
-            System.out.println(this.mapping.list_mappedEntities.iterator().next().getName());
             assertEquals(this.expectedMappedMetabolite.iterator().next().getName(),
                     this.mapping.list_mappedEntities.iterator().next().getName());
         } catch (IOException e) {
@@ -315,7 +316,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testMappingIDReaction () {
-        //Test the success of a mapping with the ID ofa reaction
+        //Test the success of a mapping with the ID of a reaction
         this.bioEntityType = 2;
         this.setMapping4OneColumnFileByID("R_FUM", "R_FUM");
     }
@@ -327,7 +328,6 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void itestMappingIDEnzyme() {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
         try {
             this.setUp();
         }catch (Exception e){}
@@ -336,7 +336,6 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void itestMappingNameEnzyme () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
         try {
             this.setUp();
         }catch (Exception e){}
@@ -345,7 +344,6 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void itestMappingIDProtein() {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
         try {
             this.setUp();
         }catch (Exception e){}
@@ -354,7 +352,6 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void itestMappingNameProtein () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
         try {
             this.setUp();
         }catch (Exception e){}
@@ -363,7 +360,6 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void itestMappingIDGene() {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
         try {
             this.setUp();
         }catch (Exception e){}
@@ -372,7 +368,6 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void itestMappingNameGene () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
         try {
             this.setUp();
         }catch (Exception e){}
@@ -381,29 +376,29 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testMappingIDPathway() {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        //Test the success of a mapping with the ID of a pathway
         this.bioEntityType = 3;
         this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
     }
 
     public void testMappingNamePathway () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        //Test the success of a mapping with the name of a pathway
         this.bioEntityType = 3;
         this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
     }
 
     public void testMappingHMDB () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        //Test the success of a mapping with the HMDB ID
         this.setMapping4OneColumnFile(7,0,"HMDB00251", "M_taur");
     }
 
     public void testMappingInchiKey () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        //Test the success of a mapping with the Inchikey
         this.setMapping4OneColumnFile(5,0,"XOAAWQZATWQOTB-UHFFFAOYSA-N", "M_taur");
     }
 
     public void testMappingKegg () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        //Test the success of a mapping with the KEGG ID
         this.setMapping4OneColumnFile(6,0,"C00160", "M_glyclt");
     }
 
@@ -472,7 +467,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testWriteOutputPathEnrWithReaction() {
-        //Test the expected format of the output file obtained by pathway enrichment
+        //Test the expected format of the output file obtained by pathway enrichment and with a reaction
         this.bioEntityType = 2;
         this.setMapping4OneColumnFileByID("RE1096", "R_RE1096C");
         try {
@@ -488,6 +483,28 @@ public class Test_PathEnr extends TestCase {
         }
     }
 
+
+    public void testWriteOutput4GalaxyWithReaction() {
+        //Test the expected format of the output files obtained with galaxy instantiation option and with a reaction
+        this.ifGalaxy=true;
+        this.outputMappingFile="";
+        this.bioEntityType = 2;
+        this.setMapping4OneColumnFileByID("R_RE1096C", "R_RE1096C");
+        try {
+            this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
+                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy);
+            setBufferReader("pathwayEnr.tsv");
+            assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
+                    "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\t" +
+                    "Nb. of unmapped in fingerprint\tNb. of remaining in network");
+            assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\t" +
+                    "RE1096\tR_RE1096C\t1\t1.32\t75\t0\t4134");
+            setBufferReader("information.tsv");
+            assertEquals(buffer.readLine(),"1 pathways are concerned among the network (on 97 in the network).");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 //    public void testMappingOtherEntity (){
 //        network= (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
 //        itestMappingIDEnzyme();

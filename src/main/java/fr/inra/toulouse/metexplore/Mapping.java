@@ -262,14 +262,33 @@ public class Mapping extends Omics {
 
     public void quickMapping() {
         for (String[] metabolite : this.list_fingerprint.values()) {
-            //System.out.println(metabolite[1]);
-            this.list_mappedEntities.add(this.network.getBioPhysicalEntityById(metabolite[1]));
+            BioEntity entity=getBioEntity(metabolite[1]);
+
+            if (entity != null) this.list_mappedEntities.add(entity);
+            else System.out.println("##Warning: " + metabolite[1] + " has not been mapped.");
         }
 
         if (this.list_mappedEntities.size() == 0) {
-            System.err.println("No metabolite have been extracted from the network. \n Check the list the format of the list of ID provided by Mapping module.");
+            System.err.println("No metabolite have been extracted from the network. \nCheck the list the format of the list of ID provided by the mapping module.");
             exit(1);
         }
+    }
+
+    public BioEntity getBioEntity(String bpe) {
+        if (this.bioEntityType == 1) {
+            return this.network.getBioPhysicalEntityById(bpe);
+        } else if (this.bioEntityType == 2) {
+            return this.network.getBiochemicalReactionList().get(bpe);
+        } else if (this.bioEntityType == 3) {
+            return this.network.getPathwayList().get(bpe);
+        } else if (this.bioEntityType == 4) {
+            return this.network.getEnzymeList().get(bpe);
+        } else if (this.bioEntityType == 5) {
+            return this.network.getProteinList().get(bpe);
+        } else if (this.bioEntityType == 6) {
+            return this.network.getGeneList().get(bpe);
+        }
+        return null;
     }
 }
 

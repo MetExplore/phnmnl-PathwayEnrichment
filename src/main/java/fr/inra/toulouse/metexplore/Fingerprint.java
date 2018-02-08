@@ -81,9 +81,9 @@ public class Fingerprint {
             exit(1);
         }
 
-        for (String[] lineInFile : list_entities.values()) {
+        /*for (String[] lineInFile : list_entities.values()) {
             System.out.println(Arrays.toString(lineInFile));
-        }
+        }*/
     }
 
     public void putValueIfExists (String[] lineFormatted, String[] lineInFile, int columnInTable, int columnInFile){

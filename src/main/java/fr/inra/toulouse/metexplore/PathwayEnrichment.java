@@ -88,24 +88,13 @@ public class PathwayEnrichment extends Omics{
                 }
             }
             //Collections.sort(listPathwayMetabolites);
-            int entityPerPathwaySize = 0;
-            BioEntity bpe = this.list_mappedEntities.iterator().next();
-            if(bpe instanceof BioChemicalReaction) {
-                entityPerPathwaySize = path.getReactions().size();
-            }else if(bpe instanceof BioGene) {
-                entityPerPathwaySize = path.getGenes().size();
-            }
-            else{
-                entityPerPathwaySize = path.getListOfInvolvedMetabolite().size();
-            }
-
-            String coverage = this.writingComportment.round((double) j / (double) entityPerPathwaySize * (double) 100);
+            String coverage = this.writingComportment.round((double) j / (double) getEntityPerPathwaySize(path) * (double) 100);
             PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
                     (double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage, this.ifGalaxy);
             if (this.ifGalaxy) pathEnrElement.settings4Galaxy(this.getFisherTestParameters(path, j));
             list_pathwayEnrElement.add(pathEnrElement);
         }
-                    
+
         Collections.sort(list_pathwayEnrElement);
         for (int i=0;i< list_pathwayEnrElement.size();i++){
             f.write(list_pathwayEnrElement.get(i).toString());
@@ -115,17 +104,39 @@ public class PathwayEnrichment extends Omics{
         }
     }
 
+    public int getEntityPerPathwaySize(BioPathway pathway) {
+        BioEntity bpe = this.list_mappedEntities.iterator().next();
+        if (bpe instanceof BioChemicalReaction) {
+            return pathway.getReactions().size();
+        } else if (bpe instanceof BioGene) {
+            return pathway.getGenes().size();
+        } else {
+            return pathway.getListOfInvolvedMetabolite().size();
+        }
+    }
+
+    public int getEntityPerNetworkSize() {
+        BioEntity bpe = this.list_mappedEntities.iterator().next();
+        if (bpe instanceof BioChemicalReaction) {
+            return this.network.getBiochemicalReactionList().size();
+        } else if (bpe instanceof BioGene) {
+            return this.network.getGeneList().size();
+        } else {
+            return this.network.getPhysicalEntityList().size();
+        }
+    }
+
+
     public int[] getFisherTestParameters(BioPathway pathway,  int nbMapped) {
-        Collection<BioPhysicalEntity> metaboliteInPathway = pathway.getListOfInvolvedMetabolite().values();
 
         //nb of mapped in the pathway
         int a = nbMapped;
         //unmapped metabolites in the fingerprint
         int b = this.list_mappedEntities.size() - a;
         //unmapped metabolites in the pathway
-        int c = metaboliteInPathway.size() - a;
+        int c = this.getEntityPerPathwaySize(pathway) - a;
         //remaining metabolites in the network
-        int d = this.network.getPhysicalEntityList().size() - (a + b + c);
+        int d = this.getEntityPerNetworkSize() - (a + b + c);
 
         int fisherTestParameters[] = {b,c,d};
         return fisherTestParameters;

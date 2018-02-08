@@ -20,25 +20,31 @@ public abstract class Omics {
     //Set type is used to avoid metabolites duplicates (no need to used Set now, could be refactored)
     protected BioNetwork network;
     protected WritingComportment writingComportment;
+    protected  OmicsMethods methods;
+    protected int bioEntityType;
 
     public Omics (Boolean ifGalaxy, HashMap<String, String[]> list_fingerprint,
-                       Set<BioEntity> list_mappedEntities, BioNetwork network){
+                       Set<BioEntity> list_mappedEntities, BioNetwork network, int bioEntityType){
         this.ifGalaxy =ifGalaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
         this.list_mappedEntities = list_mappedEntities;
         this.network = network;
         this.writingComportment = new WritingComportment();
+        this.bioEntityType=bioEntityType;
+        this.methods = new OmicsMethods(list_mappedEntities,network,bioEntityType);
     }
 
     public Omics (Boolean ifGalaxy, HashMap<String, String[]> list_fingerprint,
-                  BioNetwork network){
+                  BioNetwork network, int bioEntityType){
         this.ifGalaxy =ifGalaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
         this.list_mappedEntities = new HashSet<BioEntity>();
         this.network = network;
         this.writingComportment = new WritingComportment();
+        this.bioEntityType=bioEntityType;
+        this.methods = new OmicsMethods(list_mappedEntities,network,bioEntityType);
     }
 
     public void writeOutputInfo() throws IOException {

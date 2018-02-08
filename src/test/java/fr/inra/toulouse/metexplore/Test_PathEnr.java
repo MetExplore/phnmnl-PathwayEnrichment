@@ -29,7 +29,7 @@ public class Test_PathEnr extends TestCase {
     public void setUp() throws Exception {
     //Initialization of the parameters before each tests
         super.setUp();
-        this.setSecurityManager();
+        //this.setSecurityManager();
         if (this.file != null) this.file.delete();
         this.setDefaultInChILayers();
         this.setDefaultMappingColumn();
@@ -433,7 +433,7 @@ public class Test_PathEnr extends TestCase {
                 "M_tststeroneglc");
         try {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
-                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy);
+                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy,this.bioEntityType);
             setBufferReader("pathwayEnr.tsv");
             assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
                     "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
@@ -452,7 +452,7 @@ public class Test_PathEnr extends TestCase {
                 "M_tststeroneglc");
         try {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
-                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy);
+                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy,this.bioEntityType);
             setBufferReader("pathwayEnr.tsv");
             assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
                     "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\t" +
@@ -472,7 +472,7 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4OneColumnFileByID("RE1096", "R_RE1096C");
         try {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
-                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy);
+                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy,this.bioEntityType);
             setBufferReader("pathwayEnr.tsv");
             assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
                     "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
@@ -492,7 +492,7 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4OneColumnFileByID("R_RE1096C", "R_RE1096C");
         try {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
-                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy);
+                    this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy,this.bioEntityType);
             setBufferReader("pathwayEnr.tsv");
             assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
                     "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\t" +

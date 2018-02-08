@@ -154,7 +154,7 @@ public class Launcher_PathEnr {
             Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers,
                     launch.outFileMapping, ifGalaxy, launch.bioEntityType);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
-                    launch.outFilePathEnr,ifGalaxy);
+                    launch.outFilePathEnr,ifGalaxy, launch.bioEntityType);
         }
         catch (IOException e){
             e.printStackTrace();

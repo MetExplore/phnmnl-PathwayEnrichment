@@ -23,43 +23,40 @@ public class Mapping extends Omics {
     public Mapping(BioNetwork network, HashMap<String, String[]> list_fingerprint,
                    String[] inchiLayers, String outFileMapping, Boolean ifGalaxy,
                    int bioEntityType) throws IOException {
-        super(ifGalaxy, list_fingerprint, network);
+        super(ifGalaxy, list_fingerprint, network, bioEntityType);
         this.inchiLayers = inchiLayers;
         this.outFileMapping = outFileMapping;
         this.list_unmappedEntities = (HashMap<String, String[]>) list_fingerprint.clone();
         //will contain non-mapped metabolites
-        this.bioEntityType = bioEntityType;
 
         if (this.outFileMapping != "") this.performMapping();
         else this.quickMapping();
     }
 
-    public Boolean mapEntity(String[] lineInFile, int typeMapping, Iterator entitySet){
-        while(entitySet.hasNext()) {
-            BioEntity e = (BioEntity)entitySet.next();
-            if(typeMapping == 1 && lineInFile[1].equals(e.getId())){
-                this.mappedBpe = e;
-                return mapping4AttributesCase(lineInFile,e.getId(),1,e);
+    public Boolean mapEntity(String[] lineInFile, int typeMapping, Collection entitySet){
+        Iterator it = entitySet.iterator();
+        int mappingColumnInFile;
+        String valueInSbml;
 
+        while(it.hasNext()) {
+            BioEntity e = (BioEntity)it.next();
+
+            if(typeMapping == 1){
+                mappingColumnInFile = 1;
+                valueInSbml = e.getId();
+            }else{
+                mappingColumnInFile = 0;
+                valueInSbml = e.getName();
             }
-            if(typeMapping == 2 && lineInFile[0].equals(e.getName())){
+
+            if(lineInFile[mappingColumnInFile].equals(valueInSbml)){
                 this.mappedBpe = e;
-                return mapping4AttributesCase(lineInFile,e.getName(),0,e);
-            } //TODO: contient bout de string
+                return mapping4AttributesCase(lineInFile,valueInSbml,mappingColumnInFile,e);
+            }//TODO: mapping on partial string of the name in SBML
         }
         return false;
     }
 
-    public Iterator[] setIterators(){
-        Iterator[] listEntities = {
-                this.network.getPhysicalEntityList().values().iterator(),
-                this.network.getBiochemicalReactionList().values().iterator(),
-                this.network.getPathwayList().values().iterator(),
-                this.network.getEnzymeList().values().iterator(),
-                this.network.getProteinList().values().iterator(),
-                this.network.getGeneList().values().iterator()};
-        return listEntities;
-    }
     public void performMapping() throws IOException {
         //Performs mapping on InChI, CHEBI, SBML_ID, PubChem_ID, SMILES, KEGG_ID and InChIKey
         //Remove doublets for analysis and prints warnings
@@ -75,20 +72,16 @@ public class Mapping extends Omics {
             //System.out.println(Arrays.toString(lineInFile));
 
             //Mapping on other bioEntity than mapping
-            Iterator[] listEntities = setIterators();
-           for (int i = 0 ; i < listEntities.length ; i++) {
-               if (lineInFile[1] != "" && this.bioEntityType == i + 1) {
-                   isMapped = mapEntity(lineInFile, 1, listEntities[i]);
-               }
-               if (!isMapped && lineInFile[0]!="" && this.bioEntityType == i + 1) {
-                   listEntities = setIterators();
-                   isMapped = mapEntity(lineInFile, 2, listEntities[i]);
-               }
-           }
+            Collection entitySet = this.methods.getEntitySetInNetwork().values();
+            if (lineInFile[1] != "") {
+                isMapped = mapEntity(lineInFile, 1, entitySet);
+            }
+            if (!isMapped && lineInFile[0]!="") {
+                isMapped = mapEntity(lineInFile, 2, entitySet);
+            }
 
-
-           //Mapping on metabolites
-            //Loop for each metabolite from the SBML
+            //Mapping on metabolites
+            // Loop for each metabolite from the SBML
             if (this.bioEntityType == 1 && !isMapped) {
                 for (BioPhysicalEntity bpe : this.network.getPhysicalEntityList().values()) {
                     isMappedCurrentBpe = false;
@@ -161,7 +154,7 @@ public class Mapping extends Omics {
 
     public Boolean mapping4AttributesCase(String[] lineInFile, String associatedValueInSbml, int mappingColumnInfile, BioEntity bpe) {
         //Mapping case for values which are accessible directly through the attributes of BioPhysicalEntity
-
+        System.out.println(this.inchiLayers);
         Boolean ifEquals;
 
         try {
@@ -229,16 +222,17 @@ public class Mapping extends Omics {
         File fo1 = new File(this.outFileMapping);
         fo1.createNewFile();
         BufferedWriter f = new BufferedWriter(new FileWriter(fo1));
+        int nbEntityInNetwork = this.methods.getEntitySetInNetwork().size();
         int nbMappedMetabolites = this.list_fingerprint.size() - this.list_unmappedEntities.size();
         String coverageInFile = calculPercent(nbMappedMetabolites, this.list_fingerprint.size());
-        String coverageSBML = calculPercent(nbMappedMetabolites, this.network.getPhysicalEntityList().size());
+        String coverageSBML = calculPercent(nbMappedMetabolites, nbEntityInNetwork);
 
         //File header
         f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value_(Input_File)\tMatched_value_(SBML)\n");
 
         //Print on screen and writing in log
         writeLog(nbMappedMetabolites + " metabolites have been mapped on " + this.list_fingerprint.size() + " in the fingerprint dataset ("
-                + coverageInFile + "%) and on " + this.network.getPhysicalEntityList().size() + " in the network (" +
+                + coverageInFile + "%) and on " + nbEntityInNetwork + " in the network (" +
                 coverageSBML + "%).\n");
 
         //Add non-mapped metabolites to the mapping output file
@@ -262,7 +256,7 @@ public class Mapping extends Omics {
 
     public void quickMapping() {
         for (String[] metabolite : this.list_fingerprint.values()) {
-            BioEntity entity=getBioEntity(metabolite[1]);
+            BioEntity entity=(BioEntity) methods.getEntitySetInNetwork().get(metabolite[1]);
 
             if (entity != null) this.list_mappedEntities.add(entity);
             else System.out.println("##Warning: " + metabolite[1] + " has not been mapped.");
@@ -273,22 +267,4 @@ public class Mapping extends Omics {
             exit(1);
         }
     }
-
-    public BioEntity getBioEntity(String bpe) {
-        if (this.bioEntityType == 1) {
-            return this.network.getBioPhysicalEntityById(bpe);
-        } else if (this.bioEntityType == 2) {
-            return this.network.getBiochemicalReactionList().get(bpe);
-        } else if (this.bioEntityType == 3) {
-            return this.network.getPathwayList().get(bpe);
-        } else if (this.bioEntityType == 4) {
-            return this.network.getEnzymeList().get(bpe);
-        } else if (this.bioEntityType == 5) {
-            return this.network.getProteinList().get(bpe);
-        } else if (this.bioEntityType == 6) {
-            return this.network.getGeneList().get(bpe);
-        }
-        return null;
-    }
 }
-

@@ -14,8 +14,8 @@ public class PathwayEnrichment extends Omics{
     protected String outFilePathEnr;
 
     public PathwayEnrichment (BioNetwork network, HashMap<String, String[]> list_fingerprint, Set <BioEntity> list_mappedEntities,
-                              String outFilePathEnr, Boolean ifGalaxy) throws IOException {
-        super(ifGalaxy, list_fingerprint, list_mappedEntities, network);
+                              String outFilePathEnr, Boolean ifGalaxy , int bioEntityType) throws IOException {
+        super(ifGalaxy, list_fingerprint, list_mappedEntities, network, bioEntityType);
         this.outFilePathEnr=outFilePathEnr;
         this.computeEnrichmentWithCorrections();
     }
@@ -27,7 +27,7 @@ public class PathwayEnrichment extends Omics{
         if(bpe instanceof BioChemicalReaction){
             pathEnr = new parsebionet.statistics.PathwayEnrichment(this.network, this.list_mappedEntities);
         }else {
-            pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities);
+            pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType);
         }
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);

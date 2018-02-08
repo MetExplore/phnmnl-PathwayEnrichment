@@ -1,21 +1,20 @@
 package fr.inra.toulouse.metexplore;
 
-import parsebionet.biodata.BioNetwork;
-import parsebionet.biodata.BioPathway;
-import parsebionet.biodata.BioEntity;
-import parsebionet.biodata.BioPhysicalEntity;
+import parsebionet.biodata.*;
 
 import java.util.*;
 
 public class PathwayEnrichmentCalculation extends parsebionet.statistics.PathwayEnrichment {
 
-    BioNetwork network;
-    Set <BioEntity> list_mappedMetabolites;
+    protected  BioNetwork network;
+    protected  Set <BioEntity> list_mappedEntities;
+    protected  OmicsMethods methods;
 
-    protected PathwayEnrichmentCalculation(BioNetwork network, Set <BioEntity> list_mappedMetabolites){
-        super(network, list_mappedMetabolites);
+    protected PathwayEnrichmentCalculation(BioNetwork network, Set <BioEntity> list_mappedEntities, int bioEntityType){
+        super(network, list_mappedEntities);
         this.network = network;
-        this.list_mappedMetabolites = list_mappedMetabolites;
+        this.list_mappedEntities = list_mappedEntities;
+        this.methods = new OmicsMethods(list_mappedEntities,network, bioEntityType);
     }
 
     @Override
@@ -30,16 +29,15 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
     }
 
     public int[] getFisherTestParameters(BioPathway pathway) {
-        Collection<BioPhysicalEntity> metaboliteInPathway = pathway.getListOfInvolvedMetabolite().values();
-
+        Collection entityInPathway = methods.getEntitySetInPathway(pathway);
         //nb of mapped in the pathway
-        int a = this.intersect(metaboliteInPathway).size();
+        int a = this.intersect(entityInPathway).size();
         //unmapped metabolites in the fingerprint
-        int b = this.list_mappedMetabolites.size() - a;
+        int b = this.list_mappedEntities.size() - a;
         //unmapped metabolites in the pathway
-        int c = metaboliteInPathway.size() - a;
+        int c = entityInPathway.size() - a;
         //remaining metabolites in the network
-        int d = this.network.getPhysicalEntityList().size() - (a + b + c);
+        int d = methods.getEntitySetInNetwork().size() - (a + b + c);
 
         int fisherTestParameters[] = {a,b,c,d};
         return fisherTestParameters;
@@ -79,9 +77,9 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
         return adjPvalues;
     }
 
-    public HashSet<BioEntity> intersect(Collection<BioPhysicalEntity> set2) {
+    public HashSet<BioEntity> intersect(Collection<BioEntity> set2) {
         HashSet<BioEntity> inter = new HashSet();
-        for (BioEntity bpe: this.list_mappedMetabolites){
+        for (BioEntity bpe: this.list_mappedEntities){
             if (set2.contains(bpe)) inter.add(bpe);
         }
         return inter;

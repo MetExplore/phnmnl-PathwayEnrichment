@@ -17,7 +17,6 @@ public class Mapping extends Omics {
     protected String[] inchiLayers;
     protected HashMap<String, String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappingElement> list_mappingElement = new ArrayList<MappingElement>(); //list of mapped metabolites used only for writing mapping output into a file
-    protected int bioEntityType;
     protected BioEntity mappedBpe = new BioPhysicalEntity();
 
     public Mapping(BioNetwork network, HashMap<String, String[]> list_fingerprint,
@@ -60,7 +59,6 @@ public class Mapping extends Omics {
     public void performMapping() throws IOException {
         //Performs mapping on InChI, CHEBI, SBML_ID, PubChem_ID, SMILES, KEGG_ID and InChIKey
         //Remove doublets for analysis and prints warnings
-
         Boolean isMapped = false, isMappedCurrentBpe = false;
         int mappingOccurrences = 0, id = 1;
         String warningsDoublets = "";
@@ -154,7 +152,7 @@ public class Mapping extends Omics {
 
     public Boolean mapping4AttributesCase(String[] lineInFile, String associatedValueInSbml, int mappingColumnInfile, BioEntity bpe) {
         //Mapping case for values which are accessible directly through the attributes of BioPhysicalEntity
-        System.out.println(this.inchiLayers);
+
         Boolean ifEquals;
 
         try {

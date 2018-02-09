@@ -120,31 +120,17 @@ public class Test_PathEnr extends TestCase {
     //Extract the expected metabolite and process a mapping for comparison
 
         this.expectedMappedMetabolite = new ArrayList<BioEntity>();
-        this.addBioEntity(bpe);
+
         try {
             this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.outputMappingFile,
                     this.ifGalaxy, this.bioEntityType);
             this.file = new File(this.outputMappingFile);
+            OmicsMethods methods = new OmicsMethods(this.mapping.list_mappedEntities,network,this.bioEntityType);
+            this.expectedMappedMetabolite.add((BioEntity)methods.getEntitySetInNetwork().get(bpe));
             assertEquals(this.expectedMappedMetabolite.iterator().next().getName(),
                     this.mapping.list_mappedEntities.iterator().next().getName());
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void addBioEntity(String bpe){
-        if(this.bioEntityType == 1){
-            this.expectedMappedMetabolite.add(this.network.getBioPhysicalEntityById(bpe));
-        }else if (this.bioEntityType == 2){
-            this.expectedMappedMetabolite.add(this.network.getBiochemicalReactionList().get(bpe));
-        }else if (this.bioEntityType == 3){
-            this.expectedMappedMetabolite.add(this.network.getPathwayList().get(bpe));
-        }else if (this.bioEntityType == 4){
-            this.expectedMappedMetabolite.add(this.network.getEnzymeList().get(bpe));
-        }else if (this.bioEntityType == 5){
-            this.expectedMappedMetabolite.add(this.network.getProteinList().get(bpe));
-        }else if (this.bioEntityType == 6){
-            this.expectedMappedMetabolite.add(this.network.getGeneList().get(bpe));
         }
     }
 
@@ -435,8 +421,8 @@ public class Test_PathEnr extends TestCase {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
                     this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy,this.bioEntityType);
             setBufferReader("pathwayEnr.tsv");
-            assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
-                    "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
+            assertEquals(buffer.readLine(), "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
+                                    "Mapped_entities_ID\tNb. of mapped\tCoverage (%)");
             assertEquals(buffer.readLine(), "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
                     "\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67");
         } catch (IOException e) {
@@ -454,8 +440,8 @@ public class Test_PathEnr extends TestCase {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
                     this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy,this.bioEntityType);
             setBufferReader("pathwayEnr.tsv");
-            assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
-                    "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\t" +
+            assertEquals(buffer.readLine(), "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
+                                                        "Mapped_entities_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\t" +
                     "Nb. of unmapped in fingerprint\tNb. of remaining in network");
             assertEquals(buffer.readLine(), "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t" +
                     "0.02314814814814815\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
@@ -474,8 +460,8 @@ public class Test_PathEnr extends TestCase {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
                     this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy,this.bioEntityType);
             setBufferReader("pathwayEnr.tsv");
-            assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
-                    "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)");
+            assertEquals(buffer.readLine(),  "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
+                    "Mapped_entities_ID\tNb. of mapped\tCoverage (%)");
             assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\t" +
                     "RE1096\tR_RE1096C\t1\t1.32");
         } catch (IOException e) {
@@ -494,8 +480,8 @@ public class Test_PathEnr extends TestCase {
             this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
                     this.mapping.list_mappedEntities, "pathwayEnr.tsv",this.ifGalaxy,this.bioEntityType);
             setBufferReader("pathwayEnr.tsv");
-            assertEquals(buffer.readLine(), "Pathway_name\tFisher_p-value\tBonferroni_correction\tBenjamini-Hochberg_correction" +
-                    "\tMapped_metabolites\tMapped_metabolites_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\t" +
+            assertEquals(buffer.readLine(), "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
+                    "Mapped_entities_ID\tNb. of mapped\tCoverage (%)\tNb. of unmapped in pathway\t" +
                     "Nb. of unmapped in fingerprint\tNb. of remaining in network");
             assertEquals(buffer.readLine(), "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\t" +
                     "RE1096\tR_RE1096C\t1\t1.32\t75\t0\t4134");

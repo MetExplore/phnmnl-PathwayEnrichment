@@ -1,5 +1,7 @@
 package fr.inra.toulouse.metexplore;
 
+import parsebionet.biodata.BioPathway;
+
 import java.util.List;
 
 public class PathwayEnrichmentElement implements Comparable <PathwayEnrichmentElement> {
@@ -21,12 +23,6 @@ public class PathwayEnrichmentElement implements Comparable <PathwayEnrichmentEl
         this.nb_mapped = nb_mapped;
         this.coverage = coverage;
         this.ifGalaxy = ifGalaxy;
-    }
-
-    public void settings4Galaxy(int[] fisherTestParameters) {
-        this.nb_unmappedInPathway = fisherTestParameters[1];
-        this.nb_unmappedInFingerprint = fisherTestParameters[0];
-        this.nb_remainingInNetwork = fisherTestParameters[2];
     }
 
     //TODO: hashmap pour list metab et id et sort functionality

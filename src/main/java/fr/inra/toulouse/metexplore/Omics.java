@@ -20,7 +20,7 @@ public abstract class Omics {
     //Set type is used to avoid metabolites duplicates (no need to used Set now, could be refactored)
     protected BioNetwork network;
     protected WritingComportment writingComportment;
-    protected  OmicsMethods methods;
+    protected OmicsMethods methods;
     protected int bioEntityType;
 
     public Omics (Boolean ifGalaxy, HashMap<String, String[]> list_fingerprint,

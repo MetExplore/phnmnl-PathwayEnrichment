@@ -9,38 +9,49 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
     protected  BioNetwork network;
     protected  Set <BioEntity> list_mappedEntities;
     protected  OmicsMethods methods;
+    //protected Set<BioChemicalReaction> reactionSet;
 
-    protected PathwayEnrichmentCalculation(BioNetwork network, Set <BioEntity> list_mappedEntities, int bioEntityType){
+    public PathwayEnrichmentCalculation(BioNetwork network, Set <BioEntity> list_mappedEntities, int bioEntityType){
         super(network, list_mappedEntities);
         this.network = network;
         this.list_mappedEntities = list_mappedEntities;
         this.methods = new OmicsMethods(list_mappedEntities,network, bioEntityType);
     }
 
+    /*
+    public void setReactionSet(BioNetwork network, Set<? extends BioEntity> BioEntitySet) {
+        this.reactionSet = new HashSet();
+        Iterator var3 = BioEntitySet.iterator();
+
+        while(var3.hasNext()) {
+            BioEntity e = (BioEntity)var3.next();
+            if (e instanceof BioChemicalReaction) {
+                this.reactionSet.add((BioChemicalReaction)e);
+            } else if (e instanceof BioPhysicalEntity) {
+                BioPhysicalEntity m = (BioPhysicalEntity)e;
+                this.reactionSet.addAll(m.getReactionsAsProduct().values());
+                this.reactionSet.addAll(m.getReactionsAsSubstrate().values());
+            } else if (e instanceof BioGene) {
+                 BioGene g = (BioGene) e;
+                HashMap<String, BioProtein> proteinList = g.getProteinList();
+                BioProtein p = proteinList.values().iterator().next();
+
+            } else if (e instanceof BioProtein) {
+                 BioProtein p = (BioProtein) e;
+                HashMap<String, BioGene> geneList = p.getGeneList();
+            }
+        }
+    }*/
+
     @Override
     public double getPvalue(BioPathway pathway) throws IllegalArgumentException {
         if (!this.network.getPathwayList().values().contains(pathway)) {
             throw new IllegalArgumentException("pathway not in network");
         } else {
-            int fisherTestParameters[] = this.getFisherTestParameters(pathway);
+            int fisherTestParameters[] = this.methods.getFisherTestParameters(pathway);
             return this.exactFisherOneTailed(fisherTestParameters[0], fisherTestParameters[1],
                     fisherTestParameters[2], fisherTestParameters[3]);
         }
-    }
-
-    public int[] getFisherTestParameters(BioPathway pathway) {
-        Collection entityInPathway = methods.getEntitySetInPathway(pathway);
-        //nb of mapped in the pathway
-        int a = this.intersect(entityInPathway).size();
-        //unmapped metabolites in the fingerprint
-        int b = this.list_mappedEntities.size() - a;
-        //unmapped metabolites in the pathway
-        int c = entityInPathway.size() - a;
-        //remaining metabolites in the network
-        int d = methods.getEntitySetInNetwork().size() - (a + b + c);
-
-        int fisherTestParameters[] = {a,b,c,d};
-        return fisherTestParameters;
     }
 
     @Override
@@ -75,13 +86,5 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
             }
         }
         return adjPvalues;
-    }
-
-    public HashSet<BioEntity> intersect(Collection<BioEntity> set2) {
-        HashSet<BioEntity> inter = new HashSet();
-        for (BioEntity bpe: this.list_mappedEntities){
-            if (set2.contains(bpe)) inter.add(bpe);
-        }
-        return inter;
     }
 }

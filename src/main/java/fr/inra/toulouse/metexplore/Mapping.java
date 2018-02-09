@@ -254,10 +254,12 @@ public class Mapping extends Omics {
 
     public void quickMapping() {
         for (String[] metabolite : this.list_fingerprint.values()) {
-            BioEntity entity=(BioEntity) methods.getEntitySetInNetwork().get(metabolite[1]);
+
+            BioEntity entity = (BioEntity) methods.getEntitySetInNetwork().get(metabolite[1]);
 
             if (entity != null) this.list_mappedEntities.add(entity);
-            else System.out.println("##Warning: " + metabolite[1] + " has not been mapped.");
+            else System.out.println("##Warning: " + metabolite[0] + " has not been mapped. Check the ID: " + metabolite[1] + ".");
+
         }
 
         if (this.list_mappedEntities.size() == 0) {

@@ -19,7 +19,7 @@ public class Test_PathEnr extends TestCase {
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
     //curl  http://metexplore.toulouse.inra.fr:8080/metExploreWebService/biosources/3223
-    protected static BioNetwork network = (new JSBML2Bionetwork4Galaxy("data/recon2.v03_ext_noCompartment_noTransport_v2.xml")).getBioNetwork();
+    protected static BioNetwork network = (new JSBML2Bionetwork4Galaxy("data/recon2.02_without_compartment.xml")).getBioNetwork();
     protected Fingerprint fingerprint;
     protected File file;
     protected BufferedReader buffer;

@@ -14,20 +14,35 @@ public class Launcher_PathEnr {
     @Option(name="-h", usage="Prints this help.")
     protected boolean phelp = false;
 
-    @Option(name="-o1", usage="Output file name for mapping result (by default: disabled).")
-    protected String outFileMapping = "";
+    /******FILES PARAMETERS*****/
 
-    @Option(name="-gal", usage="Formating output in a galaxy compliant way (by default: disabled).")
-    protected String galaxy;
+    @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
+    protected String inFileFingerprint ;
+
+    @Option(name="-o1", usage="Output file name for mapping result (by default: disabled).")
+    protected String outFileMapping = "mapping.tsv";
 
     @Option(name="-o2", usage="Output file name for pathway enrichment result (by default: pathwayEnrichment.tsv).")
     protected String outFilePathEnr = "pathwayEnrichment.tsv";
 
     @Option(name="-s", usage="SBML file name (by default: Recon 2v02).")
-    protected String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
+    protected String sbml = "data/recon2.02_without_compartment.xml.xml";
 
-    @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
-    protected String inFileFingerprint ;
+    /******PARSING PARAMETERS*****/
+
+    @Option(name="-header", usage="Activate this option if the fingerprint dataset contains no header (by default: disabled).")
+    protected boolean ifNoHeader = false;
+
+    @Option(name="-sep", usage="Character used as separator in the dataset (by default: \\t for tab).")
+    protected String separator = "\t";
+
+    @Option(name="-f", usage="Number of the filtered column (by default: disabled)")
+    protected int colFiltered = -1;
+
+    @Option(name="-gal", usage="Formating output in a galaxy compliant way (by default: disabled).")
+    protected boolean ifGalaxy = false;
+
+    /*****MAPPING PARAMETERS*****/
 
     @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
     protected int bioEntityType = 1;
@@ -35,17 +50,18 @@ public class Launcher_PathEnr {
     @Option(name="-name", usage="Number of the file's column containing the metabolite name (by default: 1st column).")
     protected int nameColumn = 1;
 
-    @Option(name="-f", usage="Number of the filtered column (by default: disabled)")
-    protected int colFiltered = -1;
+    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
+            " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
+    protected String inchiLayers = "c,h";
 
-    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: disabled).")
-    protected int inchiColumn = -1;
+    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5th column).")
+    protected int inchiColumn = 5;
 
     @Option(name="-chebi", usage="Number of the file's column containing the CHEBI data (by default: disabled).")
     protected int chebiColumn = -1;
 
-    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: 2nd column).")
-    protected int idSBMLColumn = 2;
+    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: disabled).")
+    protected int idSBMLColumn = -1;
 
     @Option(name="-smiles", usage="Number of the file's column containing the SMILES data (by default: disabled).")
     protected int smilesColumn = -1;
@@ -68,15 +84,6 @@ public class Launcher_PathEnr {
     @Option(name="-weight", usage="Number of the file's column containing the weigth of the metabolites (by default: disabled).")
     protected int weightColumn = -1;
 
-    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
-            " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
-    protected String inchiLayers = "c,h";
-
-    @Option(name="h=F", usage="Activate this option if the fingerprint dataset contains no header (by default: disabled).")
-    protected String header;
-
-    @Option(name="-sep", usage="Character used as separator in the dataset (by default: \\t for tab).")
-    protected String separator = "\t";
 
     public void timeCalculation(long elapsedTime){
         long min = elapsedTime / 60000000000L;
@@ -89,8 +96,6 @@ public class Launcher_PathEnr {
     public static void main(String[] args) {
 
         long startTime = System.nanoTime();
-        Boolean ifHeader = true;//Take account of the header
-        Boolean ifGalaxy = false;//Galaxy compliance
         Launcher_PathEnr launch = new Launcher_PathEnr();
         CmdLineParser parser = new CmdLineParser(launch);
 
@@ -109,7 +114,7 @@ public class Launcher_PathEnr {
                 throw new CmdLineException("-i parameter required");
             }
 
-            if (launch.chebiColumn < 1 && launch.inchiColumn < 1 && launch.idSBMLColumn < 1 &&
+            if (launch.nameColumn < 1 && launch.chebiColumn < 1 && launch.inchiColumn < 1 && launch.idSBMLColumn < 1 &&
                     launch.smilesColumn < 1 && launch.pubchemColum < 1 && launch.inchikeysColumn < 1
                     && launch.keggColumn < 1 && launch.hmdColumn < 1 && launch.chemspiderColumn < 1
                     && launch.weightColumn < 1){
@@ -120,17 +125,13 @@ public class Launcher_PathEnr {
                 throw new CmdLineException("-l parameter badly formatted");
             }
 
-            if (launch.bioEntityType < 1 || launch.bioEntityType > 7) {
+            if (launch.bioEntityType < 1 || launch.bioEntityType > 6) {
                 throw new CmdLineException("Type of biological object must be between 1 and 6.");
             }
 
             //Personalised error print for help
         } catch (CmdLineException e) {
-            if(e.getMessage().equals("No argument is allowed: h=F")) {
-                ifHeader = false;
-            }else if(e.getMessage().equals("Option \"-gal\" takes an operand")) {
-                ifGalaxy = true;
-            }else if(e.getMessage().equals("Option \"-l\" takes an operand")){
+            if(e.getMessage().equals("Option \"-l\" takes an operand")){
                 launch.inchiLayers="";
             }else {
                 System.err.println(e.getMessage());
@@ -149,12 +150,12 @@ public class Launcher_PathEnr {
                 (launch.keggColumn-1), (launch.hmdColumn-1), (launch.chemspiderColumn-1), (launch.weightColumn-1)};
 
         try{
-            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,ifHeader, launch.separator, (launch.nameColumn-1),
+            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.separator, (launch.nameColumn-1),
                     mappingColumns, (launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers,
-                    launch.outFileMapping, ifGalaxy, launch.bioEntityType);
+                    launch.outFileMapping, launch.ifGalaxy, launch.bioEntityType);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
-                    launch.outFilePathEnr,ifGalaxy, launch.bioEntityType);
+                    launch.outFilePathEnr,launch.ifGalaxy, launch.bioEntityType);
         }
         catch (IOException e){
             e.printStackTrace();

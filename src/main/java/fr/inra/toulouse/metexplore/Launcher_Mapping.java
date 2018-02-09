@@ -19,10 +19,10 @@ public class Launcher_Mapping {
 
     @Option(name="-gal", usage="Output file name for general information resulting from mapping and pathway enrichment" +
             " results (by default: NONE).")
-    protected String galaxy;
+    protected boolean ifGalaxy;
 
     @Option(name="-s", usage="SBML file name.")
-    protected String sbml = "data/recon2.v03_ext_noCompartment_noTransport_v2.xml";
+    protected String sbml = "data/recon2.02_without_compartment.xml";
 
     @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
     protected String inFileFingerprint ;
@@ -72,8 +72,8 @@ public class Launcher_Mapping {
             "for a mapping on formula layer only, enter the -l option with no parameter).")
     protected String inchiLayers = "c,h";
 
-    @Option(name="h=F", usage="Activate this option if the fingerprint dataset contains no header.")
-    protected String header;
+    @Option(name="-header", usage="Activate this option if the fingerprint dataset contains no header.")
+    protected boolean ifNoHeader;
 
     @Option(name="-sep", usage="Activate this option if the fingerprint dataset contains no header.")
     protected String separator = "\t";
@@ -89,8 +89,6 @@ public class Launcher_Mapping {
     public static void main(String[] args) {
 
         long startTime = System.nanoTime();
-        Boolean ifHeader = true;//Take account of the header
-        Boolean ifGalaxy = false;//Galaxy compliance
         Launcher_Mapping launch = new Launcher_Mapping();
         CmdLineParser parser = new CmdLineParser(launch);
 
@@ -126,11 +124,7 @@ public class Launcher_Mapping {
 
             //Personalised error print for help
         } catch (CmdLineException e) {
-            if(e.getMessage().equals("No argument is allowed: h=F")) {
-                ifHeader = false;
-            }else if(e.getMessage().equals("Option \"-gal\" takes an operand")) {
-                    ifGalaxy = true;
-            }else if(e.getMessage().equals("Option \"-l\" takes an operand")){
+            if(e.getMessage().equals("Option \"-l\" takes an operand")){
                     launch.inchiLayers="";
             }else {
                 System.err.println(e.getMessage());
@@ -150,10 +144,10 @@ public class Launcher_Mapping {
                 (launch.keggColumn-1), (launch.hmdColumn-1), (launch.chemspiderColumn-1), (launch.weightColumn-1)};
 
         try{
-            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint, ifHeader, launch.separator,(launch.nameColumn-1),
+            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint, launch.ifNoHeader, launch.separator,(launch.nameColumn-1),
                     mappingColumns, (launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers,
-                    launch.outFileMapping, ifGalaxy, launch.bioEntityType);
+                    launch.outFileMapping, launch.ifGalaxy, launch.bioEntityType);
         }
         catch (IOException e){
             e.printStackTrace();

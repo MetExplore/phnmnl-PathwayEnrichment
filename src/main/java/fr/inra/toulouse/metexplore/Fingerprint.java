@@ -14,15 +14,15 @@ public class Fingerprint {
     protected int nameColumn, chebiColumn, inchiColumn, idSBMLColumn, smilesColumn, pubchemColum;
     protected int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
     protected String separator, inFileFingerprint;
-    protected Boolean ifHeader;
+    protected Boolean ifNoHeader;
     protected HashMap<String, String[]> list_entities = new HashMap<String, String[]>(); //input file after formatting and filtering
 
     //TODO: excel parsing
 
-    public Fingerprint (String inFileFingerprint, Boolean ifHeader, String separator, int nameColumn, int[] mappingColumns,
+    public Fingerprint (String inFileFingerprint, Boolean ifNoHeader, String separator, int nameColumn, int[] mappingColumns,
                         int filteredColumn) throws IOException {
         this.inFileFingerprint=inFileFingerprint;
-        this.ifHeader=ifHeader;
+        this.ifNoHeader=ifNoHeader;
         this.separator=separator;
         this.nameColumn=nameColumn;
         this.idSBMLColumn=mappingColumns[0];
@@ -52,7 +52,7 @@ public class Fingerprint {
                 this.chemspiderColumn, this.weightColumn};
         //if (verbose=true) System.out.println(Arrays.toString(columnNumbers));
 
-        if(this.ifHeader) fileBuffer.readLine(); //skip the header
+        if(!this.ifNoHeader) fileBuffer.readLine(); //skip the header
 
         //Loop on each lines from the input file
         while ((line = fileBuffer.readLine()) != null) {
@@ -81,9 +81,9 @@ public class Fingerprint {
             exit(1);
         }
 
-        for (String[] lineInFile : list_entities.values()) {
+        /*for (String[] lineInFile : list_entities.values()) {
             System.out.println(Arrays.toString(lineInFile));
-        }
+        }*/
     }
 
     public void putValueIfExists (String[] lineFormatted, String[] lineInFile, int columnInTable, int columnInFile){

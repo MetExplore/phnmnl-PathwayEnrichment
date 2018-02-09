@@ -14,9 +14,12 @@ public class Launcher_PathEnr {
     @Option(name="-h", usage="Prints this help.")
     protected boolean phelp = false;
 
+    @Option(name="-version", usage="Prints the current version of the program.")
+    protected boolean version ;
+
     /******FILES PARAMETERS*****/
 
-    @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
+    @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
     protected String inFileFingerprint ;
 
     @Option(name="-o1", usage="Output file name for mapping result (by default: disabled).")
@@ -26,7 +29,7 @@ public class Launcher_PathEnr {
     protected String outFilePathEnr = "pathwayEnrichment.tsv";
 
     @Option(name="-s", usage="SBML file name (by default: Recon 2v02).")
-    protected String sbml = "data/recon2.02_without_compartment.xml.xml";
+    protected String sbml = "data/recon2.02_without_compartment.xml";
 
     /******PARSING PARAMETERS*****/
 
@@ -39,7 +42,7 @@ public class Launcher_PathEnr {
     @Option(name="-f", usage="Number of the filtered column (by default: disabled)")
     protected int colFiltered = -1;
 
-    @Option(name="-gal", usage="Formating output in a galaxy compliant way (by default: disabled).")
+    @Option(name="-gal", usage="Formatting output in a galaxy compliant way (by default: disabled).")
     protected boolean ifGalaxy = false;
 
     /*****MAPPING PARAMETERS*****/
@@ -106,6 +109,11 @@ public class Launcher_PathEnr {
             if (launch.phelp) {
                 System.out.println("Options:");
                 parser.printUsage(System.out);
+                exit(0);
+            }
+
+            if (launch.version) {
+                System.out.println("Version: 1.1");
                 exit(0);
             }
 

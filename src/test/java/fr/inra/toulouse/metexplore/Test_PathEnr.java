@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class Test_PathEnr extends TestCase {
     protected String outputMappingFile, separator;
     protected int filteredColumn, bioEntityType;
-    protected Boolean ifHeader, ifGalaxy;
+    protected Boolean ifNoHeader, ifGalaxy;
     protected String[] inchiLayers;
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
@@ -37,7 +37,7 @@ public class Test_PathEnr extends TestCase {
         this.mapping = null;
         this.pathEnr = null;
         this.separator="\t";
-        this.ifHeader=true;
+        this.ifNoHeader = false;
         this.ifGalaxy = false;
         this.outputMappingFile = "output.tsv";
         this.filteredColumn = -1;
@@ -161,7 +161,7 @@ public class Test_PathEnr extends TestCase {
             dummyFile.write(header + "\n");
             dummyFile.write(inputLine);
             dummyFile.close();
-            this.fingerprint = new Fingerprint("dummyFile.tsv", this.ifHeader, this.separator,0,
+            this.fingerprint = new Fingerprint("dummyFile.tsv", this.ifNoHeader, this.separator,0,
                     this.mappingColumn,this.filteredColumn);
         } catch (IOException e) {
             e.printStackTrace();
@@ -204,7 +204,7 @@ public class Test_PathEnr extends TestCase {
 
     public void testHeader() {
     //Test that each possible mapping values are correctly extracted
-        this.ifHeader=false;
+        this.ifNoHeader=true;
         this.createDummyFileWithOnlyColumn("M_taur");
         assertTrue(this.fingerprint.list_entities.size() == 2);
     }

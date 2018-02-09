@@ -14,69 +14,75 @@ public class Launcher_Mapping {
     @Option(name="-h", usage="Prints this help.")
     protected boolean phelp = false;
 
-    @Option(name="-o1", usage="Output file name for mapping result (by default: mapping.tsv).")
-    protected String outFileMapping = "mapping.tsv";
+    @Option(name="-version", usage="Prints the current version of the program.")
+    protected boolean version ;
 
-    @Option(name="-gal", usage="Output file name for general information resulting from mapping and pathway enrichment" +
-            " results (by default: NONE).")
-    protected boolean ifGalaxy;
-
-    @Option(name="-s", usage="SBML file name.")
-    protected String sbml = "data/recon2.02_without_compartment.xml";
+    /******FILES PARAMETERS*****/
 
     @Option(name="-i", usage="[REQUIRED] Input file containing a fingerprint in tsv file format.")
     protected String inFileFingerprint ;
 
-    @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway," +
-            " 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
-    protected int bioEntityType = 1;
+    @Option(name="-o1", usage="Output file name for mapping result (by default: disabled).")
+    protected String outFileMapping = "mapping.tsv";
 
-    @Option(name="-name", usage="Number of the file's column containing the metabolite name.")
-    protected int nameColumn = 1;
+    @Option(name="-s", usage="SBML file name (by default: Recon 2v02).")
+    protected String sbml = "data/recon2.02_without_compartment.xml";
 
-    @Option(name="-f", usage="Number of the filtered column (by default: 0 for none)")
+    /******PARSING PARAMETERS*****/
+
+    @Option(name="-header", usage="Activate this option if the fingerprint dataset contains no header (by default: disabled).")
+    protected boolean ifNoHeader = false;
+
+    @Option(name="-sep", usage="Character used as separator in the dataset (by default: \\t for tab).")
+    protected String separator = "\t";
+
+    @Option(name="-f", usage="Number of the filtered column (by default: disabled)")
     protected int colFiltered = -1;
 
-    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5; 0 for none).")
-    protected int inchiColumn = 5;
+    @Option(name="-gal", usage="Formatting output in a galaxy compliant way (by default: disabled).")
+    protected boolean ifGalaxy = false;
 
-    @Option(name="-chebi", usage="Number of the file's column containing the CHEBI data (by default: 0 for none).")
-    protected int chebiColumn = -1;
+    /*****MAPPING PARAMETERS*****/
 
-    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: 0 for none).")
-    protected int idSBMLColumn = -1;
+    @Option(name = "-t", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
+    protected int bioEntityType = 1;
 
-    @Option(name="-smiles", usage="Number of the file's column containing the SMILES data (by default: 0 for none).")
-    protected int smilesColumn = -1;
+    @Option(name="-name", usage="Number of the file's column containing the metabolite name (by default: 1st column).")
+    protected int nameColumn = 1;
 
-    @Option(name="-pubchem", usage="Number of the file's column containing the PubChem identifier (by default: 0 for none).")
-    protected int pubchemColum = -1;
-
-    @Option(name="-inchikey", usage="Number of the file's column containing the InChIKey (by default: 0 for none).")
-    protected int inchikeysColumn = -1;
-
-    @Option(name="-kegg", usage="Number of the file's column containing the KEGG identifier (by default: 0 for none).")
-    protected int keggColumn = -1;
-
-    @Option(name="-hmdb", usage="Number of the file's column containing the HMD identifier (by default: 0 for none).")
-    protected int hmdColumn = -1;
-
-    @Option(name="-chemspider", usage="Number of the file's column containing the ChemSpider identifier (by default: 0 for none).")
-    protected int chemspiderColumn = -1;
-
-    @Option(name="-weight", usage="Number of the file's column containing the weigth of the metabolites (by default: 0 for none).")
-    protected int weightColumn = -1;
-
-    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer" +
-            " concerned by the mapping (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; " +
-            "for a mapping on formula layer only, enter the -l option with no parameter).")
+    @Option(name="-l", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
+            " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
     protected String inchiLayers = "c,h";
 
-    @Option(name="-header", usage="Activate this option if the fingerprint dataset contains no header.")
-    protected boolean ifNoHeader;
+    @Option(name="-inchi", usage="Number of the file's column containing the InChI data (by default: 5th column).")
+    protected int inchiColumn = 5;
 
-    @Option(name="-sep", usage="Activate this option if the fingerprint dataset contains no header.")
-    protected String separator = "\t";
+    @Option(name="-chebi", usage="Number of the file's column containing the CHEBI data (by default: disabled).")
+    protected int chebiColumn = -1;
+
+    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: disabled).")
+    protected int idSBMLColumn = -1;
+
+    @Option(name="-smiles", usage="Number of the file's column containing the SMILES data (by default: disabled).")
+    protected int smilesColumn = -1;
+
+    @Option(name="-pubchem", usage="Number of the file's column containing the PubChem identifier (by default: disabled).")
+    protected int pubchemColum = -1;
+
+    @Option(name="-inchikey", usage="Number of the file's column containing the InChIKey (by default: disabled).")
+    protected int inchikeysColumn = -1;
+
+    @Option(name="-kegg", usage="Number of the file's column containing the KEGG identifier (by default: disabled).")
+    protected int keggColumn = -1;
+
+    @Option(name="-hmdb", usage="Number of the file's column containing the HMD identifier (by default: disabled).")
+    protected int hmdColumn = -1;
+
+    @Option(name="-chemspider", usage="Number of the file's column containing the ChemSpider identifier (by default: disabled).")
+    protected int chemspiderColumn = -1;
+
+    @Option(name="-weight", usage="Number of the file's column containing the weigth of the metabolites (by default: disabled).")
+    protected int weightColumn = -1;
 
     public void timeCalculation(long elapsedTime){
         long min = elapsedTime / 60000000000L;
@@ -99,6 +105,11 @@ public class Launcher_Mapping {
             if (launch.phelp) {
                 System.out.println("Options:");
                 parser.printUsage(System.out);
+                exit(0);
+            }
+
+            if (launch.version) {
+                System.out.println("Version: 1.1");
                 exit(0);
             }
 

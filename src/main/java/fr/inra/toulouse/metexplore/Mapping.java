@@ -27,7 +27,6 @@ public class Mapping extends Omics {
         this.outFileMapping = outFileMapping;
         this.list_unmappedEntities = (HashMap<String, String[]>) list_fingerprint.clone();
         //will contain non-mapped metabolites
-
         if (this.outFileMapping != "") this.performMapping();
         else this.quickMapping();
     }
@@ -96,6 +95,7 @@ public class Mapping extends Omics {
                     //Mapping on CHEBI, InChIKey or KEGG
                     String[] associatedValueInSbml2 = {"chebi", "inchikey", "kegg.compound", "hmdb", "chemspider"};
                     //TODO?: regex to take account for SBML diversity
+                    //TODO: regex for multiple chebi (CHEBI:[1-9]*)
                     int[] mappingColumnInfile2 = {3, 6, 7, 8, 9};
                     for (int i = 0; i < associatedValueInSbml2.length; i++) {
                         if (!isMappedCurrentBpe) {

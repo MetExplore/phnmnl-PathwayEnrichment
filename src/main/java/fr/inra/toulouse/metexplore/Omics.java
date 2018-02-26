@@ -22,9 +22,13 @@ public abstract class Omics {
     protected WritingComportment writingComportment;
     protected OmicsMethods methods;
     protected int bioEntityType;
+    protected File log = new File("information.tsv");
+    static int nbInstance=0;
+
 
     public Omics (Boolean ifGalaxy, HashMap<String, String[]> list_fingerprint,
                        Set<BioEntity> list_mappedEntities, BioNetwork network, int bioEntityType){
+        nbInstance++;
         this.ifGalaxy =ifGalaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
@@ -37,6 +41,7 @@ public abstract class Omics {
 
     public Omics (Boolean ifGalaxy, HashMap<String, String[]> list_fingerprint,
                   BioNetwork network, int bioEntityType){
+        nbInstance++;
         this.ifGalaxy =ifGalaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
@@ -49,9 +54,15 @@ public abstract class Omics {
 
     public void writeOutputInfo() throws IOException {
         if (this.ifGalaxy) {//if "writing console output in a file" functionality is activated
-            File f = new File("information.tsv");
-            f.createNewFile();
-            BufferedWriter b = new BufferedWriter(new FileWriter(f));
+            if(nbInstance==1){
+                //avoid to erase the file if Omics class is called more than one time
+                if(log.isFile()) {
+                    //write a new file if already exists
+                    log.delete();
+                }
+                log.createNewFile();
+            }
+            BufferedWriter b = new BufferedWriter(new FileWriter(log, true));
             b.write(text4outputFileInfo);
             b.close();
         }

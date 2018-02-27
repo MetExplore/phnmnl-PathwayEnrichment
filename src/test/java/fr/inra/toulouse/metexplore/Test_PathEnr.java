@@ -20,8 +20,7 @@ public class Test_PathEnr extends TestCase {
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
     //curl  http://metexplore.toulouse.inra.fr:8080/metExploreWebService/biosources/3223
-    //protected static BioNetwork network = (new JSBML2Bionetwork4Galaxy("data/recon2.02_without_compartment.xml")).getBioNetwork();
-    protected static BioNetwork network = (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
+    protected static BioNetwork network = (new JSBML2Bionetwork4Galaxy("data/recon2.02_without_compartment.xml")).getBioNetwork();
     protected Fingerprint fingerprint;
     protected File file;
     protected BufferedReader buffer;
@@ -190,21 +189,6 @@ public class Test_PathEnr extends TestCase {
         }
     }
 
-    public void setWriteOutputPathEnr(String pathFile, String galColumn, String line) {
-        //Test the expected format of the output file obtained by pathway enrichment
-        try {
-            this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
-                    this.mapping.list_mappedEntities, pathFile,this.ifGalaxy,this.bioEntityType);
-        }catch (IOException e ){
-            e.printStackTrace();
-        }
-        this.setBufferTest(
-                pathFile,
-                "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
-                        "Mapped_entities_ID\tNb. of mapped\tCoverage (%)"+galColumn,
-                line);
-    }
-
     /***********createDummyFile*************/
 
     public void createDummyFile(String inputLine, String header){
@@ -240,7 +224,7 @@ public class Test_PathEnr extends TestCase {
      *****************************/
 
     /*************ExtractData***********/
-/*
+
     public void testExtractData() {
     //Test that each possible mapping values are correctly extracted
         this.setMappingAllColumn();
@@ -282,7 +266,7 @@ public class Test_PathEnr extends TestCase {
     /************Mapping************/
 
     /***InChI***/
-/*
+
     public void testMappingInChI () {
     //Test the success of a mapping with on first two layers (c and h) of InChI from a dataset containing multiple columns
 
@@ -336,7 +320,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     /***Others***/
-/*
+
     public void testMappingCHEBI () {
     //Test the success of a mapping with CHEBI
         this.setMappingColumn(2,1);
@@ -363,58 +347,8 @@ public class Test_PathEnr extends TestCase {
         //Test the success of a mapping with the ID of the network from a dataset containing an only column
         this.bioEntityType = 2;
         this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
-    }*/
-
-    public void testMappingIDEnzyme() {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 4;
-        this.setMapping4OneColumnFileByID("_9415_1", "_9415_1");
-    }
-    //BUG: in SBML, there is no "_9415_1_c"
-
-    public void itestMappingNameEnzyme () {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 4;
-        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
-    }
-    //BUG: there is no name in SBML
-
-    public void testMappingIDProtein() {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 5;
-        this.setMapping4OneColumnFileByID("_9415_1", "_9415_1");
     }
 
-    public void itestMappingNameProtein () {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 5;
-        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
-    }
-
-    public void testMappingIDGene() {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 6;
-        this.setMapping4OneColumnFileByID("10026.1", "10026.1");
-    }
-
-    public void testMappingNameGene () {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 6;
-        this.setMapping4OneColumnFileByID("10026.1", "10026.1");
-    }
-/*
     public void testMappingIDPathway() {
         //Test the success of a mapping with the ID of a pathway
         this.bioEntityType = 3;
@@ -443,7 +377,6 @@ public class Test_PathEnr extends TestCase {
     }
 
     /*************Writing output***********/
-/*
     public void testWriteOutputMapping(){
         //Test the expected format of the output file obtained by mapping
         this.setMapping4Testo();
@@ -452,6 +385,21 @@ public class Test_PathEnr extends TestCase {
                 "true\tTestosterone glucuronide\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc" +
                         "\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1" +
                         "\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1");
+    }
+
+    public void setWriteOutputPathEnr(String pathFile, String galColumn, String line) {
+    //Test the expected format of the output file obtained by pathway enrichment
+            try {
+                this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
+                        this.mapping.list_mappedEntities, pathFile,this.ifGalaxy,this.bioEntityType);
+            }catch (IOException e ){
+                e.printStackTrace();
+            }
+            this.setBufferTest(
+                    pathFile,
+                    "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
+                                    "Mapped_entities_ID\tNb. of mapped\tCoverage (%)"+galColumn,
+                    line);
     }
 
     public void testWriteOutputPathEnr() {
@@ -501,16 +449,60 @@ public class Test_PathEnr extends TestCase {
                 "1 pathways are concerned among the network (on 97 in the network).",
                 null);
     }
+
+    /*************Tests in progress with Recon2.02 containing enzymes, protein & genes***********/
 /*
-    public void testMappingOtherEntity (){
-        this.network= (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
-        itestMappingIDEnzyme();
-        itestMappingIDGene();
-        itestMappingIDProtein();
-        //itestMappingNameEnzyme();
-        itestMappingNameGene();
-        //itestMappingNameProtein();
+    public void testMappingIDEnzyme() {
+        try {
+            this.setUp();
+        }catch (Exception e){}
+        this.bioEntityType = 4;
+        this.setMapping4OneColumnFileByID("_9415_1", "_9415_1");
+    }
+    //BUG: in SBML, there is no "_9415_1_c"
+
+    public void itestMappingNameEnzyme () {
+        try {
+            this.setUp();
+        }catch (Exception e){}
+        this.bioEntityType = 4;
+        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
+    }
+    //BUG: there is no name in SBML
+
+    public void testMappingIDProtein() {
+        try {
+            this.setUp();
+        }catch (Exception e){}
+        this.bioEntityType = 5;
+        this.setMapping4OneColumnFileByID("_9415_1", "_9415_1");
+    }
+
+    public void itestMappingNameProtein () {
+        try {
+            this.setUp();
+        }catch (Exception e){}
+        this.bioEntityType = 5;
+        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
     }*/
+
+    public void testMappingIDGene() {
+        this.network = (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
+        System.out.println(network.getEnzList().get("_9415_1_c"));
+        System.out.println(network.getProteinList().get("_9415_1_c"));
+        System.out.println(network.getEnzList().get("_9415_1"));
+        System.out.println(network.getProteinList().get("_9415_1"));
+        System.out.println(network.getEnzList().get("hsa:9415"));
+        System.out.println(network.getProteinList().get("hsa:9415"));
+        System.out.println(network.getGeneList().get("10026.1"));
+        this.bioEntityType = 6;
+        this.setMapping4OneColumnFileByID("10026.1", "10026.1");
+    }
+
+    public void testMappingNameGene () {
+        this.bioEntityType = 6;
+        this.setMapping4OneColumnFileByID("10026.1", "10026.1");
+    }
 
     //TODO: regex to remove HRA and split by _ for prot and enz
 

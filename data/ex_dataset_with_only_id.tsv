@@ -1,39 +1,34 @@
-Name_(SBML)	SBML_ID
-L-2-aminoadipate(1-)	M_L2aadp
-o-methylhippurate	M_CE2934
-(3,4-dihydroxyphenyl)acetate	M_34dhpha
-3-methyl-2-oxopentanoate	M_3mop
-3-methylcrotonoylglycine	M_CE2026
-4-hydroxybenzoate	M_4hbz
-5-Hydroxyindoleacetate	M_5hoxindoa
-N-acetyl-seryl-aspartate	M_CE5868
-L-aspartate(1-)	M_asp_L
-D-aspartate(1-)	M_asp_D
-1-deoxy-1-(N6-lysino)-D-fructose	M_CE1787
+Name_(Input_File)	SBML_ID
+2-Aminoadipic acid	M_L2aadp
+2-Methylhippuric acid	M_CE2934
+3,4-Dihydroxybenzeneacetic acid	M_34dhpha
+3-Methyl-2-oxovaleric acid	M_3mop
+3-Methylcrotonylglycine	M_CE2026
+4-Hydroxybenzoic acid	M_4hbz
+5-Hydroxyindoleacetic acid	M_5hoxindoa
+Aspartic acid	M_asp_L
 Azelaic acid	M_C08261
-Citrate	M_cit
-citr_L[e]	M_citr_L
-3beta-hydroxyandrost-5-en-17-one 3-sulfate(1-)	M_dheas
-Fumarate	M_fum
-2,5-dihydroxybenzoate	M_HC00460
-D-glycerate	M_glyc_R
-(S)-Glycerate	M_glyc_S
-N-benzoylglycinate	M_bgly
-3-(4-hydroxyphenyl)lactate	M_34hpl
-4-methyl-2-oxopentanoate	M_4mop
-kynurenate	M_kynate
-(S)-malate(2-)	M_mal_L
-N-acetyl-L-aspartate(2-)	M_Nacasp
-2-Hydroxyphenylacetate	M_2hyoxplac
-2-oxoglutarate(2-)	M_akg
-4-hydroxyphenylacetate	M_4hphac
-(R)-Pantothenate	M_pnto_R
+Citric acid	M_cit
+Dehydroepiandrosterone sulfate	M_dheas
+Fumaric acid	M_fum
+Gentisic acid	M_HC00460
+Glyceric acid	M_glyc_R
+Hippuric acid	M_bgly
+Hydroxyphenyllactic acid	M_34hpl
+Ketoleucine	M_4mop
+Kynurenic acid	M_kynate
+Malic acid	M_mal_L
+N-Acetyl-aspartic acid	M_Nacasp
+o-Hydroxyphenylacetic acid	M_2hyoxplac
+Oxoglutaric acid	M_akg
+p-Hydroxyphenylacetic acid	M_4hphac
+Pantothenic acid	M_pnto_R
 Porphobilinogen	M_ppbng
-5-oxoprolinate	M_5oxpro
-pyruvate	M_pyr
-sebacicacid	M_sebacid
-suberic acid	M_subeac
+Pyroglutamic acid	M_5oxpro
+Pyruvic acid	M_pyr
+Sebacic acid	M_sebacid
+Suberic acid	M_subeac
 Taurine	M_taur
-testosterone 3-glucosiduronic acid	M_tststeroneglc
-L-tryptophan	M_trp_L
-xanthosine	M_xtsn
+Testosterone glucuronide	M_tststeroneglc
+Tryptophan	M_trp_L
+Xanthosine	M_xtsn

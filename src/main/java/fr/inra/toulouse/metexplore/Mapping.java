@@ -18,6 +18,8 @@ public class Mapping extends Omics {
     protected HashMap<String, String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappingElement> list_mappingElement = new ArrayList<MappingElement>(); //list of mapped metabolites used only for writing mapping output into a file
     protected BioEntity mappedBpe = new BioPhysicalEntity();
+    protected int nbOccurences;
+    protected Boolean isMapped;
 
     public Mapping(BioNetwork network, HashMap<String, String[]> list_fingerprint,
                    String[] inchiLayers, String outFileMapping, Boolean ifGalaxy,
@@ -58,14 +60,13 @@ public class Mapping extends Omics {
     public void performMapping() throws IOException {
         //Performs mapping on InChI, CHEBI, SBML_ID, PubChem_ID, SMILES, KEGG_ID and InChIKey
         //Remove doublets for analysis and prints warnings
-        Boolean isMapped = false, isMappedCurrentBpe = false;
-        int mappingOccurrences = 0, id = 1;
+        int id = 1;
         String warningsDoublets = "";
 
         //Loop on each metabolite from the input file
         for (String[] lineInFile : this.list_fingerprint.values()) {
-            isMapped = false;
-            mappingOccurrences = 0;//identification of multiple mapping
+            this.isMapped = false;
+            this.nbOccurences = 0;//identification of multiple mapping
             //System.out.println(Arrays.toString(lineInFile));
 
             //Mapping on other bioEntity than mapping
@@ -80,16 +81,14 @@ public class Mapping extends Omics {
             //Mapping on metabolites
             // Loop for each metabolite from the SBML
             if (this.bioEntityType == 1 && !isMapped) {
+
                 for (BioPhysicalEntity bpe : this.network.getPhysicalEntityList().values()) {
-                    isMappedCurrentBpe = false;
 
                     //Mapping on metabolite identifier associated with a bionetwork, InChI, SMILES and PubCHEM_ID
                     String[] associatedValueInSbml = {bpe.getInchi(), bpe.getSmiles(), bpe.getPubchemCID(), bpe.getMolecularWeight()};
                     int[] mappingColumnInfile = {2, 4, 5, 10};
                     for (int i = 0; i < associatedValueInSbml.length; i++) {
-                        if (!isMappedCurrentBpe) {
-                            isMappedCurrentBpe = mapping4AttributesCase(lineInFile, associatedValueInSbml[i], mappingColumnInfile[i], bpe);
-                        }
+                            mapping4AttributesCase(lineInFile, associatedValueInSbml[i], mappingColumnInfile[i], bpe);
                     }
 
                     //Mapping on CHEBI, InChIKey or KEGG
@@ -98,17 +97,9 @@ public class Mapping extends Omics {
                     //TODO: regex for multiple chebi (CHEBI:[1-9]*)
                     int[] mappingColumnInfile2 = {3, 6, 7, 8, 9};
                     for (int i = 0; i < associatedValueInSbml2.length; i++) {
-                        if (!isMappedCurrentBpe) {
-                            isMappedCurrentBpe = mapping4BiorefCase(lineInFile, associatedValueInSbml2[i], mappingColumnInfile2[i], bpe);
-                        }
+                            mapping4BiorefCase(lineInFile, associatedValueInSbml2[i], mappingColumnInfile2[i], bpe);
                     }
 
-                    //Updating variables for the end of the loop
-                    if (isMappedCurrentBpe) {
-                        isMapped = true;
-                        mappingOccurrences++;
-                        this.mappedBpe = bpe;
-                    }
                 }
             }
 
@@ -116,11 +107,11 @@ public class Mapping extends Omics {
                 //If there is no doublets, add the mapped metabolite to the mapped metabolite list (mappingList variable) used for pathway enrichment
                 //Warning: in any case, the multiple matches will be written in the mapping output file (mappingElementList variable) (but not used in the analysis)
                 //System.out.println(mappedBpe.getName());
-                if (mappingOccurrences <= 1) {
+                if (this.nbOccurences <= 1) {
                     this.list_mappedEntities.add(this.mappedBpe);
                 } else {
                     if (this.outFileMapping != "") {
-                        warningsDoublets = "###Warning: There are " + mappingOccurrences + " possible matches for " + lineInFile[0] + ".\n";
+                        warningsDoublets = "###Warning: There are " + this.nbOccurences + " possible matches for " + lineInFile[0] + ".\n";
                         writeLog(warningsDoublets);
                     }
                 }
@@ -131,19 +122,19 @@ public class Mapping extends Omics {
         }
         if (this.outFileMapping != "") {
             if (warningsDoublets != "")
-                writeLog("###Warning: Please, check the corresponding lines in the mapping output file. " +
+                writeLog("###Warning: Please, check the corresponding lines in the mapping output file.\n" +
                         "These duplicates will be discarded from the pathway analysis.\n");
             writeOutputMapping();
             writeOutputInfo();
         }
         if (this.list_mappedEntities.size() == 0) {
             if (warningsDoublets != "")
-                System.err.println("There is multiple possible match for your whole list of metabolites. " +
-                        "Please choose the ID of the desired metabolites among those proposed in the output file. " +
+                System.err.println("There is multiple possible match for your whole list of metabolites.\n " +
+                        "Please choose the ID of the desired metabolites among those proposed in the output file.\n " +
                         "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
                         "enter the number of this added column into your program settings.");
             else System.err.println("There is no match for this network. \nCommon mistakes: wrong type of mapping " +
-                    "(by default on InChI only), wrong number of column from the dataset or wrong type of bioEntity." +
+                    "(by default on InChI only), wrong number of column from the dataset or wrong type of bioEntity.\n" +
                     " Please check your settings" +
                     " and rerun the analysis.");
             exit(1);
@@ -154,17 +145,31 @@ public class Mapping extends Omics {
         //Mapping case for values which are accessible directly through the attributes of BioPhysicalEntity
 
         Boolean ifEquals;
-
         try {
-            if (ifNotBlankValue(lineInFile, mappingColumnInfile)) {
-                ifEquals = (mappingColumnInfile == 2) ?
-                        (new InChI4Galaxy(((BioPhysicalEntity)bpe).getInchi(), this.inchiLayers)).equals(new InChI4Galaxy(lineInFile[2], this.inchiLayers))
-                        : associatedValueInSbml.equals(lineInFile[mappingColumnInfile]);
-                //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
-                if (ifEquals) {
-                    addMappingElement2List(lineInFile, bpe, mappingColumnInfile, associatedValueInSbml);
-                    return true;
-                }
+                if (ifNotBlankValue(lineInFile, mappingColumnInfile)) {
+                    //Splitting database ID values from the fingerprint dataset, if there is more than one per case
+
+                    String[] list_id;
+                    if (mappingColumnInfile != 2 ) {
+                       list_id = lineInFile[mappingColumnInfile].split(",");
+                   }else{
+                        String[] list_id2 = {lineInFile[mappingColumnInfile]};
+                        list_id = list_id2;
+                    }
+                    for (String id : list_id) {
+                        if (mappingColumnInfile < 2) id.replaceAll("\\s", "");
+                        //avoid to replace space for exemple for pathway name (could be refactored)
+
+                    //String id = lineInFile[mappingColumnInfile];
+                        ifEquals = (mappingColumnInfile == 2) ?
+                                (new InChI4Galaxy(((BioPhysicalEntity) bpe).getInchi(), this.inchiLayers)).equals(new InChI4Galaxy(id, this.inchiLayers))
+                                : associatedValueInSbml.equals(id);
+                        //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
+                        if (ifEquals) {
+                            addMappingElement2List(lineInFile, bpe, mappingColumnInfile, associatedValueInSbml);
+                            return true;
+                        }
+                    }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             //avoid errors with an only column in the input file containing empty values
@@ -178,16 +183,21 @@ public class Mapping extends Omics {
 
         try {
             if (ifNotBlankValue(lineInFile, mappingColumnInfile)) {
-
+                //Splitting database ID values from the fingerprint dataset, if there is more than one per case
+                String[] list_id = lineInFile[mappingColumnInfile].split(",");
                 //Loop on attribute of the metabolite from the SBML
                 for (Map.Entry<String, Set<BioRef>> key : bpe.getRefs().entrySet()) {
                     if (key.getKey().equals(associatedValueInSbml)) {//researching the one positioned on chebi
                         //Sometimes different values can be associated to one key
-                        for (BioRef val : key.getValue()) {
-                            if (lineInFile[mappingColumnInfile].equals(val.id)) {
-                                //add a mappingElement to the list
-                                addMappingElement2List(lineInFile, bpe, mappingColumnInfile, val.id);
-                                return true;
+
+                        for (String id : list_id) {
+                            id = id.replaceAll("\\s", "");
+                            for (BioRef val : key.getValue()) {
+                                if (id.equals(val.id)) {
+                                    //add a mappingElement to the list
+                                    addMappingElement2List(lineInFile, bpe, mappingColumnInfile, val.id);
+                                    return true;
+                                }
                             }
                         }
                         return false; //case: find the key but values did not match
@@ -209,6 +219,9 @@ public class Mapping extends Omics {
     public void addMappingElement2List(String[] lineInFile, BioEntity bpe, int mappingColumnInfile, String associatedValueInSbml) {
         //Create a mappingElement and add it to the mapped metabolites list
         this.list_mappingElement.add(new MappingElement(true, lineInFile[0], bpe.getName(), bpe.getId(), lineInFile[mappingColumnInfile], associatedValueInSbml));
+        this.nbOccurences++;
+        this.mappedBpe=bpe;
+        this.isMapped=true;
         //TODO: write associated SBML value only with InChI mapping
     }
 

@@ -120,24 +120,25 @@ public class Mapping extends Omics {
             }
             id++;
         }
+
+        if (this.list_mappedEntities.size() == 0) {
+            if (warningsDoublets != "")
+                System.err.println("There is multiple possible match for your whole list of metabolites !\n " +
+                        "Please choose the ID of the desired metabolites among those proposed in the output file.\n " +
+                        "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
+                        "enter the number of this added column into your program settings.");
+            else System.err.println("There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
+                    "(by default on the SBML ID and the name of the metabolites), wrong number of column from the dataset" +
+                    " or wrong type of bioEntity.\nPlease check your settings and rerun the analysis.");
+            exit(1);
+        }
+
         if (this.outFileMapping != "") {
             if (warningsDoublets != "")
                 writeLog("###Warning: Please, check the corresponding lines in the mapping output file.\n" +
                         "These duplicates will be discarded from the pathway analysis.\n");
             writeOutputMapping();
             writeOutputInfo();
-        }
-        if (this.list_mappedEntities.size() == 0) {
-            if (warningsDoublets != "")
-                System.err.println("There is multiple possible match for your whole list of metabolites.\n " +
-                        "Please choose the ID of the desired metabolites among those proposed in the output file.\n " +
-                        "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
-                        "enter the number of this added column into your program settings.");
-            else System.err.println("There is no match for this network. \nCommon mistakes: wrong type of mapping " +
-                    "(by default on InChI only), wrong number of column from the dataset or wrong type of bioEntity.\n" +
-                    " Please check your settings" +
-                    " and rerun the analysis.");
-            exit(1);
         }
     }
 
@@ -242,7 +243,7 @@ public class Mapping extends Omics {
         f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value_(Input_File)\tMatched_value_(SBML)\n");
 
         //Print on screen and writing in log
-        writeLog(nbMappedMetabolites + " metabolites have been mapped on " + this.list_fingerprint.size() + " in the fingerprint dataset ("
+        writeLog(nbMappedMetabolites + " entities have been mapped on " + this.list_fingerprint.size() + " in the fingerprint dataset ("
                 + coverageInFile + "%) and on " + nbEntityInNetwork + " in the network (" +
                 coverageSBML + "%).\n");
 

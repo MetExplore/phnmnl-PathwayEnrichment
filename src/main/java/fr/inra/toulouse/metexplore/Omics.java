@@ -22,7 +22,7 @@ public abstract class Omics {
     protected WritingComportment writingComportment;
     protected OmicsMethods methods;
     protected int bioEntityType;
-    protected File log = new File("information.tsv");
+    protected File log = new File("information.txt");
     static int nbInstance=0;
 
 

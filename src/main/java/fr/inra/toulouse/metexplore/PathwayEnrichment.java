@@ -77,12 +77,12 @@ public class PathwayEnrichment extends Omics{
             //Extracting metabolites from the mapping list contained in BioPathway
             for (BioEntity bpe : this.list_mappedEntities) {
                 if (methods.getEntitySetInPathway(path).contains(bpe)) {
-                    listPathwayMetabolites.add(bpe.getName());
                     listPathwayMetabolitesID.add(bpe.getId());
                     j++;
                 }
             }
-            //Collections.sort(listPathwayMetabolites);
+            Collections.sort(listPathwayMetabolitesID);
+            for(String id_bpe : listPathwayMetabolitesID) listPathwayMetabolites.add(((BioEntity)methods.getEntitySetInNetwork().get(id_bpe)).getName());
             String coverage = this.writingComportment.round((double) j / (double) methods.getEntitySetInPathway(path).size() * (double) 100);
             PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
                     (double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage, this.ifGalaxy);

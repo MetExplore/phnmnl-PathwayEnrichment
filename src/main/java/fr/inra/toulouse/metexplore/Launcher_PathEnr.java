@@ -47,7 +47,7 @@ public class Launcher_PathEnr {
 
     /*****MAPPING PARAMETERS*****/
 
-    @Option(name = "-t", aliases="--bioType", usage = "Type of biological object selected : 1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
+    @Option(name = "-t", aliases="--bioType", usage = "Type of biological object selected : 1 for metabolites or 2 for reactions (by default: metabolites).")
     protected int bioEntityType = 1;
 
     @Option(name="-name", usage="Number of the file's column containing the metabolite name (by default: 1st column).")
@@ -70,7 +70,7 @@ public class Launcher_PathEnr {
     protected int smilesColumn = -1;
 
     @Option(name="-pubchem", usage="Number of the file's column containing the PubChem identifier.")
-    protected int pubchemColum = -1;
+    protected int pubchemColumn = -1;
 
     @Option(name="-inchikey", usage="Number of the file's column containing the InChIKey.")
     protected int inchikeyColumn = -1;
@@ -81,7 +81,7 @@ public class Launcher_PathEnr {
     @Option(name="-hmdb", usage="Number of the file's column containing the HMDB identifier.")
     protected int hmdbColumn = -1;
 
-    @Option(name="-csid", aliases="-chemspider", usage="Number of the file's column containing the ChemSpider identifier.")
+    @Option(name="-csid", aliases="--chemspider", usage="Number of the file's column containing the ChemSpider identifier.")
     protected int csidColumn = -1;
 
     @Option(name="-weight", usage="Number of the file's column containing the weight of the metabolites.")
@@ -95,14 +95,24 @@ public class Launcher_PathEnr {
 
     }
 
+    public static Boolean testInchiParameter(String[] args){
+
+        for (String arg2 : args) {
+            if (Pattern.matches("-inchi[ ]*", arg2)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
 
         long startTime = System.nanoTime();
         Launcher_PathEnr launch = new Launcher_PathEnr();
         CmdLineParser parser = new CmdLineParser(launch);
-        String mappingWarnings = "#Warning: By default, a mapping has been set with the name and the SBML id respectively on the 1st and the 2nd column of your dataset.\n"+
-            "#Warning: Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem and HMDB (check --help).";
+        String mappingWarnings = "#Warning: By default, a mapping has been set with the name and the SBML id respectively on the 1st and the 2nd column of your dataset.\n" +
+                "#Warning: Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem and HMDB (check --help).";
 
         try {
             parser.parseArgument(args);
@@ -124,42 +134,6 @@ public class Launcher_PathEnr {
                 throw new CmdLineException("-i parameter required");
             }
 
-            //The user have use any mapping parameters
-            int i=0;
-            Boolean ifMappingParameter = false;
-            for (String arg : args) {
-                if(Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchemColum|inchikeys|kegg|hmd|csid|weight)[ ]*", arg)) {
-                    ifMappingParameter = true;
-                    break;
-                }
-                i++;
-            }
-            if(!ifMappingParameter){
-                launch.idSBMLColumn = 2;
-                System.out.println("#Warning: No mapping parameters have been chosen.\n" + mappingWarnings);
-            }
-
-            //All mapping parameters are disabled
-            i=0;
-            ifMappingParameter=false;
-            if (launch.nameColumn < 1 && launch.chebiColumn < 1 && launch.inchiColumn < 1 && launch.idSBMLColumn  < 1 &&
-                    launch.smilesColumn < 1 && launch.pubchemColum < 1 && launch.inchikeyColumn < 1
-                    && launch.keggColumn < 1 && launch.hmdbColumn < 1 && launch.csidColumn < 1
-                    && launch.weightColumn < 1) {
-                launch.nameColumn = 1;
-                launch.idSBMLColumn = 2;
-                System.out.println("#Warning: All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
-            }else {
-                for (String arg : args) {
-                    if (Pattern.matches("-name[ ]*", arg) && Pattern.matches("-1[ ]*", args[i + 1])) {
-                        System.out.println("#Warning: By disabling the name parameters, name of the entities will not be appear.");
-                        break;
-                    } else {
-                        i++;
-                    }
-                }
-            }
-
             if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", launch.inchiLayers)) {
                 throw new CmdLineException("-l parameter badly formatted");
             }
@@ -168,10 +142,65 @@ public class Launcher_PathEnr {
                 throw new CmdLineException("Type of biological object must be between 1 and 6.");
             }
 
-            //Personalised error print for help
+            Boolean ifLayerMappingParameter = false, ifInchiMappingParameter = false;
+            for (String arg : args) {
+                if (Pattern.matches("-l[ ]*", arg)) {
+                    ifLayerMappingParameter = true;
+                    ifInchiMappingParameter = testInchiParameter(args);
+                }
+            }
+            if(ifLayerMappingParameter && !ifInchiMappingParameter){
+                launch.inchiColumn = 2;
+                System.out.println("#Warning: InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+                        "#Warning: By default, the column used for InChI mapping is the 2nd of your dataset.");
+            }else{
+
+                //The user have use any mapping parameters
+                int i=0;
+                Boolean ifMappingParameter = false;
+                for (String arg : args) {
+                    if(Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|weight)[ ]*", arg)) {
+                        ifMappingParameter = true;
+                        break;
+                    }
+                    i++;
+                }
+                if(!ifMappingParameter){
+                    launch.idSBMLColumn = 2;
+                    System.out.println("#Warning: No mapping parameters have been chosen.\n" + mappingWarnings);
+                }
+
+                //All mapping parameters are disabled
+                i=0;
+                if (launch.nameColumn < 1 && launch.chebiColumn < 1 && launch.inchiColumn < 1 && launch.idSBMLColumn  < 1 &&
+                        launch.smilesColumn < 1 && launch.pubchemColumn < 1 && launch.inchikeyColumn < 1
+                        && launch.keggColumn < 1 && launch.hmdbColumn < 1 && launch.csidColumn < 1
+                        && launch.weightColumn < 1) {
+                    launch.nameColumn = 1;
+                    launch.idSBMLColumn = 2;
+                    System.out.println("#Warning: All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
+                }else {
+                    for (String arg : args) {
+                        if (Pattern.matches("-name[ ]*", arg) && Pattern.matches("-1[ ]*", args[i + 1])) {
+                            System.out.println("#Warning: By disabling the name parameters, name of the entities will not appear.");
+                            break;
+                        } else {
+                            i++;
+                        }
+                    }
+                }
+            }
+
+        //Personalised error print for help
         } catch (CmdLineException e) {
             if(e.getMessage().equals("Option \"-l (--layers)\" takes an operand")){
                 launch.inchiLayers="";
+                Boolean ifInchiMappingParameter = testInchiParameter(args);
+                if(!ifInchiMappingParameter) {
+                    launch.inchiColumn = 2;
+                    System.out.println("#Warning: InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+                            "#Warning: By default, the column used for InChI mapping is the 2nd of your dataset.");
+                }
             }else {
                 System.err.println(e.getMessage());
                 System.err.println("Options:");
@@ -185,7 +214,7 @@ public class Launcher_PathEnr {
         //Extract SBML
         BioNetwork network = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
         int[] mappingColumns = {(launch.idSBMLColumn-1), (launch.inchiColumn-1), (launch.chebiColumn-1),
-                (launch.smilesColumn-1), (launch.pubchemColum-1), (launch.inchikeyColumn-1),
+                (launch.smilesColumn-1), (launch.pubchemColumn-1), (launch.inchikeyColumn-1),
                 (launch.keggColumn-1), (launch.hmdbColumn-1), (launch.csidColumn-1), (launch.weightColumn-1)};
 
         try{

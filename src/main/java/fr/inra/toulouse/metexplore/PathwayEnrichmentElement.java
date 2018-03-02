@@ -1,7 +1,5 @@
 package fr.inra.toulouse.metexplore;
 
-import parsebionet.biodata.BioPathway;
-
 import java.util.List;
 
 public class PathwayEnrichmentElement implements Comparable <PathwayEnrichmentElement> {

@@ -2,3 +2,9 @@
 src/main/java/fr/inra/toulouse/metexplore/Test\.java
 
 \.idea/workspace\.xml
+
+data/\.~lock\.sacurine_workflow_output\.tsv#
+
+pathwayEnrichment\.jar
+
+multipleRunb\.sh

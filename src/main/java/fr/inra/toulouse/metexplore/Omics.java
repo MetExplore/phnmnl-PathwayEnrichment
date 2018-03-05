@@ -12,9 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class Omics {
-
-    protected Boolean ifGalaxy;
-    protected String text4outputFileInfo;
+    protected String galaxy, text4outputFileInfo;
     protected HashMap<String, String[]> list_fingerprint;//input file after formatting and filtering
     protected Set<BioEntity> list_mappedEntities; //list of mapped metabolites used for analysis
     //Set type is used to avoid metabolites duplicates (no need to used Set now, could be refactored)
@@ -22,14 +20,14 @@ public abstract class Omics {
     protected WritingComportment writingComportment;
     protected OmicsMethods methods;
     protected int bioEntityType;
-    protected File log = new File("information.txt");
+    protected File log;
     static int nbInstance=0;
 
 
-    public Omics (Boolean ifGalaxy, HashMap<String, String[]> list_fingerprint,
+    public Omics (String galaxy, HashMap<String, String[]> list_fingerprint,
                        Set<BioEntity> list_mappedEntities, BioNetwork network, int bioEntityType){
         nbInstance++;
-        this.ifGalaxy =ifGalaxy;
+        this.galaxy = galaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
         this.list_mappedEntities = list_mappedEntities;
@@ -39,10 +37,10 @@ public abstract class Omics {
         this.methods = new OmicsMethods(list_mappedEntities,network,bioEntityType);
     }
 
-    public Omics (Boolean ifGalaxy, HashMap<String, String[]> list_fingerprint,
+    public Omics (String galaxy, HashMap<String, String[]> list_fingerprint,
                   BioNetwork network, int bioEntityType){
         nbInstance++;
-        this.ifGalaxy =ifGalaxy;
+        this.galaxy = galaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
         this.list_mappedEntities = new HashSet<BioEntity>();
@@ -53,9 +51,10 @@ public abstract class Omics {
     }
 
     public void writeOutputInfo() throws IOException {
-        if (this.ifGalaxy) {//if "writing console output in a file" functionality is activated
+        if (this.galaxy != "") {//if "writing console log in a file" functionality is activated
             if(nbInstance==1){
                 //avoid to erase the file if Omics class is called more than one time
+                 log = new File(this.galaxy);
                 if(log.isFile()) {
                     //write a new file if already exists
                     log.delete();

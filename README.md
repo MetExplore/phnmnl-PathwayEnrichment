@@ -57,7 +57,7 @@ java -jar pathwayEnrichment.jar -i  data/recon2.02_without_compartment.xml
 For direct usage:
 
 ```
-java -jar pathwayenrichment.jar -i  <input_file> [-s <sbml_file>] [-o1 <mapping_output_file>] [-o2 <pathway_enrichment_output_file>] [-f <filtered_column>] [-sep <separator>] [--header] [-t <bio_entity>] [-name <name_column>] [-id <SBML_ID_column>] [-chebi <ChEBI_ID_column>] [-kegg <KEGG_ID_column>], [-hmdb <HMDB_ID_column>] [-csid <ChemSpider_ID_column>] [-inchikey <InChIKey_column>] [-inchi <InChI_column>] [-l <layer_selection>] [-h]
+java -jar pathwayenrichment.jar -i  <input_file> [-s <sbml_file>] [-o1 <mapping_output_file>] [-o2 <pathway_enrichment_output_file>] [-f <filtered_column>] [-sep <separator>] [--header] [-t <bio_entity>] [-name <name_column>] [-idSBML <SBML_ID_column>] [-chebi <ChEBI_ID_column>] [-kegg <KEGG_ID_column>], [-hmdb <HMDB_ID_column>] [-csid <ChemSpider_ID_column>] [-inchikey <InChIKey_column>] [-inchi <InChI_column>] [-l <layer_selection>] [-h]
 ```
 
 - ```-h (--help)``` for printing the help.
@@ -72,7 +72,7 @@ java -jar pathwayenrichment.jar -i  <input_file> [-s <sbml_file>] [-o1 <mapping_
 - ```-sep (--separator)``` (STRING) specify the character used to separate the column in the fingerprint dataset (e.g., ";"). By default, the program uses "\\t" for tabulation separators.
 
 ##### Mapping parameters
-- ```-name```, ```-id```, ```-inchi```, ```-inchikey```, ```-chebi```,```-kegg```, ```-hmdb``` and ```-csid (--chemspider)``` (NUMERICAL) options point out specific column numbers in the fingerprint file. ```-name``` indicates the name of the bio-entities. ```-id``` corresponds to the ID of the bio-entities in the SBML. At least one mapping parameter should be activated; multiple parameters could be activated together. By default, ```-name``` and ```-id``` are set respectively to 1 and 2 ("1" is considered as the first column); the other parameters are disabled.
+- ```-name```, ```-idSBML```, ```-inchi```, ```-inchikey```, ```-chebi```,```-kegg```, ```-hmdb``` and ```-csid (--chemspider)``` (NUMERICAL) options point out specific column numbers in the fingerprint file. ```-name``` indicates the name of the bio-entities. ```-idSBML``` corresponds to the ID of the bio-entities in the SBML. At least one mapping parameter should be activated; multiple parameters could be activated together. By default, ```-name``` and ```-id``` are set respectively to 1 and 2 ("1" is considered as the first column); the other parameters are disabled.
 - ```-l``` (STRING) selects the InChI's layers used to map metabolites. Nine layers could be selected: connections (c), hydrogens atoms (h), charge (q), protons (p), double-bond stereo (b), tetrahedral sp3 stereo (t), isotopic atoms (i), fixed hydrogens (f) and reconnected layers (r). These layers must be set as a list of characters containing the letter of each selected layer separated by commas. By default, this option is set on ```c,h``` for a mapping only on connections and hydrogens atom layers. A whole layers selected must be ```c,h,q,p,b,t,i,f,r```. For mapping on formula only, select ```-l``` option with no parameters after.
 - ```-t``` (NUMERICAL) specify the bio-entities used for pathway analysis: 1 for metabolites (by default), 2 for reactions. 
 

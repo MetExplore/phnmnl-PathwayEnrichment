@@ -42,8 +42,8 @@ public class Launcher_PathEnr {
     @Option(name="-f", aliases="--filter", usage="Number of the filtered column")
     protected int colFiltered = -1;
 
-    @Option(name="-gal", aliases="--galaxy", usage="Formatting output in a galaxy compliant way.")
-    protected boolean ifGalaxy = false;
+    @Option(name="-gal", aliases="--galaxy", usage="For galaxy compliance: formatting pathway output and creating a new one containing log information.")
+    protected String galaxy = "";
 
     /*****MAPPING PARAMETERS*****/
 
@@ -63,7 +63,7 @@ public class Launcher_PathEnr {
     @Option(name="-chebi", usage="Number of the file's column containing the ChEBI data.")
     protected int chebiColumn = -1;
 
-    @Option(name="-id", usage="Number of the file's column containing the metabolite identifier (by default: 2nd column).")
+    @Option(name="-idSBML", usage="Number of the file's column containing the metabolite identifier (by default: 2nd column).")
     protected int idSBMLColumn = -1;
 
     @Option(name="-smiles", usage="Number of the file's column containing the SMILES data.")
@@ -144,6 +144,7 @@ public class Launcher_PathEnr {
 
             Boolean ifLayerMappingParameter = false, ifInchiMappingParameter = false;
             for (String arg : args) {
+                System.out.println();
                 if (Pattern.matches("-l[ ]*", arg)) {
                     ifLayerMappingParameter = true;
                     ifInchiMappingParameter = testInchiParameter(args);
@@ -221,9 +222,9 @@ public class Launcher_PathEnr {
             Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.separator, (launch.nameColumn-1),
                     mappingColumns, (launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers,
-                    launch.outFileMapping, launch.ifGalaxy, launch.bioEntityType);
+                    launch.outFileMapping, launch.galaxy, launch.bioEntityType);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
-                    launch.outFilePathEnr,launch.ifGalaxy, launch.bioEntityType);
+                    launch.outFilePathEnr,launch.galaxy, launch.bioEntityType);
         }
         catch (IOException e){
             e.printStackTrace();

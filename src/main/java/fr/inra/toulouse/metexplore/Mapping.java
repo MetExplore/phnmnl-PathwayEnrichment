@@ -22,9 +22,9 @@ public class Mapping extends Omics {
     protected Boolean isMapped;
 
     public Mapping(BioNetwork network, HashMap<String, String[]> list_fingerprint,
-                   String[] inchiLayers, String outFileMapping, Boolean ifGalaxy,
+                   String[] inchiLayers, String outFileMapping, String galaxy,
                    int bioEntityType) throws IOException {
-        super(ifGalaxy, list_fingerprint, network, bioEntityType);
+        super(galaxy, list_fingerprint, network, bioEntityType);
         this.inchiLayers = inchiLayers;
         this.outFileMapping = outFileMapping;
         this.list_unmappedEntities = (HashMap<String, String[]>) list_fingerprint.clone();
@@ -124,7 +124,7 @@ public class Mapping extends Omics {
         if (this.list_mappedEntities.size() == 0) {
             if (warningsDoublets != "")
                 System.err.println("There is multiple possible match for your whole list of metabolites !\n " +
-                        "Please choose the ID of the desired metabolites among those proposed in the output file.\n " +
+                        "Please, choose the ID of the desired metabolites among those proposed in the output file.\n " +
                         "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
                         "enter the number of this added column into your program settings.");
             else System.err.println("There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
@@ -145,7 +145,7 @@ public class Mapping extends Omics {
     public Boolean mapping4AttributesCase(String[] lineInFile, String associatedValueInSbml, int mappingColumnInfile, BioEntity bpe) {
         //Mapping case for values which are accessible directly through the attributes of BioPhysicalEntity
 
-        Boolean ifEquals;
+        Boolean ifEquals = false;
         try {
                 if (ifNotBlankValue(lineInFile, mappingColumnInfile)) {
                     //Splitting database ID values from the fingerprint dataset, if there is more than one per case
@@ -159,12 +159,19 @@ public class Mapping extends Omics {
                     }
                     for (String id : list_id) {
                         if (mappingColumnInfile < 2) id.replaceAll("\\s", "");
-                        //avoid to replace space for exemple for pathway name (could be refactored)
+                        //avoid to replace space for example for pathway name (could be refactored)
 
-                    //String id = lineInFile[mappingColumnInfile];
-                        ifEquals = (mappingColumnInfile == 2) ?
-                                (new InChI4Galaxy(((BioPhysicalEntity) bpe).getInchi(), this.inchiLayers)).equals(new InChI4Galaxy(id, this.inchiLayers))
-                                : associatedValueInSbml.equals(id);
+                        if (mappingColumnInfile == 2) {
+                            try {
+                                ifEquals = (new InChI4Galaxy(((BioPhysicalEntity) bpe).getInchi(), this.inchiLayers)).equals(new InChI4Galaxy(id, this.inchiLayers));
+                            }catch (NullPointerException e){
+                                ifEquals = false;
+                                System.out.println("#Warning: " + lineInFile[0] + "entity have encounter an error with an InChI format. Please, check it validity.");
+                            }
+                        }else{
+                            ifEquals = associatedValueInSbml.equals(id);
+                        }
+
                         //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
                         if (ifEquals) {
                             addMappingElement2List(lineInFile, bpe, mappingColumnInfile, associatedValueInSbml);
@@ -272,12 +279,12 @@ public class Mapping extends Omics {
             BioEntity entity = (BioEntity) methods.getEntitySetInNetwork().get(metabolite[1]);
 
             if (entity != null) this.list_mappedEntities.add(entity);
-            else System.out.println("##Warning: " + metabolite[0] + " has not been mapped. Check the ID: " + metabolite[1] + ".");
+            else System.out.println("##Warning: " + metabolite[0] + " has not been mapped. Please, check the ID: " + metabolite[1] + ".");
 
         }
 
         if (this.list_mappedEntities.size() == 0) {
-            System.err.println("No metabolite have been extracted from the network. \nCheck the list the format of the list of ID provided by the mapping module.");
+            System.err.println("No metabolite have been extracted from the network. \nPlease, check the list the format of the list of ID provided by the mapping module.");
             exit(1);
         }
     }

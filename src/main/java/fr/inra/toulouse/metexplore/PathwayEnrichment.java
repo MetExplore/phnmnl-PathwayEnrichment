@@ -14,8 +14,8 @@ public class PathwayEnrichment extends Omics{
     protected String outFilePathEnr;
 
     public PathwayEnrichment (BioNetwork network, HashMap<String, String[]> list_fingerprint, Set <BioEntity> list_mappedEntities,
-                              String outFilePathEnr, Boolean ifGalaxy , int bioEntityType) throws IOException {
-        super(ifGalaxy, list_fingerprint, list_mappedEntities, network, bioEntityType);
+                              String outFilePathEnr, String galaxy , int bioEntityType) throws IOException {
+        super(galaxy, list_fingerprint, list_mappedEntities, network, bioEntityType);
         this.outFilePathEnr=outFilePathEnr;
         this.computeEnrichmentWithCorrections();
     }

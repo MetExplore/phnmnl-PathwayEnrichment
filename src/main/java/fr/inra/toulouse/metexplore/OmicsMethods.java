@@ -6,12 +6,12 @@ import java.util.*;
 
 public class OmicsMethods {
 
-    protected Set<BioEntity> list_mappedEntities; //list of mapped metabolites used for analysis
+    protected HashMap<BioEntity, String> list_mappedEntities; //list of mapped metabolites used for analysis
     //Set type is used to avoid metabolites duplicates (no need to used Set now, could be refactored)
     protected BioNetwork network;
     protected int bioEntityTYpe;
 
-    public OmicsMethods(Set<BioEntity> list_mappedEntities, BioNetwork network, int bioEntityType){
+    public OmicsMethods(HashMap<BioEntity, String> list_mappedEntities, BioNetwork network, int bioEntityType){
         this.list_mappedEntities = list_mappedEntities;
         this.network = network;
         this.bioEntityTYpe=bioEntityType;
@@ -63,7 +63,7 @@ public class OmicsMethods {
 
     public HashSet<BioEntity> intersect(Collection<BioEntity> set2) {
         HashSet<BioEntity> inter = new HashSet();
-        for (BioEntity bpe: this.list_mappedEntities){
+        for (BioEntity bpe: this.list_mappedEntities.keySet()){
             if (set2.contains(bpe)) inter.add(bpe);
         }
         return inter;

@@ -15,18 +15,18 @@ public class Mapping extends Omics {
 
     protected String outFileMapping;
     protected String[] inchiLayers;
-    protected HashMap<String, String[]> list_unmappedEntities; //list of non-mapped metabolites
+    protected ArrayList<String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappingElement> list_mappingElement = new ArrayList<MappingElement>(); //list of mapped metabolites used only for writing mapping output into a file
-    protected int nbOccurences, id;
+    protected int nbOccurences;
     protected Boolean isMappedBpe;
 
-    public Mapping(BioNetwork network, HashMap<String, String[]> list_fingerprint,
+    public Mapping(BioNetwork network, ArrayList<String[]> list_fingerprint,
                    String[] inchiLayers, String outFileMapping, String galaxy,
                    int bioEntityType) throws IOException {
         super(galaxy, list_fingerprint, network, bioEntityType);
         this.inchiLayers = inchiLayers;
         this.outFileMapping = outFileMapping;
-        this.list_unmappedEntities = (HashMap<String, String[]>) list_fingerprint.clone();
+        this.list_unmappedEntities = (ArrayList<String[]>) list_fingerprint.clone();
         //will contain non-mapped metabolites
         if (this.outFileMapping != "") this.performMapping();
         else this.quickMapping();
@@ -58,12 +58,11 @@ public class Mapping extends Omics {
     public void performMapping() throws IOException {
         //Performs mapping on InChI, CHEBI, SBML_ID, PubChem_ID, SMILES, KEGG_ID and InChIKey
         //Remove doublets for analysis and prints warnings
-        this.id = 1;
         String warningsDoublets = "";
         Boolean isMapped;
 
         //Loop on each metabolite from the input file
-        for (String[] lineInFile : this.list_fingerprint.values()) {
+        for (String[] lineInFile : this.list_fingerprint) {
             isMapped = false;
             this.nbOccurences = 0;//identification of multiple mapping
             //System.out.println(Arrays.toString(lineInFile));
@@ -118,7 +117,6 @@ public class Mapping extends Omics {
                     writeLog(warningsDoublets);
                 }
             }
-            this.id++;
         }
 
         if (this.list_mappedEntities.size() == 0) {
@@ -226,7 +224,7 @@ public class Mapping extends Omics {
 
     public void addMappingElement2List(String[] lineInFile, BioEntity bpe, int mappingColumnInfile, String associatedValueInSbml) {
         //Create a mappingElement and add it to the mapped metabolites list
-        if (!list_mappedEntities.contains(bpe)){
+        if (!list_mappedEntities.keySet().contains(bpe)){
             if (mappingColumnInfile == 2) {
                 this.list_mappingElement.add(new MappingElement(true, lineInFile[0], bpe.getName(), bpe.getId(), lineInFile[mappingColumnInfile], associatedValueInSbml));
             }else{
@@ -239,9 +237,9 @@ public class Mapping extends Omics {
             //Warning: in any case, the multiple matches will be written in the mapping output file (mappingElementList variable) (but not used in the analysis)
             //System.out.println(mappedBpe.getName());
             if (this.nbOccurences <= 1) {
-                this.list_mappedEntities.add(bpe);
+                this.list_mappedEntities.put (bpe, lineInFile[0]);
                 //Remove the mapped metabolite from unmapped list
-                this.list_unmappedEntities.remove("" + this.id);
+                this.list_unmappedEntities.remove(lineInFile);
             }
         }
         //TODO: write associated SBML value only with InChI mapping
@@ -271,7 +269,7 @@ public class Mapping extends Omics {
                 coverageSBML + "%).\n");
 
         //Add non-mapped metabolites to the mapping output file
-        for (String[] unmappedMetabolites : this.list_unmappedEntities.values()) {
+        for (String[] unmappedMetabolites : this.list_unmappedEntities) {
             this.list_mappingElement.add(new MappingElement(false, unmappedMetabolites[0], "", "", "", ""));
         }
 
@@ -289,11 +287,11 @@ public class Mapping extends Omics {
     }
 
     public void quickMapping() {
-        for (String[] metabolite : this.list_fingerprint.values()) {
+        for (String[] metabolite : this.list_fingerprint) {
 
             BioEntity entity = (BioEntity) methods.getEntitySetInNetwork().get(metabolite[1]);
 
-            if (entity != null) this.list_mappedEntities.add(entity);
+            if (entity != null) this.list_mappedEntities.put(entity, metabolite[0]);
             else System.out.println("##Warning: " + metabolite[0] + " has not been mapped. Please, check the ID: " + metabolite[1] + ".");
 
         }

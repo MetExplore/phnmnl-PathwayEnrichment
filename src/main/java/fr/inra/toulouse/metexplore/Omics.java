@@ -7,15 +7,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class Omics {
     protected String galaxy, text4outputFileInfo;
-    protected HashMap<String, String[]> list_fingerprint;//input file after formatting and filtering
-    protected Set<BioEntity> list_mappedEntities; //list of mapped metabolites used for analysis
-    //Set type is used to avoid metabolites duplicates (no need to used Set now, could be refactored)
+    protected ArrayList<String[]> list_fingerprint;//input file after formatting and filtering
+    protected HashMap<BioEntity, String> list_mappedEntities; //list of mapped metabolites used for analysis
     protected BioNetwork network;
     protected WritingComportment writingComportment;
     protected OmicsMethods methods;
@@ -24,8 +24,8 @@ public abstract class Omics {
     static int nbInstance=0;
 
 
-    public Omics (String galaxy, HashMap<String, String[]> list_fingerprint,
-                       Set<BioEntity> list_mappedEntities, BioNetwork network, int bioEntityType){
+    public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
+                       HashMap<BioEntity, String> list_mappedEntities, BioNetwork network, int bioEntityType){
         nbInstance++;
         this.galaxy = galaxy;
         this.text4outputFileInfo="";
@@ -37,13 +37,13 @@ public abstract class Omics {
         this.methods = new OmicsMethods(list_mappedEntities,network,bioEntityType);
     }
 
-    public Omics (String galaxy, HashMap<String, String[]> list_fingerprint,
+    public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
                   BioNetwork network, int bioEntityType){
         nbInstance++;
         this.galaxy = galaxy;
         this.text4outputFileInfo="";
         this.list_fingerprint = list_fingerprint;
-        this.list_mappedEntities = new HashSet<BioEntity>();
+        this.list_mappedEntities = new HashMap<BioEntity, String>();
         this.network = network;
         this.writingComportment = new WritingComportment();
         this.bioEntityType=bioEntityType;

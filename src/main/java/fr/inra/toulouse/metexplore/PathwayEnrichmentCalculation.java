@@ -7,12 +7,12 @@ import java.util.*;
 public class PathwayEnrichmentCalculation extends parsebionet.statistics.PathwayEnrichment {
 
     protected  BioNetwork network;
-    protected  Set <BioEntity> list_mappedEntities;
+    protected  HashMap <BioEntity, String> list_mappedEntities;
     protected  OmicsMethods methods;
     //protected Set<BioChemicalReaction> reactionSet;
 
-    public PathwayEnrichmentCalculation(BioNetwork network, Set <BioEntity> list_mappedEntities, int bioEntityType){
-        super(network, list_mappedEntities);
+    public PathwayEnrichmentCalculation(BioNetwork network, HashMap <BioEntity, String> list_mappedEntities, int bioEntityType){
+        super(network, list_mappedEntities.keySet());
         this.network = network;
         this.list_mappedEntities = list_mappedEntities;
         this.methods = new OmicsMethods(list_mappedEntities,network, bioEntityType);

@@ -13,7 +13,7 @@ public class PathwayEnrichment extends Omics{
     protected List<HashMap<BioPathway, Double>> list_pathwayEnr = new ArrayList<HashMap<BioPathway, Double>>(); //list of pathway containing mapped metabolites, p-value and corrections values
     protected String outFilePathEnr;
 
-    public PathwayEnrichment (BioNetwork network, HashMap<String, String[]> list_fingerprint, Set <BioEntity> list_mappedEntities,
+    public PathwayEnrichment (BioNetwork network, ArrayList<String[]> list_fingerprint, HashMap <BioEntity, String> list_mappedEntities,
                               String outFilePathEnr, String galaxy , int bioEntityType) throws IOException {
         super(galaxy, list_fingerprint, list_mappedEntities, network, bioEntityType);
         this.outFilePathEnr=outFilePathEnr;
@@ -23,7 +23,7 @@ public class PathwayEnrichment extends Omics{
     public void computeEnrichmentWithCorrections() throws IOException {
         System.out.println("Pathway enrichment in progress...");
         parsebionet.statistics.PathwayEnrichment pathEnr;
-        BioEntity bpe = this.list_mappedEntities.iterator().next();
+        BioEntity bpe = this.list_mappedEntities.keySet().iterator().next();
         pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType);
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);
@@ -75,7 +75,7 @@ public class PathwayEnrichment extends Omics{
             int j = 0; //number of mapped metabolites contained in a BioPathway
 
             //Extracting metabolites from the mapping list contained in BioPathway
-            for (BioEntity bpe : this.list_mappedEntities) {
+            for (BioEntity bpe : this.list_mappedEntities.keySet()) {
                 if (methods.getEntitySetInPathway(path).contains(bpe)) {
                     listPathwayMetabolitesID.add(bpe.getId());
                     j++;

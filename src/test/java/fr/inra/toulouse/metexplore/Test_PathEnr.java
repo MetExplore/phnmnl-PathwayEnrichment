@@ -145,7 +145,7 @@ public class Test_PathEnr extends TestCase {
             OmicsMethods methods = new OmicsMethods(this.mapping.list_mappedEntities,network,this.bioEntityType);
             this.expectedMappedMetabolite.add((BioEntity)methods.getEntitySetInNetwork().get(bpe));
             assertEquals(this.expectedMappedMetabolite.iterator().next().getName(),
-                    this.mapping.list_mappedEntities.iterator().next().getName());
+                    this.mapping.list_mappedEntities.keySet().iterator().next().getName());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -229,7 +229,7 @@ public class Test_PathEnr extends TestCase {
         this.setMappingAllColumn();
         this.createDummyFileWithMultipleColumns("nameMetabolite\tidSBML\tinchi\tchebi\tsmiles\tpubchemColum\tinchikeys\tkegg\thmd\tchemspider\tweight");
         String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchemColum","inchikeys","kegg","hmd","chemspider","weight"};
-        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).values().iterator().next()));
+        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).iterator().next()));
     }
 
     public void testSeparator() {
@@ -238,7 +238,7 @@ public class Test_PathEnr extends TestCase {
         this.separator=";";
         this.createDummyFileWithMultipleColumns("nameMetabolite;idSBML;inchi;chebi;smiles;pubchemColum;inchikeys;kegg;hmd;chemspider;weight");
         String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchemColum","inchikeys","kegg","hmd","chemspider","weight"};
-        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).values().iterator().next()));
+        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).iterator().next()));
     }
 
     public void testHeader() {

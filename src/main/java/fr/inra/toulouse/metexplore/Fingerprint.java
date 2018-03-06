@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import static java.lang.System.exit;
 
@@ -15,7 +17,7 @@ public class Fingerprint {
     protected int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
     protected String separator, inFileFingerprint;
     protected Boolean ifNoHeader;
-    protected HashMap<String, String[]> list_entities = new HashMap<String, String[]>(); //input file after formatting and filtering
+    protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
 
     //TODO: excel parsing
 
@@ -46,7 +48,6 @@ public class Fingerprint {
         Boolean isFiltered = (this.filteredColumn >= 0) ? true : false;
         BufferedReader fileBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));
         String line;
-        int id = 1;
         int[] columnNumbers = {this.nameColumn, this.idSBMLColumn, this.inchiColumn, this.chebiColumn,
                 this.smilesColumn, this.pubchemColum, this.inchikeysColumn, this.keggColumn, this.hmdColumn,
                 this.chemspiderColumn, this.weightColumn};
@@ -68,8 +69,7 @@ public class Fingerprint {
             try {
                 if (isFiltered == false || lineInFile[this.filteredColumn] != "") { //optional filtering on a specified column
                     //if (verbose=true) System.out.println(Arrays.toString(lineFormatted));
-                    this.list_entities.put(""+ id, lineFormatted);//add to hashmap
-                    id++;
+                    this.list_entities.add(lineFormatted);//add to hashmap
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
                 //avoid errors with filtering functionality containing empty values
@@ -81,9 +81,9 @@ public class Fingerprint {
             exit(1);
         }
 
-        /*for (String[] lineInFile : list_entities.values()) {
-            System.out.println(Arrays.toString(lineInFile));
-        }*/
+        //for (String[] lineInFile : list_entities) {
+            //System.out.println(Arrays.toString(lineInFile));
+        //}
     }
 
     public void putValueIfExists (String[] lineFormatted, String[] lineInFile, int columnInTable, int columnInFile){

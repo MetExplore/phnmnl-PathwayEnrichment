@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Test_PathEnr extends TestCase {
-    protected String separator, outputFile, dummyFile="temp/dummy.tsv";
+    protected String separator, outputFile, galaxy, dummyFile="temp/dummy.tsv";
     protected int filteredColumn, bioEntityType;
-    protected Boolean ifNoHeader, ifGalaxy;
+    protected Boolean ifNoHeader;
     protected String[] inchiLayers;
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
@@ -39,7 +39,7 @@ public class Test_PathEnr extends TestCase {
         this.pathEnr = null;
         this.separator="\t";
         this.ifNoHeader = false;
-        this.ifGalaxy = false;
+        this.galaxy = "";
         this.outputFile = "temp/output.tsv";
         this.filteredColumn = -1;
         this.bioEntityType = 1;
@@ -141,7 +141,7 @@ public class Test_PathEnr extends TestCase {
 
         try {
             this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.outputFile,
-                    this.ifGalaxy, this.bioEntityType);
+                    this.galaxy, this.bioEntityType);
             this.file = new File(this.outputFile);
             OmicsMethods methods = new OmicsMethods(this.mapping.list_mappedEntities,network,this.bioEntityType);
             this.expectedMappedMetabolite.add((BioEntity)methods.getEntitySetInNetwork().get(bpe));
@@ -391,7 +391,7 @@ public class Test_PathEnr extends TestCase {
     //Test the expected format of the output file obtained by pathway enrichment
             try {
                 this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
-                        this.mapping.list_mappedEntities, pathFile,this.ifGalaxy,this.bioEntityType);
+                        this.mapping.list_mappedEntities, pathFile,this.galaxy,this.bioEntityType);
             }catch (IOException e ){
                 e.printStackTrace();
             }
@@ -412,7 +412,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testWriteOutputPathEnr4Galaxy() {
-        this.ifGalaxy=true;
+        this.galaxy="temp/information.tsv";
         this.setMapping4OneColumnFile(0,1,"Testosterone glucuronide\tM_tststeroneglc\n",
                 "M_tststeroneglc");
         this.setWriteOutputPathEnr(
@@ -437,7 +437,7 @@ public class Test_PathEnr extends TestCase {
 
     public void testWriteOutput4GalaxyWithReaction() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
-        this.ifGalaxy=true;
+        this.galaxy="temp/information.tsv";
         this.outputFile="";
         this.bioEntityType = 2;
         this.setMapping4OneColumnFileByID("R_RE1096C", "R_RE1096C");

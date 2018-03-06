@@ -60,7 +60,7 @@ public class PathwayEnrichment extends Omics{
 
         f.write("Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
                 "Mapped_entities_ID\tNb. of mapped\tCoverage (%)");
-        if (this.ifGalaxy)  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
+        if (this.galaxy !="")  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
         else f.write("\n");
 
         HashMap<BioPathway, Double> result = this.list_pathwayEnr.get(0);//get pathway enrichment without corrections
@@ -85,8 +85,8 @@ public class PathwayEnrichment extends Omics{
             for(String id_bpe : listPathwayMetabolitesID) listPathwayMetabolites.add(((BioEntity)methods.getEntitySetInNetwork().get(id_bpe)).getName());
             String coverage = this.writingComportment.round((double) j / (double) methods.getEntitySetInPathway(path).size() * (double) 100);
             PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
-                    (double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage, this.ifGalaxy);
-            if (this.ifGalaxy) this.settings4Galaxy(path, pathEnrElement);
+                    (double)itBonCorr.next(),(double)itBenHocCorr.next(),listPathwayMetabolites,listPathwayMetabolitesID,j,coverage, this.galaxy);
+            if (this.galaxy != "") this.settings4Galaxy(path, pathEnrElement);
             list_pathwayEnrElement.add(pathEnrElement);
         }
 

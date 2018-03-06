@@ -52,9 +52,9 @@ public abstract class Omics {
 
     public void writeOutputInfo() throws IOException {
         if (this.galaxy != "") {//if "writing console log in a file" functionality is activated
+            log = new File(this.galaxy);
             if(nbInstance==1){
                 //avoid to erase the file if Omics class is called more than one time
-                 log = new File(this.galaxy);
                 if(log.isFile()) {
                     //write a new file if already exists
                     log.delete();

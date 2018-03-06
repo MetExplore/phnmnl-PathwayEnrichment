@@ -11,7 +11,7 @@ public class PathwayEnrichmentElement implements Comparable <PathwayEnrichmentEl
 
     public PathwayEnrichmentElement(String pathName, double p_value, double q_value_Bonf, double q_value_BenHoc,
                                     List<String> mappedMetabolites, List<String> mappedMetabolitesID,
-                                    int nb_mapped, String coverage, Boolean ifGalaxy) {
+                                    int nb_mapped, String coverage, String galaxy) {
         this.pathName = pathName;
         this.p_value = (new WritingComportment()).removeSciNot(p_value);
         this.q_value_Bonf = (new WritingComportment()).removeSciNot(q_value_Bonf);
@@ -20,7 +20,7 @@ public class PathwayEnrichmentElement implements Comparable <PathwayEnrichmentEl
         this.mappedMetabolitesID = String.join(";", mappedMetabolitesID);
         this.nb_mapped = nb_mapped;
         this.coverage = coverage;
-        this.ifGalaxy = ifGalaxy;
+        this.ifGalaxy = (galaxy !="");
     }
 
     //TODO: hashmap pour list metab et id et sort functionality

@@ -144,7 +144,6 @@ public class Launcher_PathEnr {
 
             Boolean ifLayerMappingParameter = false, ifInchiMappingParameter = false;
             for (String arg : args) {
-                System.out.println();
                 if (Pattern.matches("-l[ ]*", arg)) {
                     ifLayerMappingParameter = true;
                     ifInchiMappingParameter = testInchiParameter(args);

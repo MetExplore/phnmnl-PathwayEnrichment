@@ -52,7 +52,6 @@ public class Test_PathEnr extends TestCase {
         }catch (IOException e){
             ;
         }
-        this.deleteFile("information.txt");
     }
 
     /*******************************
@@ -412,7 +411,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testWriteOutputPathEnr4Galaxy() {
-        this.galaxy="temp/information.tsv";
+        this.galaxy="temp/information.txt";
         this.setMapping4OneColumnFile(0,1,"Testosterone glucuronide\tM_tststeroneglc\n",
                 "M_tststeroneglc");
         this.setWriteOutputPathEnr(
@@ -420,7 +419,7 @@ public class Test_PathEnr extends TestCase {
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
                         "\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
-        this.setBufferTest("information.txt",
+        this.setBufferTest(this.galaxy,
                 "1 entities have been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
                 "1 pathways are concerned among the network (on 97 in the network).");
     }
@@ -437,7 +436,7 @@ public class Test_PathEnr extends TestCase {
 
     public void testWriteOutput4GalaxyWithReaction() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
-        this.galaxy="temp/information.tsv";
+        this.galaxy="temp/information.txt";
         this.outputFile="";
         this.bioEntityType = 2;
         this.setMapping4OneColumnFileByID("R_RE1096C", "R_RE1096C");
@@ -445,7 +444,7 @@ public class Test_PathEnr extends TestCase {
                 "temp/pathEnr.tsv",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tR_RE1096C\t1\t1.32\t75\t0\t4134");
-        this.setBufferTest("information.txt",
+        this.setBufferTest(this.galaxy,
                 "1 pathways are concerned among the network (on 97 in the network).",
                 null);
     }

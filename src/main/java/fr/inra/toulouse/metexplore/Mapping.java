@@ -172,7 +172,7 @@ public class Mapping extends Omics {
                                 ifEquals = (new InChI4Galaxy(((BioPhysicalEntity) bpe).getInchi(), this.inchiLayers)).equals(new InChI4Galaxy(id, this.inchiLayers));
                             }catch (NullPointerException e){
                                 ifEquals = false;
-                                //System.out.println("#Warning: " + lineInFile[0] + "entity have encounter an error with an InChI format. Please, check it validity.");
+                                System.out.println("#Warning: " + lineInFile[0] + "entity have encounter an error with an InChI format. Please, check it validity.");
                             }
                         }else{
                             ifEquals = associatedValueInSbml.equals(id);

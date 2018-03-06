@@ -396,8 +396,9 @@ public class Test_PathEnr extends TestCase {
             }
             this.setBufferTest(
                     pathFile,
-                    "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
-                                    "Mapped_entities_ID\tNb. of mapped\tCoverage (%)"+galColumn,
+                    "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\t" +
+                            "Mapped_entities_SBML\tMapped_entities_Fingerprint\tMapped_entities_ID\t" +
+                            "Nb. of mapped\tCoverage (%)"+galColumn,
                     line);
     }
 
@@ -407,7 +408,7 @@ public class Test_PathEnr extends TestCase {
                 this.outputFile,
                 "",
                 "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
-                        "\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67");
+                        "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67");
     }
 
     public void testWriteOutputPathEnr4Galaxy() {
@@ -418,7 +419,7 @@ public class Test_PathEnr extends TestCase {
                 this.outputFile,
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
-                        "\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
+                        "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
         this.setBufferTest(this.galaxy,
                 "1 entities have been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
                 "1 pathways are concerned among the network (on 97 in the network).");
@@ -431,7 +432,7 @@ public class Test_PathEnr extends TestCase {
         this.setWriteOutputPathEnr(
                 this.outputFile,
                 "",
-                "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tR_RE1096C\t1\t1.32");
+                "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tRE1096\tR_RE1096C\t1\t1.32");
     }
 
     public void testWriteOutput4GalaxyWithReaction() {
@@ -443,7 +444,7 @@ public class Test_PathEnr extends TestCase {
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
-                "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tR_RE1096C\t1\t1.32\t75\t0\t4134");
+                "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tR_RE1096C\tR_RE1096C\t1\t1.32\t75\t0\t4134");
         this.setBufferTest(this.galaxy,
                 "1 pathways are concerned among the network (on 97 in the network).",
                 null);

@@ -18,7 +18,8 @@ public class Mapping extends Omics {
     protected ArrayList<String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappingElement> list_mappingElement = new ArrayList<MappingElement>(); //list of mapped metabolites used only for writing mapping output into a file
     protected int nbOccurences;
-    protected Boolean isMappedBpe;
+    protected Boolean isMapped, isMappedBpe;
+    protected BioEntity mappedBpe;
 
     public Mapping(BioNetwork network, ArrayList<String[]> list_fingerprint,
                    String[] inchiLayers, String outFileMapping, String galaxy,
@@ -59,21 +60,20 @@ public class Mapping extends Omics {
         //Performs mapping on InChI, CHEBI, SBML_ID, PubChem_ID, SMILES, KEGG_ID and InChIKey
         //Remove doublets for analysis and prints warnings
         String warningsDoublets = "";
-        Boolean isMapped;
 
         //Loop on each metabolite from the input file
         for (String[] lineInFile : this.list_fingerprint) {
-            isMapped = false;
+            this.isMapped = false;
             this.nbOccurences = 0;//identification of multiple mapping
             //System.out.println(Arrays.toString(lineInFile));
 
             //Mapping on other bioEntity than mapping
             Collection entitySet = this.methods.getEntitySetInNetwork().values();
             if (lineInFile[1] != "") {
-                isMapped = mapEntity(lineInFile, 1, entitySet);
+                mapEntity(lineInFile, 1, entitySet);
             }
-            if (!isMapped && lineInFile[0]!="") {
-                isMapped = mapEntity(lineInFile, 2, entitySet);
+            if (!isMapped && lineInFile[0] != "") {
+                mapEntity(lineInFile, 2, entitySet);
             }
 
             //Mapping on metabolites
@@ -111,12 +111,20 @@ public class Mapping extends Omics {
             //If there is no doublets, add the mapped metabolite to the mapped metabolite list (mappingList variable) used for pathway enrichment
             //Warning: in any case, the multiple matches will be written in the mapping output file (mappingElementList variable) (but not used in the analysis)
             //System.out.println(mappedBpe.getName());
-            if (this.nbOccurences > 1) {
-                if (this.outFileMapping != "") {
-                    warningsDoublets = "###Warning: There are " + this.nbOccurences + " possible matches for " + lineInFile[0] + ".\n";
-                    writeLog(warningsDoublets);
+            if (isMapped) {
+                if (this.nbOccurences > 1) {
+                    if (this.outFileMapping != "") {
+                        warningsDoublets = "###Warning: There are " + this.nbOccurences + " possible matches for " + lineInFile[0] + ".\n";
+                        writeLog(warningsDoublets);
+                    }
+                } else {
+                    this.list_mappedEntities.put(this.mappedBpe, lineInFile[0]);
+                    //Remove the mapped metabolite from unmapped list
+                    this.list_unmappedEntities.remove(lineInFile);
                 }
+
             }
+
         }
 
         if (this.list_mappedEntities.size() == 0) {
@@ -231,16 +239,9 @@ public class Mapping extends Omics {
                 this.list_mappingElement.add(new MappingElement(true, lineInFile[0], bpe.getName(), bpe.getId(), lineInFile[mappingColumnInfile], ""));
             }
             this.nbOccurences++;
+            this.mappedBpe = bpe;
             this.isMappedBpe = true;
-
-            //If there is no doublets, add the mapped metabolite to the mapped metabolite list (mappingList variable) used for pathway enrichment
-            //Warning: in any case, the multiple matches will be written in the mapping output file (mappingElementList variable) (but not used in the analysis)
-            //System.out.println(mappedBpe.getName());
-            if (this.nbOccurences <= 1) {
-                this.list_mappedEntities.put (bpe, lineInFile[0]);
-                //Remove the mapped metabolite from unmapped list
-                this.list_unmappedEntities.remove(lineInFile);
-            }
+            this.isMapped = true;
         }
         //TODO: write associated SBML value only with InChI mapping
     }

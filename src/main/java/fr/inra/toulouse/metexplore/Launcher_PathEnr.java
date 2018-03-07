@@ -1,5 +1,6 @@
 package fr.inra.toulouse.metexplore;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
@@ -55,7 +56,7 @@ public class Launcher_PathEnr {
     @Option(name = "-t", aliases="--bioType", usage = "Type of biological object selected : 1 for metabolites or 2 for reactions (by default: metabolites).")
     protected int bioEntityType = 1;
 
-    @Option(name="-name", usage="Number of the file's column containing the metabolite name (by default: 1st column).")
+    @Option(name="-name", usage="Number of the file's column containing the bio-entity name (by default: 1st column).")
     protected int nameColumn = 1;
 
     @Option(name="-l", aliases="--layers", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
@@ -68,7 +69,7 @@ public class Launcher_PathEnr {
     @Option(name="-chebi", usage="Number of the file's column containing the ChEBI data.")
     protected int chebiColumn = -1;
 
-    @Option(name="-idSBML", usage="Number of the file's column containing the metabolite identifier (by default: 2nd column).")
+    @Option(name="-idSBML", usage="Number of the file's column containing the SBML identifier (by default: 2nd column).")
     protected int idSBMLColumn = -1;
 
     @Option(name="-smiles", usage="Number of the file's column containing the SMILES data.")
@@ -117,10 +118,10 @@ public class Launcher_PathEnr {
         Launcher_PathEnr launch = new Launcher_PathEnr();
         CmdLineParser parser = new CmdLineParser(launch);
         String mappingWarnings = "[WARNING] By default, a mapping has been set with the name and the SBML id respectively on the 1st and the 2nd column of your dataset.\n" +
-                "[WARNING] Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem and HMDB (check --help).";
-
+                "[WARNING] Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem and HMDB (check --help).\n";
         try {
             parser.parseArgument(args);
+            WritingComportment write = new WritingComportment(launch.galaxy);
 
             //Print help
             if (launch.phelp) {
@@ -156,8 +157,8 @@ public class Launcher_PathEnr {
             }
             if(ifLayerMappingParameter && !ifInchiMappingParameter){
                 launch.inchiColumn = 2;
-                System.out.println("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
-                        "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.");
+                write.writeLog("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+                        "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
             }else{
 
                 //The user have use any mapping parameters
@@ -172,7 +173,7 @@ public class Launcher_PathEnr {
                 }
                 if(!ifMappingParameter){
                     launch.idSBMLColumn = 2;
-                    System.out.println("[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
+                    write.writeLog("[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
                 }
 
                 //All mapping parameters are disabled
@@ -183,11 +184,11 @@ public class Launcher_PathEnr {
                         && launch.weightColumn < 1) {
                     launch.nameColumn = 1;
                     launch.idSBMLColumn = 2;
-                    System.out.println("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
+                    write.writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
                 }else {
                     for (String arg : args) {
                         if (Pattern.matches("-name[ ]*", arg) && Pattern.matches("-1[ ]*", args[i + 1])) {
-                            System.out.println("[WARNING] By disabling the name parameters, name of the entities will not appear.");
+                            write.writeLog("[WARNING] By disabling the name parameters, name of the entities will not appear.\n");
                             break;
                         } else {
                             i++;
@@ -203,8 +204,9 @@ public class Launcher_PathEnr {
                 Boolean ifInchiMappingParameter = testInchiParameter(args);
                 if(!ifInchiMappingParameter) {
                     launch.inchiColumn = 2;
+                    WritingComportment write = new WritingComportment(launch.galaxy) ;
                     System.out.println("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
-                            "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.");
+                            "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
                 }
             }else {
                 System.err.println(e.getMessage());
@@ -214,6 +216,7 @@ public class Launcher_PathEnr {
             }
         }
 
+        WritingComportment write = new WritingComportment(launch.galaxy) ;
         //Regex for inchiLayers parameter
         String[] inchiLayers = launch.inchiLayers.replaceAll(" ","").split(",");
         //Extract SBML
@@ -229,6 +232,7 @@ public class Launcher_PathEnr {
                     launch.outFileMapping, launch.galaxy, launch.bioEntityType);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
                     launch.outFilePathEnr,launch.galaxy, launch.bioEntityType);
+            write.writeOutputInfo();
         }
         catch (IOException e){
             e.printStackTrace();

@@ -1,6 +1,51 @@
 package fr.inra.toulouse.metexplore;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class WritingComportment {
+
+    protected String galaxy;
+    static String text4outputFileInfo = "";
+    protected File log;
+    static int nbInstance = 0;
+
+    public WritingComportment (String galaxyOut) {
+        nbInstance++;
+        this.galaxy = galaxyOut;
+        if(this.galaxy != "") {
+            this.log = new File(this.galaxy);
+            if (nbInstance == 1) {
+                //avoid to erase the file if this class is called more than one time
+                if (this.log.isFile()) {
+                    //write a new file if already exists
+                    this.log.delete();
+                }
+                try {
+                    this.log.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void writeOutputInfo() throws IOException {
+        if (this.galaxy != "") {//if "writing console log in a file" functionality is activated
+            this.log = new File(this.galaxy);
+            BufferedWriter b = new BufferedWriter(new FileWriter(this.log, true));
+            b.write(text4outputFileInfo);
+            b.close();
+        }
+    }
+
+    public void writeLog(String message) {
+        System.out.println(message.replaceAll("\n", ""));
+        //TODO: regex, enlever celui de la fin
+        text4outputFileInfo += message;
+    }
 
     public String removeSciNot(double value) {
         String tmp = (String.valueOf(value));

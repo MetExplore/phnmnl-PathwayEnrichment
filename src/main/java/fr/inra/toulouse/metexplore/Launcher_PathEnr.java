@@ -22,13 +22,13 @@ public class Launcher_PathEnr {
     @Option(name="-i", aliases="--inFile", usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
     protected String inFileFingerprint ;
 
-    @Option(name="-o1", aliases="--outMap", usage="Output file name for mapping result.")
+    @Option(name="-o1", aliases="--outMap", usage="Output file name for mapping result (by default: mapping.tsv).")
     protected String outFileMapping = "mapping.tsv";
 
     @Option(name="-o2", aliases="--outPath", usage="Output file name for pathway enrichment result (by default: pathwayEnrichment.tsv).")
     protected String outFilePathEnr = "pathwayEnrichment.tsv";
 
-    @Option(name="-s", aliases="--sbml", usage="SBML file name (by default: Recon 2v02).")
+    @Option(name="-s", aliases="--sbml", usage="SBML file name (by default: Recon v2.02).")
     protected String sbml = "data/recon2.02_without_compartment.xml";
 
     /******PARSING PARAMETERS*****/
@@ -36,8 +36,13 @@ public class Launcher_PathEnr {
     @Option(name="--header", usage="Activate this option if the fingerprint dataset contains no header.")
     protected boolean ifNoHeader = false;
 
-    @Option(name="-sep", aliases="--separator", usage="Character used as separator in the dataset (by default: \\t for tab).")
-    protected String separator = "\t";
+    @Option(name="-sep", aliases="--separator", usage="Character used as separator for columns in the dataset (by default: tabulation).")
+    protected String columnSeparator = "\t";
+
+    @Option(name="-sepID", aliases="--separatorID", usage="Character used as separator if there are multiple values in a database column of the dataset (by default: ,).")
+    protected String IDSeparator = ";";
+    //TODO: warning if ',' separator because of the InChI
+    //TODO: remove this separator in Fingerprint class for InChI only
 
     @Option(name="-f", aliases="--filter", usage="Number of the filtered column")
     protected int colFiltered = -1;
@@ -111,8 +116,8 @@ public class Launcher_PathEnr {
         long startTime = System.nanoTime();
         Launcher_PathEnr launch = new Launcher_PathEnr();
         CmdLineParser parser = new CmdLineParser(launch);
-        String mappingWarnings = "#Warning: By default, a mapping has been set with the name and the SBML id respectively on the 1st and the 2nd column of your dataset.\n" +
-                "#Warning: Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem and HMDB (check --help).";
+        String mappingWarnings = "[WARNING] By default, a mapping has been set with the name and the SBML id respectively on the 1st and the 2nd column of your dataset.\n" +
+                "[WARNING] Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem and HMDB (check --help).";
 
         try {
             parser.parseArgument(args);
@@ -151,8 +156,8 @@ public class Launcher_PathEnr {
             }
             if(ifLayerMappingParameter && !ifInchiMappingParameter){
                 launch.inchiColumn = 2;
-                System.out.println("#Warning: InChI layers parameters set without having specified the InChI column (-inchi).\n" +
-                        "#Warning: By default, the column used for InChI mapping is the 2nd of your dataset.");
+                System.out.println("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+                        "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.");
             }else{
 
                 //The user have use any mapping parameters
@@ -167,7 +172,7 @@ public class Launcher_PathEnr {
                 }
                 if(!ifMappingParameter){
                     launch.idSBMLColumn = 2;
-                    System.out.println("#Warning: No mapping parameters have been chosen.\n" + mappingWarnings);
+                    System.out.println("[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
                 }
 
                 //All mapping parameters are disabled
@@ -178,11 +183,11 @@ public class Launcher_PathEnr {
                         && launch.weightColumn < 1) {
                     launch.nameColumn = 1;
                     launch.idSBMLColumn = 2;
-                    System.out.println("#Warning: All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
+                    System.out.println("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
                 }else {
                     for (String arg : args) {
                         if (Pattern.matches("-name[ ]*", arg) && Pattern.matches("-1[ ]*", args[i + 1])) {
-                            System.out.println("#Warning: By disabling the name parameters, name of the entities will not appear.");
+                            System.out.println("[WARNING] By disabling the name parameters, name of the entities will not appear.");
                             break;
                         } else {
                             i++;
@@ -198,8 +203,8 @@ public class Launcher_PathEnr {
                 Boolean ifInchiMappingParameter = testInchiParameter(args);
                 if(!ifInchiMappingParameter) {
                     launch.inchiColumn = 2;
-                    System.out.println("#Warning: InChI layers parameters set without having specified the InChI column (-inchi).\n" +
-                            "#Warning: By default, the column used for InChI mapping is the 2nd of your dataset.");
+                    System.out.println("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+                            "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.");
                 }
             }else {
                 System.err.println(e.getMessage());
@@ -218,7 +223,7 @@ public class Launcher_PathEnr {
                 (launch.keggColumn-1), (launch.hmdbColumn-1), (launch.csidColumn-1), (launch.weightColumn-1)};
 
         try{
-            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.separator, (launch.nameColumn-1),
+            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator, (launch.nameColumn-1),
                     mappingColumns, (launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers,
                     launch.outFileMapping, launch.galaxy, launch.bioEntityType);

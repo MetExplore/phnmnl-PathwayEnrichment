@@ -326,8 +326,23 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4Testo();
     }
 
+    public void testMappingHMDB () {
+        //Test the success of a mapping with the HMDB ID
+        this.setMapping4OneColumnFile(7,0,"HMDB00251", "M_taur");
+    }
+
+    public void testMappingInchiKey () {
+        //Test the success of a mapping with the Inchikey
+        this.setMapping4OneColumnFile(5,0,"XOAAWQZATWQOTB-UHFFFAOYSA-N", "M_taur");
+    }
+
+    public void testMappingKegg () {
+        //Test the success of a mapping with the KEGG ID
+        this.setMapping4OneColumnFile(6,0,"C00160", "M_glyclt");
+    }
+
     public void testMappingID () {
-    //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        //Test the success of a mapping with the ID of the network from a dataset containing an only column
         this.setMapping4OneColumnFileByID("M_taur", "M_taur");
     }
 
@@ -358,21 +373,6 @@ public class Test_PathEnr extends TestCase {
         //Test the success of a mapping with the name of a pathway
         this.bioEntityType = 3;
         this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
-    }
-
-    public void testMappingHMDB () {
-        //Test the success of a mapping with the HMDB ID
-        this.setMapping4OneColumnFile(7,0,"HMDB00251", "M_taur");
-    }
-
-    public void testMappingInchiKey () {
-        //Test the success of a mapping with the Inchikey
-        this.setMapping4OneColumnFile(5,0,"XOAAWQZATWQOTB-UHFFFAOYSA-N", "M_taur");
-    }
-
-    public void testMappingKegg () {
-        //Test the success of a mapping with the KEGG ID
-        this.setMapping4OneColumnFile(6,0,"C00160", "M_glyclt");
     }
 
     /*************Writing output***********/
@@ -413,8 +413,7 @@ public class Test_PathEnr extends TestCase {
 
     public void testWriteOutputPathEnr4Galaxy() {
         this.galaxy="temp/information.txt";
-        this.setMapping4OneColumnFile(0,1,"Testosterone glucuronide\tM_tststeroneglc\n",
-                "M_tststeroneglc");
+        this.setMapping4Testo();
         this.setWriteOutputPathEnr(
                 this.outputFile,
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
@@ -428,11 +427,11 @@ public class Test_PathEnr extends TestCase {
     public void testWriteOutputPathEnrWithReaction() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
         this.bioEntityType = 2;
-        this.setMapping4OneColumnFileByID("RE1096", "R_RE1096C");
+        this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
         this.setWriteOutputPathEnr(
                 this.outputFile,
                 "",
-                "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tRE1096\tR_RE1096C\t1\t1.32");
+                "Citric acid cycle\t0.004750593824228029\t0.004750593824228029\t0.004750593824228029\tfumarase\tfumarase\tR_FUM\t1\t5.0");
     }
 
     public void testWriteOutput4GalaxyWithReaction() {
@@ -440,11 +439,11 @@ public class Test_PathEnr extends TestCase {
         this.galaxy="temp/information.txt";
         this.outputFile="";
         this.bioEntityType = 2;
-        this.setMapping4OneColumnFileByID("R_RE1096C", "R_RE1096C");
+        this.setMapping4OneColumnFileByID("R_FUM", "R_FUM");
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
-                "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tR_RE1096C\tR_RE1096C\t1\t1.32\t75\t0\t4134");
+                "Citric acid cycle\t0.004750593824228029\t0.004750593824228029\t0.004750593824228029\tfumarase\tR_FUM\tR_FUM\t1\t5.0\t19\t0\t4190");
         this.setBufferTest(this.galaxy,
                 "1 pathways are concerned among the network (on 97 in the network).",
                 null);

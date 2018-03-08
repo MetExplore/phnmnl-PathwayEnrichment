@@ -19,6 +19,7 @@ public class Mapping extends Omics {
     protected String[] inchiLayers;
     protected ArrayList<String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappingElement> list_mappingElement = new ArrayList<MappingElement>(); //list of mapped metabolites used only for writing mapping output into a file
+    protected Boolean nameMapping;
 
     //for performMapping function
     protected ArrayList <String> matchedValues;
@@ -26,11 +27,12 @@ public class Mapping extends Omics {
     protected Boolean isMappedBpe;
 
     public Mapping(BioNetwork network, ArrayList<String[]> list_fingerprint,
-                   String[] inchiLayers, String outFileMapping, String galaxy,
+                   String[] inchiLayers, Boolean nameMapping, String outFileMapping, String galaxy,
                    int bioEntityType) throws IOException {
         super(galaxy, list_fingerprint, network, bioEntityType);
         this.inchiLayers = inchiLayers;
         this.outFileMapping = outFileMapping;
+        this.nameMapping = nameMapping;
         this.list_unmappedEntities = (ArrayList<String[]>) list_fingerprint.clone();
         if (this.outFileMapping != "") this.performMapping();
         else this.quickMapping();
@@ -59,8 +61,12 @@ public class Mapping extends Omics {
                 this.isMappedBpe = false;
 
                 //Mapping on metabolite identifier associated with a bionetwork, InChI, SMILES and PubCHEM_ID
-                ArrayList<String> associatedValueInSbml = new ArrayList<String>(Arrays.asList(e.getId(), e.getName()));
-                ArrayList<Integer> mappingColumnInfile = new ArrayList<Integer>(Arrays.asList(1, 0));
+                ArrayList<String> associatedValueInSbml = new ArrayList<String>(Arrays.asList(e.getId()));
+                ArrayList<Integer> mappingColumnInfile = new ArrayList<Integer>(Arrays.asList(1));
+                if (this.nameMapping) {
+                    associatedValueInSbml.add(e.getName());
+                    mappingColumnInfile.add(0);
+                }
                 if (this.bioEntityType == 1) {
                     BioPhysicalEntity bpe = (BioPhysicalEntity) e;
                     associatedValueInSbml.addAll(Arrays.asList(bpe.getInchi(), bpe.getSmiles(), bpe.getPubchemCID(), bpe.getMolecularWeight()));

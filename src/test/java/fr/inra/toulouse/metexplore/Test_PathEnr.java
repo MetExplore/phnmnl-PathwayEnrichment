@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class Test_PathEnr extends TestCase {
     protected String separator, outputFile, galaxy, logFile="temp/information.txt", dummyFile="temp/dummy.tsv";
     protected int filteredColumn, bioEntityType;
-    protected Boolean ifNoHeader;
+    protected Boolean ifNoHeader, nameMapping;
     protected String[] inchiLayers;
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
@@ -35,6 +35,7 @@ public class Test_PathEnr extends TestCase {
         (new File("temp")).mkdir();
         this.setDefaultInChILayers();
         this.setDefaultMappingColumn();
+        this.nameMapping = false;
         this.fingerprint = null;
         this.mapping = null;
         this.pathEnr = null;
@@ -142,7 +143,7 @@ public class Test_PathEnr extends TestCase {
         this.expectedMappedMetabolite = new ArrayList<BioEntity>();
 
         try {
-            this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.outputFile,
+            this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.nameMapping, this.outputFile,
                     this.galaxy, this.bioEntityType);
             this.file = new File(this.outputFile);
             OmicsMethods methods = new OmicsMethods(this.mapping.list_mappedEntities,network,this.bioEntityType);
@@ -352,6 +353,7 @@ public class Test_PathEnr extends TestCase {
 
     public void testMappingName () {
         //Test the success of a mapping with the name of the network from a dataset containing an only column
+        this.nameMapping = true;
         this.setMapping4OneColumnFileByID("Taurine", "M_taur");
     }
 
@@ -363,6 +365,7 @@ public class Test_PathEnr extends TestCase {
 
     public void testMappingNameReaction () {
         //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        this.nameMapping = true;
         this.bioEntityType = 2;
         this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
     }
@@ -375,6 +378,7 @@ public class Test_PathEnr extends TestCase {
 
     public void testMappingNamePathway () {
         //Test the success of a mapping with the name of a pathway
+        this.nameMapping = true;
         this.bioEntityType = 3;
         this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
     }
@@ -442,6 +446,7 @@ public class Test_PathEnr extends TestCase {
     public void testWriteOutputPathEnrWithReaction() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
         this.bioEntityType = 2;
+        this.nameMapping = true;
         this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
         this.setWriteOutputPathEnr(
                 this.outputFile,
@@ -514,6 +519,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testMappingNameGene () {
+        this.nameMapping = true;
         this.bioEntityType = 6;
         this.setMapping4OneColumnFileByID("10026.1", "10026.1");
     }

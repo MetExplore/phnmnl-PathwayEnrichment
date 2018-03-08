@@ -42,7 +42,8 @@ public class WritingComportment {
     }
 
     public void writeLog(String message) {
-        System.out.println(message.replaceAll("\n", ""));
+        //Avoid to skip a line
+        System.out.println(message.replaceAll("\n$", ""));
         //TODO: regex, enlever celui de la fin
         text4outputFileInfo += message;
     }

@@ -56,7 +56,10 @@ public class Launcher_PathEnr {
     @Option(name = "-t", aliases="--bioType", usage = "Type of biological object selected : 1 for metabolites or 2 for reactions (by default: metabolites).")
     protected int bioEntityType = 1;
 
-    @Option(name="-name", usage="Number of the file's column containing the bio-entity name (by default: 1st column).")
+    @Option(name="-name", usage="Activate this option for a name mapping .")
+    protected Boolean nameMapping = false;
+
+    @Option(name="-nameCol", usage="Number of the file's column containing the bio-entity name (by default: 1st column).")
     protected int nameColumn = 1;
 
     @Option(name="-l", aliases="--layers", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
@@ -119,6 +122,7 @@ public class Launcher_PathEnr {
         CmdLineParser parser = new CmdLineParser(launch);
         String mappingWarnings = "[WARNING] By default, a mapping has been set with the name and the SBML id respectively on the 1st and the 2nd column of your dataset.\n" +
                 "[WARNING] Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem and HMDB (check --help).\n";
+
         try {
             parser.parseArgument(args);
             WritingComportment write = new WritingComportment(launch.galaxy);
@@ -165,7 +169,7 @@ public class Launcher_PathEnr {
                 int i=0;
                 Boolean ifMappingParameter = false;
                 for (String arg : args) {
-                    if(Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|weight)[ ]*", arg)) {
+                    if(Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|weight)", arg)) {
                         ifMappingParameter = true;
                         break;
                     }
@@ -187,7 +191,7 @@ public class Launcher_PathEnr {
                     write.writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
                 }else {
                     for (String arg : args) {
-                        if (Pattern.matches("-name[ ]*", arg) && Pattern.matches("-1[ ]*", args[i + 1])) {
+                        if (Pattern.matches("-nameCol", arg) && Pattern.matches("-1[ ]*", args[i + 1])) {
                             write.writeLog("[WARNING] By disabling the name parameters, name of the entities will not appear.\n");
                             break;
                         } else {
@@ -226,9 +230,9 @@ public class Launcher_PathEnr {
                 (launch.keggColumn-1), (launch.hmdbColumn-1), (launch.csidColumn-1), (launch.weightColumn-1)};
 
         try{
-            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator, (launch.nameColumn-1),
-                    mappingColumns, (launch.colFiltered-1));
-            Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers,
+            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator,
+                    (launch.nameColumn-1),mappingColumns, (launch.colFiltered-1));
+            Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers, launch.nameMapping,
                     launch.outFileMapping, launch.galaxy, launch.bioEntityType);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
                     launch.outFilePathEnr,launch.galaxy, launch.bioEntityType);

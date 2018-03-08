@@ -2,6 +2,7 @@ package fr.inra.toulouse.metexplore;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import parsebionet.biodata.BioNetwork;
@@ -96,6 +97,8 @@ public class Launcher_PathEnr {
     @Option(name="-weight", usage="Number of the file's column containing the weight of the metabolites.")
     protected int weightColumn = -1;
 
+    //TODO: --adv without interface
+    //TODO: Check separator
 
     public void timeCalculation(long elapsedTime){
         long min = elapsedTime / 60000000000L;
@@ -191,9 +194,8 @@ public class Launcher_PathEnr {
                     write.writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
                 }else {
                     for (String arg : args) {
-                        if (Pattern.matches("-nameCol", arg) && Pattern.matches("-1[ ]*", args[i + 1])) {
-                            write.writeLog("[WARNING] By disabling the name parameters, name of the entities will not appear.\n");
-                            break;
+                        if (Pattern.matches("-nameCol", arg) && Pattern.matches("-[ ]*", args[i + 1])) {
+                            throw new CmdLineException("Name column must be positive.\n");
                         } else {
                             i++;
                         }
@@ -231,10 +233,10 @@ public class Launcher_PathEnr {
 
         try{
             Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator,
-                    (launch.nameColumn-1),mappingColumns, (launch.colFiltered-1));
+                    launch.IDSeparator,(launch.nameColumn-1),mappingColumns, (launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers, launch.nameMapping,
                     launch.outFileMapping, launch.galaxy, launch.bioEntityType);
-            PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
+            PathwayEnrichment pathEnr = new PathwayEnrichment(network, mapping.list_mappedEntities,
                     launch.outFilePathEnr,launch.galaxy, launch.bioEntityType);
             write.writeOutputInfo();
         }

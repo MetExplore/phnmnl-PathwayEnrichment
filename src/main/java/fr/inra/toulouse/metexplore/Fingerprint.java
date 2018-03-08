@@ -15,17 +15,19 @@ public class Fingerprint {
 
     protected int nameColumn, chebiColumn, inchiColumn, idSBMLColumn, smilesColumn, pubchemColum;
     protected int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
-    protected String separator, inFileFingerprint;
+    protected String separator, IDSeparator, inFileFingerprint;
     protected Boolean ifNoHeader;
     protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
 
     //TODO: excel parsing
+    //
 
-    public Fingerprint (String inFileFingerprint, Boolean ifNoHeader, String separator, int nameColumn, int[] mappingColumns,
+    public Fingerprint (String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn, int[] mappingColumns,
                         int filteredColumn) throws IOException {
         this.inFileFingerprint=inFileFingerprint;
         this.ifNoHeader=ifNoHeader;
         this.separator=separator;
+        this.IDSeparator=IDSeparator;
         this.nameColumn=nameColumn;
         this.idSBMLColumn=mappingColumns[0];
         this.inchiColumn=mappingColumns[1];
@@ -51,7 +53,7 @@ public class Fingerprint {
         int[] columnNumbers = {this.nameColumn, this.idSBMLColumn, this.inchiColumn, this.chebiColumn,
                 this.smilesColumn, this.pubchemColum, this.inchikeysColumn, this.keggColumn, this.hmdColumn,
                 this.chemspiderColumn, this.weightColumn};
-        //if (verbose=true) System.out.println(Arrays.toString(columnNumbers));
+        //if (verbose) System.out.println(Arrays.toString(columnNumbers));
 
         if(!this.ifNoHeader) fileBuffer.readLine(); //skip the header
 
@@ -81,15 +83,20 @@ public class Fingerprint {
             exit(1);
         }
 
-        //for (String[] lineInFile : list_entities) {
-            //System.out.println(Arrays.toString(lineInFile));
-        //}
+        /*for (String[] lineInFile : list_entities) {
+            System.out.println(Arrays.toString(lineInFile));
+        }*/
     }
 
     public void putValueIfExists (String[] lineFormatted, String[] lineInFile, int columnInTable, int columnInFile){
         if (columnInFile >= 0) {
             try {
-                lineFormatted[columnInTable] = lineInFile[columnInFile];
+                String[] tab_ids = lineInFile[columnInFile].split(IDSeparator);
+                ArrayList <String> ids = new ArrayList <String>();
+                for (String id : tab_ids) {
+                    ids.add(id);
+                }
+                lineFormatted[columnInTable] = String.join(";", ids);
             } catch (ArrayIndexOutOfBoundsException e) {
                 //if a column contains some blank values
                 lineFormatted[columnInTable] =  "";

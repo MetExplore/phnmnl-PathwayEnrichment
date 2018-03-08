@@ -20,6 +20,8 @@ public class Mapping extends Omics {
     protected ArrayList<String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappingElement> list_mappingElement = new ArrayList<MappingElement>(); //list of mapped metabolites used only for writing mapping output into a file
     protected Boolean nameMapping;
+    protected ArrayList<String[]> list_fingerprint;//input file after formatting and filtering
+
 
     //for performMapping function
     protected ArrayList <String> matchedValues;
@@ -29,7 +31,8 @@ public class Mapping extends Omics {
     public Mapping(BioNetwork network, ArrayList<String[]> list_fingerprint,
                    String[] inchiLayers, Boolean nameMapping, String outFileMapping, String galaxy,
                    int bioEntityType) throws IOException {
-        super(galaxy, list_fingerprint, network, bioEntityType);
+        super(galaxy, network, bioEntityType);
+        this.list_fingerprint = list_fingerprint;
         this.inchiLayers = inchiLayers;
         this.outFileMapping = outFileMapping;
         this.nameMapping = nameMapping;
@@ -146,7 +149,7 @@ public class Mapping extends Omics {
                     //Splitting database ID values from the fingerprint dataset, if there is more than one per case
                     String[] list_id;
                     if (mappingColumnInfile != 2 ) {
-                       list_id = lineInFile[mappingColumnInfile].split(",");
+                       list_id = lineInFile[mappingColumnInfile].split(";");
                    }else{
                         String[] list_id2 = {lineInFile[mappingColumnInfile]};
                         list_id = list_id2;
@@ -190,7 +193,7 @@ public class Mapping extends Omics {
         try {
             if (ifNotBlankValue(lineInFile, mappingColumnInfile)) {
                 //Splitting database ID values from the fingerprint dataset, if there is more than one per case
-                String[] list_id = lineInFile[mappingColumnInfile].split(",");
+                String[] list_id = lineInFile[mappingColumnInfile].split(";");
                 //Loop on attribute of the metabolite from the SBML
                 for (Map.Entry<String, Set<BioRef>> key : bpe.getRefs().entrySet()) {
                     if (key.getKey().equals(associatedValueInSbml)) {//researching the one positioned on chebi

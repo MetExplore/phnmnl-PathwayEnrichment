@@ -10,12 +10,13 @@ import java.util.*;
 
 public class PathwayEnrichment extends Omics{
 
+    protected HashMap<BioEntity, String> list_mappedEntities; //list of mapped metabolites used for analysis
     protected List<HashMap<BioPathway, Double>> list_pathwayEnr = new ArrayList<HashMap<BioPathway, Double>>(); //list of pathway containing mapped metabolites, p-value and corrections values
     protected String outFilePathEnr;
 
-    public PathwayEnrichment (BioNetwork network, ArrayList<String[]> list_fingerprint, HashMap <BioEntity, String> list_mappedEntities,
+    public PathwayEnrichment (BioNetwork network, HashMap <BioEntity, String> list_mappedEntities,
                               String outFilePathEnr, String galaxy , int bioEntityType) throws IOException {
-        super(galaxy, list_fingerprint, list_mappedEntities, network, bioEntityType);
+        super(galaxy, list_mappedEntities, network, bioEntityType);
         this.outFilePathEnr=outFilePathEnr;
         this.computeEnrichmentWithCorrections();
     }

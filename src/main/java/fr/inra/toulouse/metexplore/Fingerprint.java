@@ -88,6 +88,8 @@ public class Fingerprint {
         if (this.list_entities.size() < 1) {//no extraction = error generation
             System.err.println("File badly formatted");
             exit(1);
+        }else {
+            //TODO: good format
         }
 
         /*for (String[] lineInFile : list_entities) {
@@ -105,7 +107,7 @@ public class Fingerprint {
                     if (columnInTable > 1){
                         //avoid to replace space for example for pathway name (could be refactored)
                         id = id.replaceAll("\\s", "");
-                        //if(!id.isEmpty() && nbLine == 11) checkIDFormat(id, lineInFile,columnInTable);
+                        if(!id.isEmpty()) checkIDFormat(id, lineInFile,columnInTable);
                     }
                     ids.add(id);
                 }
@@ -120,18 +122,18 @@ public class Fingerprint {
     }
 
     public void checkIDFormat(String id, String[] lineInFile, int columnInTable){
-        String[] patterns = {"CHEBI:[0-9]+$"};
-        String[] databases = {"ChEBI"};
-        String warning = "[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), ";
+        String[] patterns = {"^CHEBI:[0-9]+$","","^[0-9]*$","","","^HMDB[0-9]{5}$","^[0-9]*$"};
+        String[] databases = {"ChEBI","","PubChem","","","HMDB","ChemSpider"};
+        String[] warning = {"[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), ", " is badly formatted: " + id};
 
-        if (columnInTable == 18){
+        if (columnInTable > 2){
             if(!Pattern.matches(patterns[columnInTable-3], id)) {
-                System.out.println(warning + databases[columnInTable - 3] + " is badly formatted." + id);
+                System.out.println(warning[0] + databases[columnInTable - 3] + warning[1]);
             }
         }
         if (columnInTable == 2){
             InChI4Galaxy inchi = new InChI4Galaxy(id, inchiLayers);
-            System.out.println(inchi.validity);
+            /*System.out.println(inchi.validity);
             System.out.println(inchi.connectivity);
             System.out.println(inchi.hLayer);
             System.out.println(inchi.protonationLayer);
@@ -139,9 +141,9 @@ public class Fingerprint {
             System.out.println(inchi.tetraStereoLayer);
             System.out.println(inchi.isotopicLayer);
             System.out.println(inchi.fixedLayer);
-            System.out.println(inchi.reconnectedLayer);
+            System.out.println(inchi.reconnectedLayer);*/
             if(!inchi.validity) {
-                System.out.println(warning + "InChI is badly formatted: " + id);
+                System.out.println(warning[0] + "InChI" + warning[1]);
             }
         }
     }

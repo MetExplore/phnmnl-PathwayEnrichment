@@ -122,8 +122,8 @@ public class Fingerprint {
     }
 
     public void checkIDFormat(String id, String[] lineInFile, int columnInTable){
-        String[] patterns = {"^CHEBI:[0-9]+$","","^[0-9]*$","","","^HMDB[0-9]{5}$","^[0-9]*$"};
-        String[] databases = {"ChEBI","","PubChem","","","HMDB","ChemSpider"};
+        String[] patterns = {"^CHEBI:[0-9]+$","","^[0-9]*$","^[A-Z]{14}-[A-Z]{10}-[A-Z]$","^[A-Z]{1,2}[0-9]{5}$","^HMDB[0-9]{5}$","^[0-9]*$"};
+        String[] databases = {"ChEBI","","PubChem","InChIKey","KEGG","HMDB","ChemSpider"};
         String[] warning = {"[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), ", " is badly formatted: " + id};
 
         if (columnInTable > 2){

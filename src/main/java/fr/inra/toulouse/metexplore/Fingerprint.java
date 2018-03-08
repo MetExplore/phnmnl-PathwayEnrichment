@@ -16,7 +16,7 @@ public class Fingerprint {
 
     protected int nameColumn, chebiColumn, inchiColumn, idSBMLColumn, smilesColumn, pubchemColum;
     protected int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
-    protected int nbLine = 1;
+    protected int nbLine = 3;
     protected String separator, IDSeparator, inFileFingerprint;
     protected String[] inchiLayers;
     protected Boolean ifNoHeader;
@@ -58,7 +58,10 @@ public class Fingerprint {
                 this.chemspiderColumn, this.weightColumn};
         //if (verbose) System.out.println(Arrays.toString(columnNumbers));
 
-        if(!this.ifNoHeader) fileBuffer.readLine(); //skip the header
+        if(!this.ifNoHeader){
+            fileBuffer.readLine(); //skip the header
+            nbLine = 2;
+        }
 
         //Loop on each lines from the input file
         while ((line = fileBuffer.readLine()) != null) {
@@ -102,7 +105,7 @@ public class Fingerprint {
                     if (columnInTable > 1){
                         //avoid to replace space for example for pathway name (could be refactored)
                         id = id.replaceAll("\\s", "");
-                        if(!id.isEmpty()) checkIDFormat(id, lineInFile,columnInTable);
+                        //if(!id.isEmpty() && nbLine == 11) checkIDFormat(id, lineInFile,columnInTable);
                     }
                     ids.add(id);
                 }
@@ -128,6 +131,15 @@ public class Fingerprint {
         }
         if (columnInTable == 2){
             InChI4Galaxy inchi = new InChI4Galaxy(id, inchiLayers);
+            System.out.println(inchi.validity);
+            System.out.println(inchi.connectivity);
+            System.out.println(inchi.hLayer);
+            System.out.println(inchi.protonationLayer);
+            System.out.println(inchi.dbStereoLayer);
+            System.out.println(inchi.tetraStereoLayer);
+            System.out.println(inchi.isotopicLayer);
+            System.out.println(inchi.fixedLayer);
+            System.out.println(inchi.reconnectedLayer);
             if(!inchi.validity) {
                 System.out.println(warning + "InChI is badly formatted: " + id);
             }

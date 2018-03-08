@@ -58,6 +58,7 @@ public class InChI4Galaxy extends InChI {
                 }
             }
         }
+       // System.out.println(Arrays.toString(boolInchiLayers));
         this.setLayers(boolInchiLayers);
     }
 
@@ -88,7 +89,7 @@ public class InChI4Galaxy extends InChI {
 
             String[] tmp;
             InchiLayer connect;
-            if (trunckedInchi.contains("/r")) {
+
                 tmp = trunckedInchi.split("/r");
                 if (boolInchiLayers[8]) {
                     if (tmp.length != 2) {
@@ -99,9 +100,7 @@ public class InChI4Galaxy extends InChI {
                     this.setReconnectedLayer(connect);
                 }
                 trunckedInchi = tmp[0];
-            }
 
-            if (trunckedInchi.contains("/f")) {
                 tmp = trunckedInchi.split("/f");
                 if (boolInchiLayers[7]) {
                     if (tmp.length != 2) {
@@ -112,9 +111,7 @@ public class InChI4Galaxy extends InChI {
                     this.setFixedLayer(connect);
                 }
                 trunckedInchi = tmp[0];
-            }
 
-            if (trunckedInchi.contains("/i")) {
                 tmp = trunckedInchi.split("/i");
                 if (boolInchiLayers[6]) {
                     if (tmp.length != 2) {
@@ -125,9 +122,7 @@ public class InChI4Galaxy extends InChI {
                     this.setIsotopicLayer(connect);
                 }
                 trunckedInchi = tmp[0];
-            }
 
-            if (trunckedInchi.contains("/t")) {
                 tmp = trunckedInchi.split("/t");
                 if (boolInchiLayers[5]) {
                     if (tmp.length != 2) {
@@ -138,9 +133,7 @@ public class InChI4Galaxy extends InChI {
                     this.setTetraStereoLayer(connect);
                 }
                 trunckedInchi = tmp[0];
-            }
 
-            if (trunckedInchi.contains("/b")) {
                 tmp = trunckedInchi.split("/b");
                 if (boolInchiLayers[4]) {
                     if (tmp.length != 2) {
@@ -151,9 +144,7 @@ public class InChI4Galaxy extends InChI {
                     this.setDbStereoLayer(connect);
                 }
                 trunckedInchi = tmp[0];
-            }
 
-            if (trunckedInchi.contains("/p")) {
                 tmp = trunckedInchi.split("/p");
                 if (boolInchiLayers[3]) {
                     if (tmp.length != 2 || tmp[1].contains("/")) {
@@ -165,9 +156,7 @@ public class InChI4Galaxy extends InChI {
                 }
                 trunckedInchi = tmp[0];
 
-            }
 
-            if (trunckedInchi.contains("/q")) {
                 tmp = trunckedInchi.split("/q");
                 if (boolInchiLayers[2]) {
                     if (tmp.length != 2 || tmp[1].contains("/")) {
@@ -179,9 +168,7 @@ public class InChI4Galaxy extends InChI {
                 }
                 trunckedInchi = tmp[0];
 
-            }
 
-            if (trunckedInchi.contains("/h")) {
                 tmp = trunckedInchi.split("/h");
                 if (boolInchiLayers[1]) {
                     if (tmp.length != 2 || tmp[1].contains("/")) {
@@ -192,9 +179,7 @@ public class InChI4Galaxy extends InChI {
                     this.sethLayer(connect);
                 }
                 trunckedInchi = tmp[0];
-            }
 
-            if (trunckedInchi.contains("/c")) {
                 tmp = trunckedInchi.split("/c");
                 if (boolInchiLayers[0]) {
                     if (tmp.length != 2 || tmp[1].contains("/")) {
@@ -205,7 +190,6 @@ public class InChI4Galaxy extends InChI {
                     this.setConnectivity(connect);
                 }
                 trunckedInchi = tmp[0];
-            }
 
             if (!trunckedInchi.equals("/")) {
                 String formula = trunckedInchi.replaceAll("/", "");

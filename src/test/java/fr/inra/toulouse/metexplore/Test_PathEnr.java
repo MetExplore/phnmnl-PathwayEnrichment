@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Test_PathEnr extends TestCase {
-    protected String separator, outputFile, galaxy, dummyFile="temp/dummy.tsv";
+    protected String separator, outputFile, galaxy, logFile="temp/information.txt", dummyFile="temp/dummy.tsv";
     protected int filteredColumn, bioEntityType;
     protected Boolean ifNoHeader;
     protected String[] inchiLayers;
@@ -31,6 +31,7 @@ public class Test_PathEnr extends TestCase {
     //Initialization of the parameters before each tests
         super.setUp();
         //this.setSecurityManager();
+        //WritingComportment write = new WritingComportment(this.galaxy);
         (new File("temp")).mkdir();
         this.setDefaultInChILayers();
         this.setDefaultMappingColumn();
@@ -180,6 +181,7 @@ public class Test_PathEnr extends TestCase {
     public void setBufferTest(String fileName, String header, String line){
         setBufferReader(fileName);
         try {
+            if(fileName == this.logFile) this.pathEnr.write.writeOutputInfo();
             assertEquals(buffer.readLine(), header);
             assertEquals(buffer.readLine(), line);
             assertEquals(buffer.readLine(), null);
@@ -402,6 +404,17 @@ public class Test_PathEnr extends TestCase {
                     line);
     }
 
+    public void setGalaxy(){
+        this.galaxy=this.logFile;
+        this.file = new File(this.galaxy);
+        try{
+            this.file.createNewFile();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        WritingComportment.text4outputFileInfo="";
+    }
+
     public void testWriteOutputPathEnr() {
         this.setMapping4Testo();
         this.setWriteOutputPathEnr(
@@ -412,7 +425,7 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void testWriteOutputPathEnr4Galaxy() {
-        this.galaxy="temp/information.txt";
+        this.setGalaxy();
         this.setMapping4Testo();
         this.setWriteOutputPathEnr(
                 this.outputFile,
@@ -436,7 +449,7 @@ public class Test_PathEnr extends TestCase {
 
     public void testWriteOutput4GalaxyWithReaction() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
-        this.galaxy="temp/information.txt";
+        this.setGalaxy();
         this.outputFile="";
         this.bioEntityType = 2;
         this.setMapping4OneColumnFileByID("R_FUM", "R_FUM");

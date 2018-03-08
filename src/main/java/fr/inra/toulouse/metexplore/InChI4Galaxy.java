@@ -3,6 +3,8 @@ package fr.inra.toulouse.metexplore;
 import parsebionet.utils.chemicalStructures.InChI;
 import parsebionet.utils.chemicalStructures.InchiLayer;
 
+import java.util.Arrays;
+
 public class InChI4Galaxy extends InChI {
 
     public InChI4Galaxy() {
@@ -23,7 +25,6 @@ public class InChI4Galaxy extends InChI {
     public void setBoolean (String[] inchiLayers){
 
         Boolean[] boolInchiLayers = {false,false,false,false,false,false,false,false,false};
-
         for (String i : inchiLayers) {
             if (i != null){
                 switch (i) {
@@ -62,6 +63,7 @@ public class InChI4Galaxy extends InChI {
 
     private void setLayers(Boolean[] boolInchiLayers) {
 
+        this.setValidInchi(true);
         String trunckedInchi = this.getInchiString();
 
         if (!trunckedInchi.startsWith("InChI=")) {
@@ -88,12 +90,11 @@ public class InChI4Galaxy extends InChI {
             InchiLayer connect;
             if (trunckedInchi.contains("/r")) {
                 tmp = trunckedInchi.split("/r");
-                if (tmp.length != 2) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
                 if (boolInchiLayers[8]) {
+                    if (tmp.length != 2) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('r', tmp[1]);
                     this.setReconnectedLayer(connect);
                 }
@@ -102,12 +103,11 @@ public class InChI4Galaxy extends InChI {
 
             if (trunckedInchi.contains("/f")) {
                 tmp = trunckedInchi.split("/f");
-                if (tmp.length != 2) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
                 if (boolInchiLayers[7]) {
+                    if (tmp.length != 2) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('f', tmp[1]);
                     this.setFixedLayer(connect);
                 }
@@ -116,12 +116,11 @@ public class InChI4Galaxy extends InChI {
 
             if (trunckedInchi.contains("/i")) {
                 tmp = trunckedInchi.split("/i");
-                if (tmp.length != 2) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
                 if (boolInchiLayers[6]) {
+                    if (tmp.length != 2) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('i', tmp[1]);
                     this.setIsotopicLayer(connect);
                 }
@@ -130,12 +129,11 @@ public class InChI4Galaxy extends InChI {
 
             if (trunckedInchi.contains("/t")) {
                 tmp = trunckedInchi.split("/t");
-                if (tmp.length != 2) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
                 if (boolInchiLayers[5]) {
+                    if (tmp.length != 2) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('t', tmp[1]);
                     this.setTetraStereoLayer(connect);
                 }
@@ -144,25 +142,24 @@ public class InChI4Galaxy extends InChI {
 
             if (trunckedInchi.contains("/b")) {
                 tmp = trunckedInchi.split("/b");
-                if (tmp.length != 2) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
                 if (boolInchiLayers[4]) {
+                    if (tmp.length != 2) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('b', tmp[1]);
                     this.setDbStereoLayer(connect);
                 }
                 trunckedInchi = tmp[0];
             }
+
             if (trunckedInchi.contains("/p")) {
                 tmp = trunckedInchi.split("/p");
-                if (tmp.length != 2 || tmp[1].contains("/")) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
                 if (boolInchiLayers[3]) {
+                    if (tmp.length != 2 || tmp[1].contains("/")) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('p', tmp[1]);
                     this.setProtonationLayer(connect);
                 }
@@ -172,13 +169,11 @@ public class InChI4Galaxy extends InChI {
 
             if (trunckedInchi.contains("/q")) {
                 tmp = trunckedInchi.split("/q");
-                if (tmp.length != 2 || tmp[1].contains("/")) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
-
                 if (boolInchiLayers[2]) {
+                    if (tmp.length != 2 || tmp[1].contains("/")) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('q', tmp[1]);
                     this.setChargeLayer(connect);
                 }
@@ -188,13 +183,11 @@ public class InChI4Galaxy extends InChI {
 
             if (trunckedInchi.contains("/h")) {
                 tmp = trunckedInchi.split("/h");
-                if (tmp.length != 2 || tmp[1].contains("/")) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
-
                 if (boolInchiLayers[1]) {
+                    if (tmp.length != 2 || tmp[1].contains("/")) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('h', tmp[1]);
                     this.sethLayer(connect);
                 }
@@ -203,12 +196,11 @@ public class InChI4Galaxy extends InChI {
 
             if (trunckedInchi.contains("/c")) {
                 tmp = trunckedInchi.split("/c");
-                if (tmp.length != 2 || tmp[1].contains("/")) {
-                    this.setValidInchi(false);
-                    return;
-                }
-
                 if (boolInchiLayers[0]) {
+                    if (tmp.length != 2 || tmp[1].contains("/")) {
+                        this.setValidInchi(false);
+                        return;
+                    }
                     connect = new InchiLayer('c', tmp[1]);
                     this.setConnectivity(connect);
                 }

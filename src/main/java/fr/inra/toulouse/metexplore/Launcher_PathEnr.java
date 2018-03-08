@@ -233,7 +233,7 @@ public class Launcher_PathEnr {
 
         try{
             Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator,
-                    launch.IDSeparator,(launch.nameColumn-1),mappingColumns, (launch.colFiltered-1));
+                    launch.IDSeparator,(launch.nameColumn-1),mappingColumns, inchiLayers,(launch.colFiltered-1));
             /*Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers, launch.nameMapping,
                     launch.outFileMapping, launch.galaxy, launch.bioEntityType);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,

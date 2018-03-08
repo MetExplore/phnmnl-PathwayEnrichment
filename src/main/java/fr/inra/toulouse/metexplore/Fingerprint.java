@@ -18,13 +18,14 @@ public class Fingerprint {
     protected int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
     protected int nbLine = 1;
     protected String separator, IDSeparator, inFileFingerprint;
+    protected String[] inchiLayers;
     protected Boolean ifNoHeader;
     protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
 
     //TODO: excel parsing
 
-    public Fingerprint (String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn, int[] mappingColumns,
-                        int filteredColumn) throws IOException {
+    public Fingerprint (String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
+                        int[] mappingColumns, String[] inchiLayers, int filteredColumn) throws IOException {
         this.inFileFingerprint=inFileFingerprint;
         this.ifNoHeader=ifNoHeader;
         this.separator=separator;
@@ -40,6 +41,7 @@ public class Fingerprint {
         this.hmdColumn=mappingColumns[7];
         this.chemspiderColumn=mappingColumns[8];
         this.weightColumn=mappingColumns[9];
+        this.inchiLayers=inchiLayers;
         this.filteredColumn=filteredColumn;
 
         extractData();
@@ -97,7 +99,7 @@ public class Fingerprint {
                 ArrayList <String> ids = new ArrayList <String>();
                 for (String id : tab_ids) {
                     id = id.replace("\\s$", "").replace("^\\s","").replaceAll("\\s{2,}", "");
-                    if (columnInTable > 2){
+                    if (columnInTable > 1){
                         //avoid to replace space for example for pathway name (could be refactored)
                         id = id.replaceAll("\\s", "");
                         if(!id.isEmpty()) checkIDFormat(id, lineInFile,columnInTable);
@@ -117,16 +119,19 @@ public class Fingerprint {
     public void checkIDFormat(String id, String[] lineInFile, int columnInTable){
         String[] patterns = {"CHEBI:[0-9]+$"};
         String[] databases = {"ChEBI"};
-        if (columnInTable == 3){
+        String warning = "[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), ";
+
+        if (columnInTable == 18){
             if(!Pattern.matches(patterns[columnInTable-3], id)) {
-                System.out.println("[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), " + databases[columnInTable - 3] + " is badly formatted.");
-            }else {
-                //System.out.println("##OK");
+                System.out.println(warning + databases[columnInTable - 3] + " is badly formatted." + id);
             }
         }
-        //if (columnInTable == 3){
-
-        //}
+        if (columnInTable == 2){
+            InChI4Galaxy inchi = new InChI4Galaxy(id, inchiLayers);
+            if(!inchi.validity) {
+                System.out.println(warning + "InChI is badly formatted: " + id);
+            }
+        }
     }
 
 }

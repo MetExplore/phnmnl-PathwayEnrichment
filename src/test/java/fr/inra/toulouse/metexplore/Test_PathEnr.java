@@ -48,11 +48,13 @@ public class Test_PathEnr extends TestCase {
 
     protected void tearDown() throws Exception {
         super.tearDown();
+        File folder = new File("temp");
         try{
-            FileUtils.forceDelete(new File("temp"));
+            FileUtils.forceDelete(folder);
         }catch (IOException e){
             ;
         }
+        folder.delete();
     }
 
     /*******************************

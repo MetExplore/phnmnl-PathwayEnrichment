@@ -20,8 +20,6 @@ public class Mapping extends Omics {
     protected ArrayList<String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappingElement> list_mappingElement = new ArrayList<MappingElement>(); //list of mapped metabolites used only for writing mapping output into a file
     protected Boolean nameMapping;
-    protected ArrayList<String[]> list_fingerprint;//input file after formatting and filtering
-
 
     //for performMapping function
     protected ArrayList <String> matchedValues;
@@ -31,8 +29,7 @@ public class Mapping extends Omics {
     public Mapping(BioNetwork network, ArrayList<String[]> list_fingerprint,
                    String[] inchiLayers, Boolean nameMapping, String outFileMapping, String galaxy,
                    int bioEntityType) throws IOException {
-        super(galaxy, network, bioEntityType);
-        this.list_fingerprint = list_fingerprint;
+        super(galaxy, list_fingerprint, network, bioEntityType);
         this.inchiLayers = inchiLayers;
         this.outFileMapping = outFileMapping;
         this.nameMapping = nameMapping;
@@ -156,8 +153,6 @@ public class Mapping extends Omics {
                     }
 
                     for (String id : list_id) {
-                        if (mappingColumnInfile < 2) id.replaceAll("\\s", "");
-                        //avoid to replace space for example for pathway name (could be refactored)
 
                         if (mappingColumnInfile == 2) {
                             try {
@@ -200,7 +195,6 @@ public class Mapping extends Omics {
                         //Sometimes different values can be associated to one key
 
                         for (String id : list_id) {
-                            id = id.replaceAll("\\s", "");
                             for (BioRef val : key.getValue()) {
                                 if (id.equals(val.id)) {
                                     this.matchedValues.add(id);

@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class Omics {
+    protected ArrayList<String[]> list_fingerprint;//input file after formatting and filtering
     protected HashMap<BioEntity, String> list_mappedEntities; //list of mapped metabolites used for analysis
     protected BioNetwork network;
     protected WritingComportment write;
@@ -20,7 +21,9 @@ public abstract class Omics {
     protected int bioEntityType;
 
 
-    public Omics (String galaxy, HashMap<BioEntity, String> list_mappedEntities, BioNetwork network, int bioEntityType){
+    public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
+                       HashMap<BioEntity, String> list_mappedEntities, BioNetwork network, int bioEntityType){
+        this.list_fingerprint = list_fingerprint;
         this.list_mappedEntities = list_mappedEntities;
         this.network = network;
         this.write = new WritingComportment(galaxy);
@@ -28,7 +31,9 @@ public abstract class Omics {
         this.omics = new OmicsMethods(list_mappedEntities,network,bioEntityType);
     }
 
-    public Omics (String galaxy, BioNetwork network, int bioEntityType){
+    public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
+                  BioNetwork network, int bioEntityType){
+        this.list_fingerprint = list_fingerprint;
         this.list_mappedEntities = new HashMap<BioEntity, String>();
         this.network = network;
         this.write = new WritingComportment(galaxy);

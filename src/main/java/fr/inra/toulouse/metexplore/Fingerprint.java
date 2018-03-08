@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import static java.lang.System.exit;
 
@@ -15,12 +16,12 @@ public class Fingerprint {
 
     protected int nameColumn, chebiColumn, inchiColumn, idSBMLColumn, smilesColumn, pubchemColum;
     protected int inchikeysColumn, keggColumn, hmdColumn, chemspiderColumn, weightColumn,  filteredColumn;
+    protected int nbLine = 1;
     protected String separator, IDSeparator, inFileFingerprint;
     protected Boolean ifNoHeader;
     protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
 
     //TODO: excel parsing
-    //
 
     public Fingerprint (String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn, int[] mappingColumns,
                         int filteredColumn) throws IOException {
@@ -76,6 +77,7 @@ public class Fingerprint {
             } catch (ArrayIndexOutOfBoundsException e) {
                 //avoid errors with filtering functionality containing empty values
             }
+            nbLine++;
         }
         if (fileBuffer != null) fileBuffer.close();
         if (this.list_entities.size() < 1) {//no extraction = error generation
@@ -94,6 +96,12 @@ public class Fingerprint {
                 String[] tab_ids = lineInFile[columnInFile].split(IDSeparator);
                 ArrayList <String> ids = new ArrayList <String>();
                 for (String id : tab_ids) {
+                    id = id.replace("\\s$", "").replace("^\\s","").replaceAll("\\s{2,}", "");
+                    if (columnInTable > 2){
+                        //avoid to replace space for example for pathway name (could be refactored)
+                        id = id.replaceAll("\\s", "");
+                        if(!id.isEmpty()) checkIDFormat(id, lineInFile,columnInTable);
+                    }
                     ids.add(id);
                 }
                 lineFormatted[columnInTable] = String.join(";", ids);
@@ -104,6 +112,21 @@ public class Fingerprint {
         }else {
             lineFormatted[columnInTable] =  "";
         }
+    }
+
+    public void checkIDFormat(String id, String[] lineInFile, int columnInTable){
+        String[] patterns = {"CHEBI:[0-9]+$"};
+        String[] databases = {"ChEBI"};
+        if (columnInTable == 3){
+            if(!Pattern.matches(patterns[columnInTable-3], id)) {
+                System.out.println("[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), " + databases[columnInTable - 3] + " is badly formatted.");
+            }else {
+                //System.out.println("##OK");
+            }
+        }
+        //if (columnInTable == 3){
+
+        //}
     }
 
 }

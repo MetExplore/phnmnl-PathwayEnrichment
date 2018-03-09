@@ -55,6 +55,10 @@ public class Launcher_PathEnr {
     @Option(name="-gal", aliases="--galaxy", usage="For galaxy compliance: formatting pathway output and creating a new one containing log information.")
     protected String galaxy = "";
 
+    @Option(name="-lWarn", aliases="-layersWarning", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
+            " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
+    protected Boolean layerWarning = false;
+
     /*****MAPPING PARAMETERS*****/
 
     @Option(name = "-t", aliases="--bioType", usage = "Type of biological object selected : 1 for metabolites or 2 for reactions (by default: metabolites).")

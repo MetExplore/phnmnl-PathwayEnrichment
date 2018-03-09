@@ -6,6 +6,7 @@ import parsebionet.utils.chemicalStructures.InchiLayer;
 import java.util.Arrays;
 
 public class InChI4Galaxy extends InChI {
+    protected String wrongLayer = "";
 
     public InChI4Galaxy() {
         this.validity = false;
@@ -69,6 +70,7 @@ public class InChI4Galaxy extends InChI {
 
         if (!trunckedInchi.startsWith("InChI=")) {
             this.setValidInchi(false);
+            this.wrongLayer = "InChI=";
         } else {
             trunckedInchi = trunckedInchi.substring(6);
 
@@ -76,6 +78,7 @@ public class InChI4Galaxy extends InChI {
                 this.setVersion(Integer.parseInt(trunckedInchi.substring(0, 1)));
             } catch (Exception var4) {
                 this.setValidInchi(false);
+                this.wrongLayer="version";
                 return;
             }
 
@@ -85,6 +88,7 @@ public class InChI4Galaxy extends InChI {
             } else {
                 this.setStandard(false);
                 trunckedInchi = trunckedInchi.substring(1);
+                this.wrongLayer="S";
             }
 
             String[] tmp;
@@ -94,6 +98,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[8]) {
                     if (tmp.length != 2) {
                         this.setValidInchi(false);
+                        this.wrongLayer="reconnected (r)";
                         return;
                     }
                     connect = new InchiLayer('r', tmp[1]);
@@ -105,6 +110,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[7]) {
                     if (tmp.length != 2) {
                         this.setValidInchi(false);
+                        this.wrongLayer="fixed (f)";
                         return;
                     }
                     connect = new InchiLayer('f', tmp[1]);
@@ -116,6 +122,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[6]) {
                     if (tmp.length != 2) {
                         this.setValidInchi(false);
+                        this.wrongLayer="isotopic (i)";
                         return;
                     }
                     connect = new InchiLayer('i', tmp[1]);
@@ -127,6 +134,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[5]) {
                     if (tmp.length != 2) {
                         this.setValidInchi(false);
+                        this.wrongLayer="tetraStereo (t)";
                         return;
                     }
                     connect = new InchiLayer('t', tmp[1]);
@@ -138,6 +146,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[4]) {
                     if (tmp.length != 2) {
                         this.setValidInchi(false);
+                        this.wrongLayer="dbStereo (b)";
                         return;
                     }
                     connect = new InchiLayer('b', tmp[1]);
@@ -149,6 +158,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[3]) {
                     if (tmp.length != 2 || tmp[1].contains("/")) {
                         this.setValidInchi(false);
+                        this.wrongLayer="protonation (p)";
                         return;
                     }
                     connect = new InchiLayer('p', tmp[1]);
@@ -161,6 +171,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[2]) {
                     if (tmp.length != 2 || tmp[1].contains("/")) {
                         this.setValidInchi(false);
+                        this.wrongLayer="charge (q)";
                         return;
                     }
                     connect = new InchiLayer('q', tmp[1]);
@@ -173,6 +184,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[1]) {
                     if (tmp.length != 2 || tmp[1].contains("/")) {
                         this.setValidInchi(false);
+                        this.wrongLayer="h";
                         return;
                     }
                     connect = new InchiLayer('h', tmp[1]);
@@ -184,6 +196,7 @@ public class InChI4Galaxy extends InChI {
                 if (boolInchiLayers[0]) {
                     if (tmp.length != 2 || tmp[1].contains("/")) {
                         this.setValidInchi(false);
+                        this.wrongLayer="connectivity (c)";
                         return;
                     }
                     connect = new InchiLayer('c', tmp[1]);

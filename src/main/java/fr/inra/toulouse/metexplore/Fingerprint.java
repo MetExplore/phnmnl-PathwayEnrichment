@@ -18,16 +18,17 @@ public class Fingerprint {
     protected int[] columnNumbers, nbWarningPerDatabases;
     protected String separator, IDSeparator, warnings ="";
     protected String[] inchiLayers;
-    protected Boolean ifNoHeader, noFormatCheck;
+    protected Boolean ifNoHeader, noFormatCheck, layerWarning;
     protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
     protected String[] databases = {"InChI","ChEBI","SMILES","PubChem ID","InChIKey","KEGG ID","HMDB ID","ChemSpider ID", "weight"};
     protected BufferedReader fileBuffer;
 
     //TODO: excel parsing
 
-    public Fingerprint (Boolean noFormatCheck, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
+    public Fingerprint (Boolean layerWarning, Boolean noFormatCheck, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
                         int[] mappingColumns, String[] inchiLayers, int filteredColumn) throws IOException {
         this.fileBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));;
+        this.layerWarning=layerWarning;
         this.noFormatCheck=noFormatCheck;
         this.ifNoHeader=ifNoHeader;
         this.separator=separator;
@@ -156,7 +157,9 @@ public class Fingerprint {
         }else if (columnInTable == 2){
             InChI4Galaxy inchi = new InChI4Galaxy(id, this.inchiLayers);
             if(!inchi.validity) {
-                setWarnings(warning,"InChI",columnInTable);
+                String message = "InChI";
+                if (this.layerWarning) message+= " (wrong layer: " + inchi.wrongLayer +")";
+                setWarnings(warning,message,columnInTable);
             }
         }
     }

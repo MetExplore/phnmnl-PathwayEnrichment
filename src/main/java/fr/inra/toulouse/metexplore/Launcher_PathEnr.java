@@ -239,7 +239,7 @@ public class Launcher_PathEnr {
                 (launch.keggColumn-1), (launch.hmdbColumn-1), (launch.csidColumn-1), (launch.weightColumn-1)};
 
         try{
-            Fingerprint fingerprint = new Fingerprint(launch.noFormatCheck,launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator,
+            Fingerprint fingerprint = new Fingerprint(launch.layerWarning,launch.noFormatCheck,launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator,
                     launch.IDSeparator,(launch.nameColumn-1),mappingColumns, inchiLayers,(launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers, launch.nameMapping,
                     launch.outFileMapping, launch.galaxy, launch.bioEntityType);

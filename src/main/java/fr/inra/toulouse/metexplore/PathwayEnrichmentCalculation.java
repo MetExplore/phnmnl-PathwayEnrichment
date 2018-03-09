@@ -9,22 +9,20 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
     protected  BioNetwork network;
     protected  HashMap <BioEntity, String> list_mappedEntities;
     protected  OmicsMethods methods;
-    //protected Set<BioChemicalReaction> reactionSet;
+    protected Set<BioChemicalReaction> reactionSet;
 
     public PathwayEnrichmentCalculation(BioNetwork network, HashMap <BioEntity, String> list_mappedEntities, int bioEntityType){
         super(network, list_mappedEntities.keySet());
         this.network = network;
         this.list_mappedEntities = list_mappedEntities;
         this.methods = new OmicsMethods(list_mappedEntities,network, bioEntityType);
+        this.setReactionSet(network,list_mappedEntities.keySet());
     }
 
-    /*
     public void setReactionSet(BioNetwork network, Set<? extends BioEntity> BioEntitySet) {
         this.reactionSet = new HashSet();
-        Iterator var3 = BioEntitySet.iterator();
 
-        while(var3.hasNext()) {
-            BioEntity e = (BioEntity)var3.next();
+        for(BioEntity e : BioEntitySet) {
             if (e instanceof BioChemicalReaction) {
                 this.reactionSet.add((BioChemicalReaction)e);
             } else if (e instanceof BioPhysicalEntity) {
@@ -32,16 +30,26 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
                 this.reactionSet.addAll(m.getReactionsAsProduct().values());
                 this.reactionSet.addAll(m.getReactionsAsSubstrate().values());
             } else if (e instanceof BioGene) {
-                 BioGene g = (BioGene) e;
-                HashMap<String, BioProtein> proteinList = g.getProteinList();
-                BioProtein p = proteinList.values().iterator().next();
-
+                BioGene g = (BioGene) e;
+                addReactionsFromGene(g);
             } else if (e instanceof BioProtein) {
                  BioProtein p = (BioProtein) e;
-                HashMap<String, BioGene> geneList = p.getGeneList();
+                 HashMap<String, BioGene> list_genes = p.getGeneList();
+                 for (BioGene g : list_genes.values()){
+                     addReactionsFromGene(g);
+                 }
             }
         }
-    }*/
+    }
+
+    public void addReactionsFromGene(BioGene g){
+        Set <String> list_reactions_ID = network.getReactionsFromGene(g.getId());
+        for (String reac_ID : list_reactions_ID) {
+            BioChemicalReaction r = network.getBiochemicalReactionList().get(reac_ID);
+            this.reactionSet.add(r);
+        }
+    }
+
 
     @Override
     public double getPvalue(BioPathway pathway) throws IllegalArgumentException {

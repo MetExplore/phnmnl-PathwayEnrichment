@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class Test_PathEnr extends TestCase {
     protected String separator, outputFile, galaxy, logFile="temp/information.txt", dummyFile="temp/dummy.tsv";
     protected int filteredColumn, bioEntityType;
-    protected Boolean ifNoHeader, nameMapping;
+    protected Boolean ifNoHeader, nameMapping, noFormatCheck;
     protected String[] inchiLayers;
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
@@ -35,6 +35,7 @@ public class Test_PathEnr extends TestCase {
         (new File("temp")).mkdir();
         this.setDefaultInChILayers();
         this.setDefaultMappingColumn();
+        this.noFormatCheck = false;
         this.nameMapping = false;
         this.fingerprint = null;
         this.mapping = null;
@@ -205,7 +206,7 @@ public class Test_PathEnr extends TestCase {
             dummyFile.write(header + "\n");
             dummyFile.write(inputLine);
             dummyFile.close();
-            this.fingerprint = new Fingerprint(this.dummyFile, this.ifNoHeader, this.separator,";",0,
+            this.fingerprint = new Fingerprint(this.noFormatCheck,this.dummyFile, this.ifNoHeader, this.separator,";",0,
                     this.mappingColumn,this.inchiLayers,this.filteredColumn);
         } catch (IOException e) {
             e.printStackTrace();
@@ -232,17 +233,18 @@ public class Test_PathEnr extends TestCase {
     public void testExtractData() {
     //Test that each possible mapping values are correctly extracted
         this.setMappingAllColumn();
-        this.createDummyFileWithMultipleColumns("nameMetabolite\tidSBML\tinchi\tchebi\tsmiles\tpubchemColum\tinchikeys\tkegg\thmd\tchemspider\tweight");
-        String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchemColum","inchikeys","kegg","hmd","chemspider","weight"};
+        this.createDummyFileWithMultipleColumns("nameMetabolite\tidSBML\tinchi\tchebi\tsmiles\tpubchem\tinchikeys\tkegg\thmd\tchemspider\tweight");
+        String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchem","inchikeys","kegg","hmd","chemspider","weight"};
         assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).iterator().next()));
     }
 
     public void testSeparator() {
     //Test that each possible mapping values are correctly extracted
         this.setMappingAllColumn();
+        this.noFormatCheck=true;
         this.separator=";";
-        this.createDummyFileWithMultipleColumns("nameMetabolite;idSBML;inchi;chebi;smiles;pubchemColum;inchikeys;kegg;hmd;chemspider;weight");
-        String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchemColum","inchikeys","kegg","hmd","chemspider","weight"};
+        this.createDummyFileWithMultipleColumns("nameMetabolite;idSBML;inchi;chebi;smiles;pubchem;inchikeys;kegg;hmd;chemspider;weight");
+        String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchem","inchikeys","kegg","hmd","chemspider","weight"};
         assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).iterator().next()));
     }
 

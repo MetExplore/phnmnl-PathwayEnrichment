@@ -35,6 +35,9 @@ public class Launcher_PathEnr {
 
     /******PARSING PARAMETERS*****/
 
+    @Option(name="--check", usage="Activate this option if the fingerprint dataset contains no header.")
+    protected boolean noFormatCheck = false;
+
     @Option(name="--header", usage="Activate this option if the fingerprint dataset contains no header.")
     protected boolean ifNoHeader = false;
 
@@ -226,18 +229,18 @@ public class Launcher_PathEnr {
         //Regex for inchiLayers parameter
         String[] inchiLayers = launch.inchiLayers.replaceAll(" ","").split(",");
         //Extract SBML
-        //BioNetwork network = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
+        BioNetwork network = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
         int[] mappingColumns = {(launch.idSBMLColumn-1), (launch.inchiColumn-1), (launch.chebiColumn-1),
                 (launch.smilesColumn-1), (launch.pubchemColumn-1), (launch.inchikeyColumn-1),
                 (launch.keggColumn-1), (launch.hmdbColumn-1), (launch.csidColumn-1), (launch.weightColumn-1)};
 
         try{
-            Fingerprint fingerprint = new Fingerprint(launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator,
+            Fingerprint fingerprint = new Fingerprint(launch.noFormatCheck,launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator,
                     launch.IDSeparator,(launch.nameColumn-1),mappingColumns, inchiLayers,(launch.colFiltered-1));
-            /*Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers, launch.nameMapping,
+            Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers, launch.nameMapping,
                     launch.outFileMapping, launch.galaxy, launch.bioEntityType);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
-                    launch.outFilePathEnr,launch.galaxy, launch.bioEntityType);*/
+                    launch.outFilePathEnr,launch.galaxy, launch.bioEntityType);
             write.writeOutputInfo();
         }
         catch (IOException e){

@@ -56,7 +56,7 @@ public class Fingerprint {
         int[] columnNumbers = {this.nameColumn, this.idSBMLColumn, this.inchiColumn, this.chebiColumn,
                 this.smilesColumn, this.pubchemColum, this.inchikeysColumn, this.keggColumn, this.hmdColumn,
                 this.chemspiderColumn, this.weightColumn};
-        //if (verbose) System.out.println(Arrays.toString(columnNumbers));
+        //if (debug) System.out.println(Arrays.toString(columnNumbers));
 
         if(!this.ifNoHeader){
             fileBuffer.readLine(); //skip the header
@@ -68,7 +68,7 @@ public class Fingerprint {
 
             String[] lineInFile = line.replaceAll("\"", "").split(this.separator);//splitting by tabulation
             String[] lineFormatted = new String[11];
-            //if (verbose=true)
+            //if (debug)
             //System.out.println(Arrays.toString(lineInFile));
 
             for (int i = 0; i < columnNumbers.length; i++) {
@@ -76,7 +76,8 @@ public class Fingerprint {
             }
             try {
                 if (isFiltered == false || lineInFile[this.filteredColumn] != "") { //optional filtering on a specified column
-                    //if (verbose=true) System.out.println(Arrays.toString(lineFormatted));
+                   // if (debug)
+                   //     System.out.println(Arrays.toString(lineFormatted));
                     this.list_entities.add(lineFormatted);//add to hashmap
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
@@ -103,7 +104,9 @@ public class Fingerprint {
                 String[] tab_ids = lineInFile[columnInFile].split(IDSeparator);
                 ArrayList <String> ids = new ArrayList <String>();
                 for (String id : tab_ids) {
+
                     id = id.replace("\\s$", "").replace("^\\s","").replaceAll("\\s{2,}", "");
+                    if(id.toUpperCase().equals("NA")) id = "";
                     if (columnInTable > 1){
                         //avoid to replace space for example for pathway name (could be refactored)
                         id = id.replaceAll("\\s", "");
@@ -122,16 +125,22 @@ public class Fingerprint {
     }
 
     public void checkIDFormat(String id, String[] lineInFile, int columnInTable){
-        String[] patterns = {"^CHEBI:[0-9]+$","","^[0-9]*$","^[A-Z]{14}-[A-Z]{10}-[A-Z]$","^[A-Z]{1,2}[0-9]{5}$","^HMDB[0-9]{5}$","^[0-9]*$"};
-        String[] databases = {"ChEBI","","PubChem","InChIKey","KEGG","HMDB","ChemSpider"};
+        String[] patterns = {"^CHEBI:[0-9]+$",".*","^[0-9]*$","^[A-Z]{14}-[A-Z]{10}-[A-Z]$","^[A-Z]{1,2}[0-9]{5}$","^HMDB[0-9]{5}$","^[0-9]*$"};
+        String[] databases = {"ChEBI","SMILES","PubChem ID","InChIKey","KEGG ID","HMDB ID","ChemSpider ID"};
         String[] warning = {"[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), ", " is badly formatted: " + id};
 
-        if (columnInTable > 2){
+        if (columnInTable == 10){
+            try {
+                Float.parseFloat(id);
+            } catch (NumberFormatException e) {
+                System.out.println(warning[0] + "weight" + warning[1]);
+            }
+        } else if (columnInTable > 2){
             if(!Pattern.matches(patterns[columnInTable-3], id)) {
                 System.out.println(warning[0] + databases[columnInTable - 3] + warning[1]);
             }
         }
-        if (columnInTable == 2){
+        else if (columnInTable == 2){
             InChI4Galaxy inchi = new InChI4Galaxy(id, inchiLayers);
             /*System.out.println(inchi.validity);
             System.out.println(inchi.connectivity);

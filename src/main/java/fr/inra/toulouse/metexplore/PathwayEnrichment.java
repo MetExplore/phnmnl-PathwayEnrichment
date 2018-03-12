@@ -22,9 +22,7 @@ public class PathwayEnrichment extends Omics{
 
     public void computeEnrichmentWithCorrections() throws IOException {
         System.out.println("Pathway enrichment in progress...");
-        parsebionet.statistics.PathwayEnrichment pathEnr;
-        BioEntity bpe = this.list_mappedEntities.keySet().iterator().next();
-        pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType);
+        PathwayEnrichmentCalculation pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType);
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);
 

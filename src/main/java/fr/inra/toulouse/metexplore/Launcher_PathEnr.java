@@ -1,8 +1,6 @@
 package fr.inra.toulouse.metexplore;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import parsebionet.biodata.BioNetwork;
@@ -35,7 +33,7 @@ public class Launcher_PathEnr {
 
     /******PARSING PARAMETERS*****/
 
-    @Option(name="--check", usage="Activate this option if the fingerprint dataset contains no header.")
+    @Option(name="--check", usage="Activate this option to check database identifier format.")
     protected boolean noFormatCheck = false;
 
     @Option(name="--header", usage="Activate this option if the fingerprint dataset contains no header.")
@@ -55,13 +53,12 @@ public class Launcher_PathEnr {
     @Option(name="-gal", aliases="--galaxy", usage="For galaxy compliance: formatting pathway output and creating a new one containing log information.")
     protected String galaxy = "";
 
-    @Option(name="-lWarn", aliases="-layersWarning", usage="List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
-            " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
+    @Option(name="-lWarn", aliases="-layersWarning", usage="When format checking option is activated, points out badly formatted InChI layers")
     protected Boolean layerWarning = false;
 
     /*****MAPPING PARAMETERS*****/
 
-    @Option(name = "-t", aliases="--bioType", usage = "Type of biological object selected : 1 for metabolites or 2 for reactions (by default: metabolites).")
+    @Option(name = "-t", aliases="--type", usage = "Type of biological object selected : 1 for metabolites or 2 for reactions (by default: metabolites).")
     protected int bioEntityType = 1;
 
     @Option(name="-name", usage="Activate this option for a name mapping .")

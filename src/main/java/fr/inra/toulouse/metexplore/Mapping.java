@@ -50,7 +50,7 @@ public class Mapping extends Omics {
             Boolean isMapped = false;
             int nbOccurencesBpe = 0;//identification of multiple mapping
             BioEntity mappedBpe = new BioPhysicalEntity();
-            //System.out.println(Arrays.toString(lineInFile));
+            System.out.println(Arrays.toString(lineInFile));
 
             //Mapping on metabolites
             // Loop for each metabolite from the SBML
@@ -73,7 +73,7 @@ public class Mapping extends Omics {
                     mappingColumnInfile.addAll(Arrays.asList(2, 4, 5, 10));
                 }
                 //System.out.println(Arrays.toString(mappingColumnInfile.toArray()));
-                //System.out.println(Arrays.toString(associatedValueInSbml.toArray()));
+                System.out.println(Arrays.toString(associatedValueInSbml.toArray()));
                 Iterator colNum = mappingColumnInfile.iterator();
                 for (String sbmlVal : associatedValueInSbml) {
                     mapping4AttributesCase(lineInFile, sbmlVal, (int) colNum.next(), e);
@@ -125,7 +125,7 @@ public class Mapping extends Omics {
             else
                 System.err.println("There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
                         "(by default on the SBML ID and the name of the metabolites), wrong number of column from the dataset" +
-                        " or wrong type of bioEntity.\nPlease check your settings and rerun the analysis.");
+                        " or wrong type of bioEntity (or bad SBML).\nPlease check your settings and rerun the analysis.");
             exit(1);
         }
 

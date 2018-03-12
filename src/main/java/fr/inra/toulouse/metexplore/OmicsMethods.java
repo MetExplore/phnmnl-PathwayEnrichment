@@ -23,6 +23,14 @@ public class OmicsMethods {
                return pathway.getListOfInvolvedMetabolite().values();
            case 2:
                return pathway.getReactions().values();
+           case 4:
+                ;
+           case 5:
+               Set <BioProtein> proteins = new HashSet<BioProtein>();
+               for (BioGene g : pathway.getGenes()){
+                   proteins.addAll(g.getProteinList().values());
+               }
+               return proteins;
            case 6:
             return pathway.getGenes();
        }
@@ -47,9 +55,11 @@ public class OmicsMethods {
         return null;
     }
     public int[] getFisherTestParameters(BioPathway pathway) {
+        System.out.println("Hi again !");
         Collection entityInPathway = this.getEntitySetInPathway(pathway);
         //nb of mapped in the pathway
         int a = this.intersect(entityInPathway).size();
+        System.out.println(pathway.getName() + ": size: " + a);
         //unmapped metabolites in the fingerprint
         int b = this.list_mappedEntities.size() - a;
         //unmapped metabolites in the pathway

@@ -1,6 +1,7 @@
 package fr.inra.toulouse.metexplore;
 
 import junit.framework.TestCase;
+import org.apache.commons.io.FileUtils;
 import parsebionet.biodata.BioEntity;
 import parsebionet.biodata.BioNetwork;
 
@@ -12,9 +13,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Test_PathEnr extends TestCase {
-    protected String outputFile, separator;
+    protected String separator, outputFile, galaxy, logFile="temp/information.txt", dummyFile="temp/dummy.tsv";
     protected int filteredColumn, bioEntityType;
-    protected Boolean ifNoHeader, ifGalaxy;
+    protected Boolean ifNoHeader, nameMapping, noFormatCheck;
     protected String[] inchiLayers;
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
@@ -29,27 +30,33 @@ public class Test_PathEnr extends TestCase {
     public void setUp() throws Exception {
     //Initialization of the parameters before each tests
         super.setUp();
-        //this.setSecurityManager();;
+        //this.setSecurityManager();
+        //WritingComportment write = new WritingComportment(this.galaxy);
+        (new File("temp")).mkdir();
         this.setDefaultInChILayers();
         this.setDefaultMappingColumn();
+        this.noFormatCheck = false;
+        this.nameMapping = false;
         this.fingerprint = null;
         this.mapping = null;
         this.pathEnr = null;
         this.separator="\t";
         this.ifNoHeader = false;
-        this.ifGalaxy = false;
-        this.outputFile = "output.tsv";
+        this.galaxy = "";
+        this.outputFile = "temp/output.tsv";
         this.filteredColumn = -1;
         this.bioEntityType = 1;
     }
 
     protected void tearDown() throws Exception {
         super.tearDown();
-        String[] files = {this.outputFile, "information.tsv", "dummyFile.tsv"};
-        for (String f: files){
-            this.deleteFile(f);
+        File folder = new File("temp");
+        try{
+            FileUtils.forceDelete(folder);
+        }catch (IOException e){
+            ;
         }
-        //TODO: output.tsv delete don't work
+        folder.delete();
     }
 
     /*******************************
@@ -137,13 +144,13 @@ public class Test_PathEnr extends TestCase {
         this.expectedMappedMetabolite = new ArrayList<BioEntity>();
 
         try {
-            this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.outputFile,
-                    this.ifGalaxy, this.bioEntityType);
+            this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.nameMapping, this.outputFile,
+                    this.galaxy, this.bioEntityType);
             this.file = new File(this.outputFile);
             OmicsMethods methods = new OmicsMethods(this.mapping.list_mappedEntities,network,this.bioEntityType);
             this.expectedMappedMetabolite.add((BioEntity)methods.getEntitySetInNetwork().get(bpe));
             assertEquals(this.expectedMappedMetabolite.iterator().next().getName(),
-                    this.mapping.list_mappedEntities.iterator().next().getName());
+                    this.mapping.list_mappedEntities.keySet().iterator().next().getName());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -173,20 +180,34 @@ public class Test_PathEnr extends TestCase {
                 "M_tststeroneglc");
     }
 
+    /************setWriteOutput************/
+
+    public void setBufferTest(String fileName, String header, String line){
+        setBufferReader(fileName);
+        try {
+            if(fileName == this.logFile) this.pathEnr.write.writeOutputInfo();
+            assertEquals(buffer.readLine(), header);
+            assertEquals(buffer.readLine(), line);
+            assertEquals(buffer.readLine(), null);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
     /***********createDummyFile*************/
 
     public void createDummyFile(String inputLine, String header){
     //Create a dummy fingerprint dataset for tests
 
         try {
-            this.file = new File("dummyFile.tsv");
+            this.file = new File(this.dummyFile);
             this.file.createNewFile();
             BufferedWriter dummyFile = new BufferedWriter(new FileWriter(this.file));
             dummyFile.write(header + "\n");
             dummyFile.write(inputLine);
             dummyFile.close();
-            this.fingerprint = new Fingerprint("dummyFile.tsv", this.ifNoHeader, this.separator,0,
-                    this.mappingColumn,this.filteredColumn);
+            this.fingerprint = new Fingerprint(false,this.noFormatCheck,this.dummyFile, this.ifNoHeader, this.separator,";",0,
+                    this.mappingColumn,this.inchiLayers,this.filteredColumn);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -212,18 +233,19 @@ public class Test_PathEnr extends TestCase {
     public void testExtractData() {
     //Test that each possible mapping values are correctly extracted
         this.setMappingAllColumn();
-        this.createDummyFileWithMultipleColumns("nameMetabolite\tidSBML\tinchi\tchebi\tsmiles\tpubchemColum\tinchikeys\tkegg\thmd\tchemspider\tweight");
-        String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchemColum","inchikeys","kegg","hmd","chemspider","weight"};
-        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).values().iterator().next()));
+        this.createDummyFileWithMultipleColumns("nameMetabolite\tidSBML\tinchi\tchebi\tsmiles\tpubchem\tinchikeys\tkegg\thmd\tchemspider\tweight");
+        String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchem","inchikeys","kegg","hmd","chemspider","weight"};
+        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).iterator().next()));
     }
 
     public void testSeparator() {
     //Test that each possible mapping values are correctly extracted
         this.setMappingAllColumn();
+        this.noFormatCheck=true;
         this.separator=";";
-        this.createDummyFileWithMultipleColumns("nameMetabolite;idSBML;inchi;chebi;smiles;pubchemColum;inchikeys;kegg;hmd;chemspider;weight");
-        String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchemColum","inchikeys","kegg","hmd","chemspider","weight"};
-        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).values().iterator().next()));
+        this.createDummyFileWithMultipleColumns("nameMetabolite;idSBML;inchi;chebi;smiles;pubchem;inchikeys;kegg;hmd;chemspider;weight");
+        String[] expectedLine = {"nameMetabolite","idSBML","inchi","chebi","smiles","pubchem","inchikeys","kegg","hmd","chemspider","weight"};
+        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).iterator().next()));
     }
 
     public void testHeader() {
@@ -311,88 +333,6 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4Testo();
     }
 
-    public void testMappingID () {
-    //Test the success of a mapping with the ID of the network from a dataset containing an only column
-        this.setMapping4OneColumnFileByID("M_taur", "M_taur");
-    }
-
-    public void testMappingName () {
-        //Test the success of a mapping with the name of the network from a dataset containing an only column
-        this.setMapping4OneColumnFileByID("Taurine", "M_taur");
-    }
-
-    public void testMappingIDReaction () {
-        //Test the success of a mapping with the ID of a reaction
-        this.bioEntityType = 2;
-        this.setMapping4OneColumnFileByID("R_FUM", "R_FUM");
-    }
-
-    public void testMappingNameReaction () {
-        //Test the success of a mapping with the ID of the network from a dataset containing an only column
-        this.bioEntityType = 2;
-        this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
-    }
-
-    public void itestMappingIDEnzyme() {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 4;
-        this.setMapping4OneColumnFileByID("_9415_1_c", "_9415_1_c");
-    }
-
-    public void itestMappingNameEnzyme () {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 4;
-        this.setMapping4OneColumnFileByID("FADS2", "_9415_1_c");
-    }
-
-    public void itestMappingIDProtein() {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 5;
-        this.setMapping4OneColumnFileByID("_9415_1_c", "_9415_1_c");
-    }
-
-    public void itestMappingNameProtein () {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 5;
-        this.setMapping4OneColumnFileByID("FADS2", "_9415_1_c");
-    }
-
-    public void itestMappingIDGene() {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 6;
-        this.setMapping4OneColumnFileByID("10026.1", "10026.1");
-    }
-
-    public void itestMappingNameGene () {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 6;
-        this.setMapping4OneColumnFileByID("10026.1", "10026.1");
-    }
-
-    public void testMappingIDPathway() {
-        //Test the success of a mapping with the ID of a pathway
-        this.bioEntityType = 3;
-        this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
-    }
-
-    public void testMappingNamePathway () {
-        //Test the success of a mapping with the name of a pathway
-        this.bioEntityType = 3;
-        this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
-    }
-
     public void testMappingHMDB () {
         //Test the success of a mapping with the HMDB ID
         this.setMapping4OneColumnFile(7,0,"HMDB00251", "M_taur");
@@ -408,18 +348,44 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4OneColumnFile(6,0,"C00160", "M_glyclt");
     }
 
-    /*************Writing output***********/
-
-    public void setBufferTest(String fileName, String header, String line){
-        setBufferReader(fileName);
-        try {
-            assertEquals(buffer.readLine(), header);
-            assertEquals(buffer.readLine(), line);
-            assertEquals(buffer.readLine(), null);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+    public void testMappingID () {
+        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        this.setMapping4OneColumnFileByID("M_taur", "M_taur");
     }
+
+    public void testMappingName () {
+        //Test the success of a mapping with the name of the network from a dataset containing an only column
+        this.nameMapping = true;
+        this.setMapping4OneColumnFileByID("Taurine", "M_taur");
+    }
+
+    public void testMappingIDReaction () {
+        //Test the success of a mapping with the ID of a reaction
+        this.bioEntityType = 2;
+        this.setMapping4OneColumnFileByID("R_FUM", "R_FUM");
+    }
+
+    public void testMappingNameReaction () {
+        //Test the success of a mapping with the ID of the network from a dataset containing an only column
+        this.nameMapping = true;
+        this.bioEntityType = 2;
+        this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
+    }
+
+    public void testMappingIDPathway() {
+        //Test the success of a mapping with the ID of a pathway
+        this.bioEntityType = 3;
+        this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
+    }
+
+    public void testMappingNamePathway () {
+        //Test the success of a mapping with the name of a pathway
+        this.nameMapping = true;
+        this.bioEntityType = 3;
+        this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
+    }
+
+    /*************Writing output***********/
     public void testWriteOutputMapping(){
         //Test the expected format of the output file obtained by mapping
         this.setMapping4Testo();
@@ -434,15 +400,27 @@ public class Test_PathEnr extends TestCase {
     //Test the expected format of the output file obtained by pathway enrichment
             try {
                 this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
-                        this.mapping.list_mappedEntities, pathFile,this.ifGalaxy,this.bioEntityType);
+                        this.mapping.list_mappedEntities, pathFile,this.galaxy,this.bioEntityType);
             }catch (IOException e ){
                 e.printStackTrace();
             }
             this.setBufferTest(
                     pathFile,
-                    "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_name\t" +
-                                    "Mapped_entities_ID\tNb. of mapped\tCoverage (%)"+galColumn,
+                    "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\t" +
+                            "Mapped_entities_SBML\tMapped_entities_Fingerprint\tMapped_entities_ID\t" +
+                            "Nb. of mapped\tCoverage (%)"+galColumn,
                     line);
+    }
+
+    public void setGalaxy(){
+        this.galaxy=this.logFile;
+        this.file = new File(this.galaxy);
+        try{
+            this.file.createNewFile();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        WritingComportment.text4outputFileInfo="";
     }
 
     public void testWriteOutputPathEnr() {
@@ -451,57 +429,102 @@ public class Test_PathEnr extends TestCase {
                 this.outputFile,
                 "",
                 "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
-                        "\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67");
+                        "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67");
     }
 
     public void testWriteOutputPathEnr4Galaxy() {
-        this.ifGalaxy=true;
-        this.setMapping4OneColumnFile(0,1,"Testosterone glucuronide\tM_tststeroneglc\n",
-                "M_tststeroneglc");
+        this.setGalaxy();
+        this.setMapping4Testo();
         this.setWriteOutputPathEnr(
                 this.outputFile,
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
-                        "\ttestosterone 3-glucosiduronic acid\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
-        this.setBufferTest("information.tsv",
-                "1 metabolites have been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
+                        "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
+        this.setBufferTest(this.galaxy,
+                "1 entities have been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
                 "1 pathways are concerned among the network (on 97 in the network).");
     }
 
     public void testWriteOutputPathEnrWithReaction() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
         this.bioEntityType = 2;
-        this.setMapping4OneColumnFileByID("RE1096", "R_RE1096C");
+        this.nameMapping = true;
+        this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
         this.setWriteOutputPathEnr(
                 this.outputFile,
                 "",
-                "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tR_RE1096C\t1\t1.32");
+                "Citric acid cycle\t0.004750593824228029\t0.004750593824228029\t0.004750593824228029\tfumarase\tfumarase\tR_FUM\t1\t5.0");
     }
 
     public void testWriteOutput4GalaxyWithReaction() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
-        this.ifGalaxy=true;
+        this.setGalaxy();
         this.outputFile="";
         this.bioEntityType = 2;
-        this.setMapping4OneColumnFileByID("R_RE1096C", "R_RE1096C");
+        this.setMapping4OneColumnFileByID("R_FUM", "R_FUM");
         this.setWriteOutputPathEnr(
-                "pathEnr.tsv",
+                "temp/pathEnr.tsv",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
-                "Steroid metabolism\t0.01805225653206651\t0.01805225653206651\t0.01805225653206651\tRE1096\tR_RE1096C\t1\t1.32\t75\t0\t4134");
-        this.setBufferTest("information.tsv",
+                "Citric acid cycle\t0.004750593824228029\t0.004750593824228029\t0.004750593824228029\tfumarase\tR_FUM\tR_FUM\t1\t5.0\t19\t0\t4190");
+        this.setBufferTest(this.galaxy,
                 "1 pathways are concerned among the network (on 97 in the network).",
                 null);
     }
 
-//    public void testMappingOtherEntity (){
-//        network= (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
-//        itestMappingIDEnzyme();
-//        itestMappingIDGene();
-//        itestMappingIDProtein();
-//        itestMappingNameEnzyme();
-//        itestMappingNameGene();
-//        itestMappingNameProtein();
-//    }
+    /*************Tests in progress with Recon2.02 containing enzymes, protein & genes***********/
+/*
+    public void testMappingIDEnzyme() {
+        try {
+            this.setUp();
+        }catch (Exception e){}
+        this.bioEntityType = 4;
+        this.setMapping4OneColumnFileByID("_9415_1", "_9415_1");
+    }
+    //BUG: in SBML, there is no "_9415_1_c"
+
+    public void itestMappingNameEnzyme () {
+        try {
+            this.setUp();
+        }catch (Exception e){}
+        this.bioEntityType = 4;
+        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
+    }
+    //BUG: there is no name in SBML
+
+    public void testMappingIDProtein() {
+        try {
+            this.setUp();
+        }catch (Exception e){}
+        this.bioEntityType = 5;
+        this.setMapping4OneColumnFileByID("_9415_1", "_9415_1");
+    }
+
+    public void itestMappingNameProtein () {
+        try {
+            this.setUp();
+        }catch (Exception e){}
+        this.bioEntityType = 5;
+        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
+    }*/
+
+    public void testMappingIDGene() {
+        this.network = (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
+        System.out.println(network.getEnzList().get("_9415_1_c"));
+        System.out.println(network.getProteinList().get("_9415_1_c"));
+        System.out.println(network.getEnzList().get("_9415_1"));
+        System.out.println(network.getProteinList().get("_9415_1"));
+        System.out.println(network.getEnzList().get("hsa:9415"));
+        System.out.println(network.getProteinList().get("hsa:9415"));
+        System.out.println(network.getGeneList().get("10026.1"));
+        this.bioEntityType = 6;
+        this.setMapping4OneColumnFileByID("10026.1", "10026.1");
+    }
+
+    public void testMappingNameGene () {
+        this.nameMapping = true;
+        this.bioEntityType = 6;
+        this.setMapping4OneColumnFileByID("10026.1", "10026.1");
+    }
 
     //TODO: regex to remove HRA and split by _ for prot and enz
 

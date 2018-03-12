@@ -7,44 +7,84 @@ import java.util.*;
 public class PathwayEnrichmentCalculation extends parsebionet.statistics.PathwayEnrichment {
 
     protected  BioNetwork network;
-    protected  Set <BioEntity> list_mappedEntities;
+    protected  HashMap <BioEntity, String> list_mappedEntities;
     protected  OmicsMethods methods;
-    //protected Set<BioChemicalReaction> reactionSet;
+    protected  Set<BioChemicalReaction> reactionSet;
 
-    public PathwayEnrichmentCalculation(BioNetwork network, Set <BioEntity> list_mappedEntities, int bioEntityType){
-        super(network, list_mappedEntities);
+    public PathwayEnrichmentCalculation(BioNetwork network, HashMap <BioEntity, String> list_mappedEntities, int bioEntityType){
+        super(network, list_mappedEntities.keySet());
         this.network = network;
         this.list_mappedEntities = list_mappedEntities;
         this.methods = new OmicsMethods(list_mappedEntities,network, bioEntityType);
+        this.setReactionSet(list_mappedEntities.keySet());
     }
 
-    /*
-    public void setReactionSet(BioNetwork network, Set<? extends BioEntity> BioEntitySet) {
+    public void setReactionSet(Set<? extends BioEntity> BioEntitySet) {
         this.reactionSet = new HashSet();
-        Iterator var3 = BioEntitySet.iterator();
-
-        while(var3.hasNext()) {
-            BioEntity e = (BioEntity)var3.next();
+        for(BioEntity e : BioEntitySet) {
+            //System.out.println(e.getId() + ":" + e.getName());
             if (e instanceof BioChemicalReaction) {
                 this.reactionSet.add((BioChemicalReaction)e);
+            } else if (e instanceof BioGene) {
+                BioGene g = (BioGene) e;
+                addReactionsFromGene(g);
+            } else if (e instanceof BioProtein) {
+                System.out.println("Protein");
+                 BioProtein p = (BioProtein) e;
+                 HashMap<String, BioGene> list_genes = p.getGeneList();
+                 for (BioGene g : list_genes.values()){
+                     addReactionsFromGene(g);
+                 }
             } else if (e instanceof BioPhysicalEntity) {
+                System.out.println("Metabolite");
                 BioPhysicalEntity m = (BioPhysicalEntity)e;
                 this.reactionSet.addAll(m.getReactionsAsProduct().values());
                 this.reactionSet.addAll(m.getReactionsAsSubstrate().values());
-            } else if (e instanceof BioGene) {
-                 BioGene g = (BioGene) e;
-                HashMap<String, BioProtein> proteinList = g.getProteinList();
-                BioProtein p = proteinList.values().iterator().next();
-
-            } else if (e instanceof BioProtein) {
-                 BioProtein p = (BioProtein) e;
-                HashMap<String, BioGene> geneList = p.getGeneList();
             }
         }
-    }*/
+        System.out.println("ListReacSize: " + this.reactionSet.size());
+    }
+
+    public void addReactionsFromGene(BioGene g){
+
+        Set <String> list_reactions_ID = network.getReactionsFromGene(g.getId());
+        //System.out.println("sizeReac: " + list_reactions_ID.size());
+        for (String reac_ID : list_reactions_ID) {
+            BioChemicalReaction r = network.getBiochemicalReactionList().get(reac_ID);
+            //System.out.println("Reac: " + r.getName());
+            this.reactionSet.add(r);
+        }
+    }
+
+    @Override
+    public HashMap<BioPathway, Double> computeEnrichment() {
+        HashSet<BioPathway> paths = new HashSet();
+        Iterator var2 = this.reactionSet.iterator();
+
+        System.out.println("SizeCompute: " + this.reactionSet.size());
+        while(var2.hasNext()) {
+            BioChemicalReaction r = (BioChemicalReaction)var2.next();
+            System.out.println("Reac: " + r.getName());
+            paths.addAll(r.getPathwayList().values());
+        }
+
+        System.out.println("PathSize: " + paths.size());
+
+        HashMap<BioPathway, Double> res = new HashMap();
+        Iterator var6 = paths.iterator();
+
+        while(var6.hasNext()) {
+            BioPathway p = (BioPathway)var6.next();
+            System.out.println("PathName: " + p.getName());
+            res.put(p, this.getPvalue(p));
+        }
+        System.out.println("ResSIze: "+ res.size());
+        return res;
+    }
 
     @Override
     public double getPvalue(BioPathway pathway) throws IllegalArgumentException {
+        System.out.println("Hi !");
         if (!this.network.getPathwayList().values().contains(pathway)) {
             throw new IllegalArgumentException("pathway not in network");
         } else {

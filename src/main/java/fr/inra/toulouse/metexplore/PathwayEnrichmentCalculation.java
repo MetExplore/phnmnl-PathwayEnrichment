@@ -24,25 +24,31 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
         for(BioEntity e : BioEntitySet) {
             //System.out.println(e.getId() + ":" + e.getName());
             if (e instanceof BioChemicalReaction) {
-                this.reactionSet.add((BioChemicalReaction)e);
+                this.reactionSet.add((BioChemicalReaction) e);
+            }else if(this.methods.bioEntityTYpe == 4) {
+                System.out.println("Enzyme");
+                for (BioChemicalReaction r2 : network.getBiochemicalReactionList().values()) {
+                    if (r2.getEnzList().values().contains(e)) {
+                        reactionSet.add(r2);
+                    }
+                }
             } else if (e instanceof BioGene) {
+                System.out.println("Genes");
                 BioGene g = (BioGene) e;
                 addReactions(network.getReactionsFromGene(g.getId()));
             } else if (e instanceof BioProtein) {
                 System.out.println("Protein");
-                for(BioChemicalReaction r2 : network.getBiochemicalReactionList().values()){
-                    if(r2.getEnzList().values().contains(e)){
-                        reactionSet.add(r2);
-                    }
+                BioProtein p = (BioProtein) e;
+                HashMap<String, BioGene> list_genes = p.getGeneList();
+                for (BioGene g : list_genes.values()){
+                    addReactions(network.getReactionsFromGene(g.getId()));
                 }
             } else if (e instanceof BioPhysicalEntity) {
-                if(this.methods.bioEntityTYpe == 1) {
+                if (this.methods.bioEntityTYpe == 1) {
                     System.out.println("Metabolite");
                     BioPhysicalEntity m = (BioPhysicalEntity) e;
                     this.reactionSet.addAll(m.getReactionsAsProduct().values());
                     this.reactionSet.addAll(m.getReactionsAsSubstrate().values());
-                }else if(this.methods.bioEntityTYpe == 4) {
-
                 }
             }
         }
@@ -62,22 +68,17 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
     @Override
     public HashMap<BioPathway, Double> computeEnrichment() {
         HashSet<BioPathway> paths = new HashSet();
-        Iterator var2 = this.reactionSet.iterator();
 
-        System.out.println("SizeCompute: " + this.reactionSet.size());
-        while(var2.hasNext()) {
-            BioChemicalReaction r = (BioChemicalReaction)var2.next();
+        //System.out.println("SizeCompute: " + this.reactionSet.size());
+       for ( BioChemicalReaction r : this.reactionSet){
             //System.out.println("Reac: " + r.getName());
             paths.addAll(r.getPathwayList().values());
         }
 
         System.out.println("PathSize: " + paths.size());
 
-        HashMap<BioPathway, Double> res = new HashMap();
-        Iterator var6 = paths.iterator();
-
-        while(var6.hasNext()) {
-            BioPathway p = (BioPathway)var6.next();
+       HashMap<BioPathway, Double> res = new HashMap();
+       for (BioPathway p : paths){
             //System.out.println("PathName: " + p.getName());
             res.put(p, this.getPvalue(p));
         }

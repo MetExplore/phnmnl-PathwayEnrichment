@@ -20,18 +20,9 @@ public class PathwayEnrichment extends Omics{
         this.computeEnrichmentWithCorrections();
     }
 
-    public static void testProtList (BioGene gTest) {
-        Collection<BioProtein> protList = gTest.getProteinList().values();
-        for (BioProtein p : protList) {
-            System.out.println(p.getId());
-        }
-        System.out.println("testGeneSize: " + protList.size());
-    }
-
     public void computeEnrichmentWithCorrections() throws IOException {
         System.out.println("Pathway enrichment in progress...");
         if (bioEntityType == 5) this.parseProtList4Genes();
-        testProtList(network.getGeneList().get("10026.1"));
         PathwayEnrichmentCalculation pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType);
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);

@@ -231,6 +231,7 @@ public class Launcher_PathEnr {
         String[] inchiLayers = launch.inchiLayers.replaceAll(" ","").split(",");
         //Extract SBML
         BioNetwork network = (new JSBML2Bionetwork4Galaxy(launch.sbml)).getBioNetwork();
+        //network.printBioNetworkSizeToOut();
         int[] mappingColumns = {(launch.idSBMLColumn-1), (launch.inchiColumn-1), (launch.chebiColumn-1),
                 (launch.smilesColumn-1), (launch.pubchemColumn-1), (launch.inchikeyColumn-1),
                 (launch.keggColumn-1), (launch.hmdbColumn-1), (launch.csidColumn-1), (launch.weightColumn-1)};

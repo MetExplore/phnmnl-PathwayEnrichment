@@ -1,10 +1,6 @@
 
 src/main/java/fr/inra/toulouse/metexplore/Test\.java
 
-\.idea/workspace\.xml
-
-data/\.~lock\.sacurine_workflow_output\.tsv#
-
 pathwayEnrichment\.jar
 
 multipleRunb\.sh
@@ -15,10 +11,10 @@ mapping\.tsv
 
 information\.txt
 
-\.idea/compiler\.xml
-
-\.idea/runConfigurations/Launcher_PathEnr\.xml
-
 target/
 
 \.idea/
+
+temp/
+
+*.~lock*

@@ -112,9 +112,10 @@ public class Mapping extends Omics {
                     }
                 } else {
                     this.list_mappedEntities.put(mappedBpe, lineInFile[0]);
-                    //Remove the mapped metabolite from unmapped list
-                    this.list_unmappedEntities.remove(lineInFile);
                 }
+
+                //Remove the mapped metabolite from unmapped list
+                this.list_unmappedEntities.remove(lineInFile);
             }
         }
 
@@ -168,10 +169,13 @@ public class Mapping extends Omics {
                                 //TODO: check that in Fingerprint class
                             }
                         }else if(mappingColumnInfile == 1 && (this.bioEntityType==5 || this.bioEntityType == 4)){
-                            ifEquals = testProtMapping(id,associatedValueInSbml);
+                            ifEquals = testProtEnzMapping(id,associatedValueInSbml);
+                        }else if(mappingColumnInfile == 1 && this.bioEntityType==6){
+                            ifEquals = testGenesMapping(id,associatedValueInSbml);
                         }else{
                             ifEquals = associatedValueInSbml.equals(id);
                         }
+
                         //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
                         if (ifEquals) {
                             this.matchedValues.add(id);
@@ -223,7 +227,21 @@ public class Mapping extends Omics {
         return (!(lineInFile[mappingColumnInfile]).equals("NA") && !(lineInFile[mappingColumnInfile]).equals(""));
     }
 
-    public Boolean testProtMapping(String query, String hit) {
+    public Boolean testGenesMapping(String query, String hit){
+        if (hit.startsWith("hsa:")) {
+            hit = hit.substring(4, hit.length());
+            if (Pattern.compile("(.+)\\.\\d$").matcher(query).matches()) {
+                query = query.substring(0, query.length() - 2);
+            }
+        }
+        //System.out.println(query + ": " + hit);
+        if (query.equals(hit)) {
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean testProtEnzMapping(String query, String hit) {
         Matcher m = Pattern.compile("_HSA:(.+)").matcher(hit);
         if (m.matches()) {
             hit = m.group(1);

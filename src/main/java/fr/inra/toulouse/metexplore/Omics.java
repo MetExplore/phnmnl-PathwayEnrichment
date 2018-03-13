@@ -1,7 +1,9 @@
 package fr.inra.toulouse.metexplore;
 
+import parsebionet.biodata.BioGene;
 import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioEntity;
+import parsebionet.biodata.BioProtein;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,5 +41,16 @@ public abstract class Omics {
         this.write = new WritingComportment(galaxy);
         this.bioEntityType=bioEntityType;
         this.omics = new OmicsMethods(list_mappedEntities,network,bioEntityType);
+    }
+
+    public void parseProtList4Genes(){
+        HashMap<String,BioProtein> protList;
+        for (BioGene g : network.getGeneList().values()) {
+            protList = new HashMap();
+            for (BioProtein p : network.getProteinList().values()) {
+                if(p.getGeneList().values().contains(g)) protList.put(p.getId(),p);
+            }
+            g.setProteinList(protList);
+        }
     }
 }

@@ -8,3 +8,17 @@ data/\.~lock\.sacurine_workflow_output\.tsv#
 pathwayEnrichment\.jar
 
 multipleRunb\.sh
+
+pathwayEnrichment\.tsv
+
+mapping\.tsv
+
+information\.txt
+
+\.idea/compiler\.xml
+
+\.idea/runConfigurations/Launcher_PathEnr\.xml
+
+target/
+
+\.idea/

@@ -840,7 +840,7 @@ public class JSBML2Bionetwork4Galaxy{
         }
 
         regexCompartIds = regexCompartIds + "]";
-        String[] simpleIDs = complexID.split("(?<=_" + regexCompartIds + "{0,1})(?=_)()");
+        String[] simpleIDs = ("(?<=_" + regexCompartIds + "{0,1})(?=_)()").split(complexID);
         if (simpleIDs.length == 1) {
             BioProtein bionetProt = (BioProtein)this.getBioNetwork().getProteinList().get(simpleIDs[0]);
             if (bionetProt != null) {
@@ -1434,6 +1434,7 @@ public class JSBML2Bionetwork4Galaxy{
         m = Pattern.compile(".*PUBCHEM.COMPOUND:\\s*([^<]+)<.*").matcher(metaboNotes);
         if (m.matches()) {
             ids = m.group(1).split(" \\|\\| ");
+            bionetSpecies.setPubchemCID(String.join(";", ids));
             var5 = ids;
             var6 = ids.length;
 

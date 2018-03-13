@@ -64,7 +64,7 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
         System.out.println("SizeCompute: " + this.reactionSet.size());
         while(var2.hasNext()) {
             BioChemicalReaction r = (BioChemicalReaction)var2.next();
-            System.out.println("Reac: " + r.getName());
+            //System.out.println("Reac: " + r.getName());
             paths.addAll(r.getPathwayList().values());
         }
 
@@ -75,7 +75,7 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
 
         while(var6.hasNext()) {
             BioPathway p = (BioPathway)var6.next();
-            System.out.println("PathName: " + p.getName());
+            //System.out.println("PathName: " + p.getName());
             res.put(p, this.getPvalue(p));
         }
         System.out.println("ResSIze: "+ res.size());
@@ -84,7 +84,6 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
 
     @Override
     public double getPvalue(BioPathway pathway) throws IllegalArgumentException {
-        System.out.println("Hi !");
         if (!this.network.getPathwayList().values().contains(pathway)) {
             throw new IllegalArgumentException("pathway not in network");
         } else {

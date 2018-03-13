@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.System.exit;
 
@@ -50,7 +52,7 @@ public class Mapping extends Omics {
             Boolean isMapped = false;
             int nbOccurencesBpe = 0;//identification of multiple mapping
             BioEntity mappedBpe = new BioPhysicalEntity();
-            System.out.println(Arrays.toString(lineInFile));
+            //System.out.println(Arrays.toString(lineInFile));
 
             //Mapping on metabolites
             // Loop for each metabolite from the SBML
@@ -73,7 +75,7 @@ public class Mapping extends Omics {
                     mappingColumnInfile.addAll(Arrays.asList(2, 4, 5, 10));
                 }
                 //System.out.println(Arrays.toString(mappingColumnInfile.toArray()));
-                System.out.println(Arrays.toString(associatedValueInSbml.toArray()));
+                //System.out.println(Arrays.toString(associatedValueInSbml.toArray()));
                 Iterator colNum = mappingColumnInfile.iterator();
                 for (String sbmlVal : associatedValueInSbml) {
                     mapping4AttributesCase(lineInFile, sbmlVal, (int) colNum.next(), e);
@@ -165,6 +167,8 @@ public class Mapping extends Omics {
                                 //System.out.println("#Warning: " + lineInFile[0] + " have encounter an error with an InChI format. Please, check it validity.");
                                 //TODO: check that in Fingerprint class
                             }
+                        }else if(mappingColumnInfile == 1 && this.bioEntityType==5 || this.bioEntityType == 4){
+                            ifEquals = testProtMapping(id,associatedValueInSbml);
                         }else{
                             ifEquals = associatedValueInSbml.equals(id);
                         }
@@ -217,6 +221,38 @@ public class Mapping extends Omics {
     public Boolean ifNotBlankValue(String[] lineInFile, int mappingColumnInfile) {
         //Test if mapping is allowed with this parameters and discard mapping on NA and blank values
         return (!(lineInFile[mappingColumnInfile]).equals("NA") && !(lineInFile[mappingColumnInfile]).equals(""));
+    }
+
+    public static  Boolean testProtMapping(String query, String hit) {
+        Matcher m = Pattern.compile("_HSA:(.+)").matcher(hit);
+        if (m.matches()) {
+            hit = m.group(1);
+            m = Pattern.compile("_(.+)(_\\w){2}").matcher(query);
+            if (m.matches()) {
+                query = m.group(1);
+                //System.out.println(query + ": " + hit);
+                if(query.equals(hit)){
+                    return true;
+                }
+
+            }
+
+        } else {
+
+                if (hit.startsWith("_")) {
+                    hit = hit.substring(1, hit.length());
+                    m = Pattern.compile("_(.+)_\\w$").matcher(query);
+                    if (m.matches()) {
+                        query = m.group(1);
+                        //System.out.println(query + ": " + hit);
+                        if (query.equals(hit)) {
+                            return true;
+                        }
+                    }
+                }
+
+        }
+        return false;
     }
 
     public void writeOutputMapping() throws IOException {

@@ -167,7 +167,7 @@ public class Mapping extends Omics {
                                 //System.out.println("#Warning: " + lineInFile[0] + " have encounter an error with an InChI format. Please, check it validity.");
                                 //TODO: check that in Fingerprint class
                             }
-                        }else if(mappingColumnInfile == 1 && this.bioEntityType==5 || this.bioEntityType == 4){
+                        }else if(mappingColumnInfile == 1 && (this.bioEntityType==5 || this.bioEntityType == 4)){
                             ifEquals = testProtMapping(id,associatedValueInSbml);
                         }else{
                             ifEquals = associatedValueInSbml.equals(id);
@@ -223,7 +223,7 @@ public class Mapping extends Omics {
         return (!(lineInFile[mappingColumnInfile]).equals("NA") && !(lineInFile[mappingColumnInfile]).equals(""));
     }
 
-    public static  Boolean testProtMapping(String query, String hit) {
+    public Boolean testProtMapping(String query, String hit) {
         Matcher m = Pattern.compile("_HSA:(.+)").matcher(hit);
         if (m.matches()) {
             hit = m.group(1);
@@ -234,7 +234,6 @@ public class Mapping extends Omics {
                 if(query.equals(hit)){
                     return true;
                 }
-
             }
 
         } else {

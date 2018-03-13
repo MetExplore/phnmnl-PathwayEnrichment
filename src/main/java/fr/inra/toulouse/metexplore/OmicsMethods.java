@@ -24,12 +24,18 @@ public class OmicsMethods {
            case 2:
                return pathway.getReactions().values();
            case 4:
-                ;
+               Set <BioEntity> enzymes = new HashSet<BioEntity>();
+               //System.out.println("ReacSize2: " + pathway.getReactions().size());
+               for (BioChemicalReaction r : pathway.getReactions().values()){
+                   //System.out.println("EnzSize2: " + r.getEnzList().size());
+                   enzymes.addAll(r.getEnzList().values());
+               }
+               return enzymes;
            case 5:
                Set <BioProtein> proteins = new HashSet<BioProtein>();
-               System.out.println("GenesSize2: " + pathway.getGenes().size());
+               //System.out.println("GenesSize2: " + pathway.getGenes().size());
                for (BioGene g : pathway.getGenes()){
-                   System.out.println("ProtSize2: " + g.getProteinList().size());
+                   //System.out.println("ProtSize2: " + g.getProteinList().size());
                    proteins.addAll(g.getProteinList().values());
                }
                return proteins;
@@ -68,7 +74,7 @@ public class OmicsMethods {
         int d = this.getEntitySetInNetwork().size() - (a + b + c);
 
         int fisherTestParameters[] = {a,b,c,d};
-        System.out.println(pathway.getName() + ": " + Arrays.toString(fisherTestParameters));
+        //System.out.println(pathway.getName() + ": " + Arrays.toString(fisherTestParameters));
         return fisherTestParameters;
     }
 

@@ -27,27 +27,30 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
                 this.reactionSet.add((BioChemicalReaction)e);
             } else if (e instanceof BioGene) {
                 BioGene g = (BioGene) e;
-                addReactionsFromGene(g);
+                addReactions(network.getReactionsFromGene(g.getId()));
             } else if (e instanceof BioProtein) {
                 System.out.println("Protein");
-                 BioProtein p = (BioProtein) e;
-                 HashMap<String, BioGene> list_genes = p.getGeneList();
-                 for (BioGene g : list_genes.values()){
-                     addReactionsFromGene(g);
-                 }
+                for(BioChemicalReaction r2 : network.getBiochemicalReactionList().values()){
+                    if(r2.getEnzList().values().contains(e)){
+                        reactionSet.add(r2);
+                    }
+                }
             } else if (e instanceof BioPhysicalEntity) {
-                System.out.println("Metabolite");
-                BioPhysicalEntity m = (BioPhysicalEntity)e;
-                this.reactionSet.addAll(m.getReactionsAsProduct().values());
-                this.reactionSet.addAll(m.getReactionsAsSubstrate().values());
+                if(this.methods.bioEntityTYpe == 1) {
+                    System.out.println("Metabolite");
+                    BioPhysicalEntity m = (BioPhysicalEntity) e;
+                    this.reactionSet.addAll(m.getReactionsAsProduct().values());
+                    this.reactionSet.addAll(m.getReactionsAsSubstrate().values());
+                }else if(this.methods.bioEntityTYpe == 4) {
+
+                }
             }
         }
         System.out.println("ListReacSize: " + this.reactionSet.size());
     }
 
-    public void addReactionsFromGene(BioGene g){
+    public void addReactions(Set <String> list_reactions_ID){
 
-        Set <String> list_reactions_ID = network.getReactionsFromGene(g.getId());
         //System.out.println("sizeReac: " + list_reactions_ID.size());
         for (String reac_ID : list_reactions_ID) {
             BioChemicalReaction r = network.getBiochemicalReactionList().get(reac_ID);

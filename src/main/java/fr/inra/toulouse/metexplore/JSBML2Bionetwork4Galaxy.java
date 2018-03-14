@@ -85,7 +85,7 @@ public class JSBML2Bionetwork4Galaxy{
     }
 
     public JSBML2Bionetwork4Galaxy(String inputFile) {
-        System.out.println("Pre-processing File...\n");
+        System.out.println("Pre-processing File...");
         try {
             this.setLogMode();
         } catch (IOException var6) {

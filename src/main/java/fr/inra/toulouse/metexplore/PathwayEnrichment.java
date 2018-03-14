@@ -22,7 +22,9 @@ public class PathwayEnrichment extends Omics{
 
     public void computeEnrichmentWithCorrections() throws IOException {
         System.out.println("Pathway enrichment in progress...");
+
         if (bioEntityType == 5) this.parseProtList4Genes();
+
         PathwayEnrichmentCalculation pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType);
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);
@@ -38,11 +40,11 @@ public class PathwayEnrichment extends Omics{
     public HashMap<BioPathway, Double> sortPathByBenHoc(HashMap<BioPathway, Double> disorderedPathEnr, HashMap<BioPathway, Double> pathEnrBenHoc) {
         ArrayList<BioPathway> pathBenHoc = new ArrayList(pathEnrBenHoc.keySet());
         HashMap<BioPathway, Double> orderedPathEnr = new HashMap();
-
         for (int i = 0; i < pathBenHoc.size(); ++i) {
             BioPathway path = (BioPathway) pathBenHoc.get(i);
             double pval = (Double) disorderedPathEnr.get(path);
             orderedPathEnr.put(path, pval);
+
         }
         return orderedPathEnr;
     }

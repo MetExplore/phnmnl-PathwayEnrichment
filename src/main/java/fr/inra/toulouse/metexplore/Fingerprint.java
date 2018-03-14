@@ -88,7 +88,7 @@ public class Fingerprint {
             System.err.println("File badly formatted");
             exit(1);
         }else if(!noFormatCheck && !testWrongColumn()){
-            if (warnings.isEmpty()) System.out.println("All your databases identifiers seems valid.\n");
+            if (warnings.isEmpty()) System.out.println("All your databases identifiers seems valid.");
             else System.out.println(warnings);
         }
 

@@ -24,7 +24,7 @@ public class PathwayEnrichment extends Omics{
         System.out.println("Pathway enrichment in progress...");
 
         if (bioEntityType == 5) this.parseProtList4Genes();
-
+        System.out.println("MapSize: " + list_mappedEntities.size());
         PathwayEnrichmentCalculation pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType);
         HashMap<BioPathway, Double> pathEnrWhithPval = pathEnr.computeEnrichment(); //obtaining p-values for mapped pathway
         HashMap<BioPathway, Double> pathEnrBenHoc = pathEnr.benjaminiHochbergCorrection(pathEnrWhithPval);

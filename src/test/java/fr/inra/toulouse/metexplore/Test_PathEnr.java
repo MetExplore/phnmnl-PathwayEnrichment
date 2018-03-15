@@ -472,50 +472,9 @@ public class Test_PathEnr extends TestCase {
     }
 
     /*************Tests in progress with Recon2.02 containing enzymes, protein & genes***********/
-/*
-    public void testMappingIDEnzyme() {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 4;
-        this.setMapping4OneColumnFileByID("_9415_1", "_9415_1");
-    }
-    //BUG: in SBML, there is no "_9415_1_c"
-
-    public void itestMappingNameEnzyme () {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 4;
-        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
-    }
-    //BUG: there is no name in SBML
-
-    public void testMappingIDProtein() {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 5;
-        this.setMapping4OneColumnFileByID("_9415_1", "_9415_1");
-    }
-
-    public void itestMappingNameProtein () {
-        try {
-            this.setUp();
-        }catch (Exception e){}
-        this.bioEntityType = 5;
-        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
-    }*/
 
     public void testMappingIDGene() {
         this.network = (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
-        System.out.println(network.getEnzList().get("_9415_1_c"));
-        System.out.println(network.getProteinList().get("_9415_1_c"));
-        System.out.println(network.getEnzList().get("_9415_1"));
-        System.out.println(network.getProteinList().get("_9415_1"));
-        System.out.println(network.getEnzList().get("hsa:9415"));
-        System.out.println(network.getProteinList().get("hsa:9415"));
-        System.out.println(network.getGeneList().get("10026.1"));
         this.bioEntityType = 6;
         this.setMapping4OneColumnFileByID("10026.1", "10026.1");
     }
@@ -525,8 +484,27 @@ public class Test_PathEnr extends TestCase {
         this.bioEntityType = 6;
         this.setMapping4OneColumnFileByID("10026.1", "10026.1");
     }
+    public void testMappingIDEnzyme() {
+        this.bioEntityType = 4;
+        this.setMapping4OneColumnFileByID("_9415_1_c", "_HSA:9415");
+    }
 
-    //TODO: regex to remove HRA and split by _ for prot and enz
+
+    public void testMappingIDProtein() {
+        this.bioEntityType = 5;
+        this.setMapping4OneColumnFileByID("_9415_1_c", "_HSA:9415");
+    }
+
+   /* public void testMappingNameProtein () {
+        this.bioEntityType = 5;
+        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
+    }
+
+    public void testMappingNameEnzyme () {
+        this.bioEntityType = 4;
+        this.setMapping4OneColumnFileByID("FADS2", "_9415_1");
+    }*/
+    //BUG: there is no name in SBML
 
     /*
 _HSA:51022: hsa:51022 (TH): null

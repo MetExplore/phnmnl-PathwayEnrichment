@@ -74,7 +74,7 @@ public class OmicsMethods {
         int d = this.getEntitySetInNetwork().size() - (a + b + c);
 
         int fisherTestParameters[] = {a,b,c,d};
-        //System.out.println(pathway.getName() + ": " + Arrays.toString(fisherTestParameters));
+        System.out.println(pathway.getName() + ": " + Arrays.toString(fisherTestParameters));
         return fisherTestParameters;
     }
 

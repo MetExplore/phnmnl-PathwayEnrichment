@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class Test_PathEnr extends TestCase {
     protected String separator, outputFile, galaxy, logFile="temp/information.txt", dummyFile="temp/dummy.tsv";
-    protected int filteredColumn, bioEntityType;
+    protected int filteredColumn, bioEntityType, entityType2Enrich;
     protected Boolean ifNoHeader, nameMapping, noFormatCheck;
     protected String[] inchiLayers;
     protected int[] mappingColumn;
@@ -46,6 +46,7 @@ public class Test_PathEnr extends TestCase {
         this.outputFile = "temp/output.tsv";
         this.filteredColumn = -1;
         this.bioEntityType = 1;
+        this.entityType2Enrich = 3;
     }
 
     protected void tearDown() throws Exception {
@@ -398,9 +399,9 @@ public class Test_PathEnr extends TestCase {
 
     public void setWriteOutputPathEnr(String pathFile, String galColumn, String line) {
     //Test the expected format of the output file obtained by pathway enrichment
-            try {
+        try {
                 this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
-                        this.mapping.list_mappedEntities, pathFile,this.galaxy,this.bioEntityType);
+                        this.mapping.list_mappedEntities, pathFile,this.galaxy,this.bioEntityType, this.entityType2Enrich);
             }catch (IOException e ){
                 e.printStackTrace();
             }
@@ -432,7 +433,17 @@ public class Test_PathEnr extends TestCase {
                         "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67");
     }
 
-    public void testWriteOutputPathEnr4Galaxy() {
+    public void itestWriteOutputReacEnr() {
+        this.setMapping4Testo();
+        this.entityType2Enrich=2;
+        this.setWriteOutputPathEnr(
+                this.outputFile,
+                "",
+                "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
+                        "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67");
+    }
+
+        public void testWriteOutputPathEnr4Galaxy() {
         this.setGalaxy();
         this.setMapping4Testo();
         this.setWriteOutputPathEnr(

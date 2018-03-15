@@ -1,22 +1,29 @@
 package fr.inra.toulouse.metexplore;
 
 import parsebionet.biodata.*;
+import parsebionet.statistics.PathwayEnrichment;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.*;
 
-public class PathwayEnrichmentCalculation extends parsebionet.statistics.PathwayEnrichment {
+public class PathwayEnrichmentCalculation {
 
+    protected static final int BONFERRONI = 0;
+    protected static final int BENJAMINIHOCHBERG = 1;
+    protected static final int HOLMBONFERRONI = 2;
     protected  BioNetwork network;
     protected  HashMap <BioEntity, String> list_mappedEntities;
     protected  OmicsMethods methods;
     protected  Set<BioChemicalReaction> reactionSet;
-
-    public PathwayEnrichmentCalculation(BioNetwork network, HashMap <BioEntity, String> list_mappedEntities, int bioEntityType){
-        super(network, list_mappedEntities.keySet());
+    protected int entityType2Enrich;
+    
+    public PathwayEnrichmentCalculation(BioNetwork network, HashMap <BioEntity, String> list_mappedEntities, int bioEntityType, int entityType2Enrich){
         this.network = network;
         this.list_mappedEntities = list_mappedEntities;
         this.methods = new OmicsMethods(list_mappedEntities,network, bioEntityType);
         this.setReactionSet(list_mappedEntities.keySet());
+        this.entityType2Enrich = entityType2Enrich;
     }
 
     public void setReactionSet(Set<? extends BioEntity> BioEntitySet) {
@@ -70,49 +77,122 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
         }
     }
 
-    @Override
-    public HashMap<BioPathway, Double> computeEnrichment() {
-        HashSet<BioPathway> paths = new HashSet();
+    public HashMap<BioEntity, Double> computeEnrichment() {
+        HashSet<BioEntity> entityType2Enrich = new HashSet();
 
        for ( BioChemicalReaction r : this.reactionSet){
             //System.out.println("Reac: " + r.getName() + ": " + r.getListOfGeneNames().size());
-            paths.addAll(r.getPathwayList().values());
+           switch (this.entityType2Enrich){
+               case 2:
+                   entityType2Enrich.add(r);
+               case 3:
+                   entityType2Enrich.addAll(r.getPathwayList().values());
+               /*case 6:
+                   entityType2Enrich.addAll(r.getListOfGenes().values());*/
+           };
         }
 
-       HashMap<BioPathway, Double> res = new HashMap();
-       for (BioPathway p : paths){
+       HashMap<BioEntity, Double> res = new HashMap();
+       for (BioEntity p : entityType2Enrich){
             //System.out.println("PathName: " + p.getName() + ": " + p.getGenes().size());
             res.put(p, this.getPvalue(p));
         }
         return res;
     }
 
-    @Override
-    public double getPvalue(BioPathway pathway) throws IllegalArgumentException {
-        if (!this.network.getPathwayList().values().contains(pathway)) {
-            throw new IllegalArgumentException("pathway not in network");
-        } else {
-            int fisherTestParameters[] = this.methods.getFisherTestParameters(pathway);
+    public Collection getMappedEntityInEnrichedEntity(BioEntity entityType2Enrich) {
+        switch (this.entityType2Enrich){
+            /*case 1:
+                return ;*/
+            case 2:
+                return this.reactionSet;
+            case 3:
+                return getMappedEntityInPathway(entityType2Enrich);
+            /*case 4:
+                return ;
+            case 5:
+                return ;
+            case 6:
+                return ;*/
+
+        };
+        return null;
+    }
+    public Collection getMappedEntityInReaction(BioEntity enrichedEntity) {
+        BioChemicalReaction reaction = (BioChemicalReaction) enrichedEntity;
+        switch (this.methods.bioEntityTYpe) {
+            case 1:
+                return reaction.getListOfProducts().values();
+        };
+        return null;
+    }
+    public Collection getMappedEntityInPathway(BioEntity enrichedEntity) {
+        BioPathway pathway = (BioPathway) enrichedEntity;
+        switch (this.methods.bioEntityTYpe){
+            case 1:
+                return pathway.getListOfInvolvedMetabolite().values();
+            case 2:
+                return pathway.getReactions().values();
+          /* case 4:
+               Set <BioEntity> enzymes = new HashSet<BioEntity>();
+               //System.out.println("ReacSize2: " + pathway.getReactions().size());
+               for (BioChemicalReaction r : pathway.getReactions().values()){
+                   //System.out.println("EnzSize2: " + r.getEnzList().size());
+                   enzymes.addAll(r.getEnzList().values());
+               }
+               return enzymes;*/
+            //BUG: TODO: see in JSBML2BioNetwork why only one enzyme is associated to a reaction
+            // (instead of multiple for protein and genes)
+            case 4 : case 5:
+                Set <BioProtein> proteins = new HashSet<BioProtein>();
+                //System.out.println("GenesSize2: " + pathway.getGenes().size());
+                for (BioGene g : pathway.getGenes()){
+                    //System.out.println("ProtSize2: " + g.getProteinList().size());
+                    proteins.addAll(g.getProteinList().values());
+                }
+                return proteins;
+            case 6:
+                return pathway.getGenes();
+        }
+        return null;
+    }
+    
+    public double getPvalue(BioEntity enrichedEntity) throws IllegalArgumentException {
+        int fisherTestParameters[] = this.getFisherTestParameters(enrichedEntity);
             return this.exactFisherOneTailed(fisherTestParameters[0], fisherTestParameters[1],
                     fisherTestParameters[2], fisherTestParameters[3]);
-        }
     }
 
-    @Override
-    public HashMap<BioPathway, Double> benjaminiHochbergCorrection(HashMap<BioPathway, Double> pvalues) {
-        ArrayList<BioPathway> orderedPaths = this.sortPval(pvalues);
-        HashMap<BioPathway, Double> adjPvalues = new HashMap();
-        BioPathway p, p_next;
+    public int[] getFisherTestParameters(BioEntity enrichedEntity) {
+        Collection entityInPathway = this.getMappedEntityInPathway(enrichedEntity);
+        //nb of mapped in the pathway
+        int a = methods.intersect(entityInPathway).size();
+        //unmapped metabolites in the fingerprint
+        int b = this.list_mappedEntities.size() - a;
+        //unmapped metabolites in the pathway
+        int c = entityInPathway.size() - a;
+        //remaining metabolites in the network
+        int d = methods.getEntitySetInNetwork().size() - (a + b + c);
+
+        int fisherTestParameters[] = {a, b, c, d};
+        //System.out.println(pathway.getName() + ": " + Arrays.toString(fisherTestParameters));
+        return fisherTestParameters;
+    }
+
+        public HashMap<BioEntity, Double> benjaminiHochbergCorrection(HashMap<BioEntity, Double> pvalues) {
+        ArrayList<BioEntity> orderedEnrichedEntities = this.sortPval(pvalues);
+        HashMap<BioEntity, Double> adjPvalues = new HashMap();
+        BioEntity p, p_next;
         double pval, adjPval;
 
-        for(int k = 0; k < orderedPaths.size(); ++k) {
-            p = (BioPathway)orderedPaths.get(k);
+        for(int k = 0; k < orderedEnrichedEntities.size(); ++k) {
+            p = (BioEntity)orderedEnrichedEntities.get(k);
             pval = ((Double)pvalues.get(p)).doubleValue();
            // System.out.println("Pval : " + p.getName() + ": " + pval);
 
             //case of probability equality
-            if (k+1 < orderedPaths.size()){
-                p_next = (BioPathway)orderedPaths.get(k+1);
+            if (k+1 < orderedEnrichedEntities.size()){
+                p_next = (BioEntity)orderedEnrichedEntities.get(k+1);
                 double pval_next = ((Double)pvalues.get(p_next)).doubleValue();
                 if (pval_next == pval) {
                     //System.out.println(true);
@@ -128,5 +208,63 @@ public class PathwayEnrichmentCalculation extends parsebionet.statistics.Pathway
             adjPvalues.put(p, new Double(adjPval));
         }
         return adjPvalues;
+    }
+
+    public static BigDecimal fact(int n) {
+        BigDecimal fact = new BigDecimal("1");
+
+        for(int i = 1; i <= n; ++i) {
+            fact = fact.multiply(new BigDecimal(i + ""));
+        }
+
+        return fact;
+    }
+
+    public HashMap<BioEntity, Double> bonferroniCorrection(HashMap<BioEntity, Double> pvalues) {
+        HashMap<BioEntity, Double> adjPvalues = new HashMap();
+
+        for (BioEntity p : pvalues.keySet()){
+            double pval = (Double)pvalues.get(p);
+            double adjPval = pval * (double)pvalues.size();
+            adjPvalues.put(p, new Double(adjPval));
+        }
+
+        return adjPvalues;
+    }
+
+    public ArrayList<BioEntity> sortPval(HashMap<BioEntity, Double> map) {
+        ArrayList<BioEntity> orderedEnrichedEntities = new ArrayList(map.keySet());
+        Collections.sort(orderedEnrichedEntities, new PathwayEnrichmentCalculation.significanceComparator(map));
+        return orderedEnrichedEntities;
+    }
+
+    static class significanceComparator implements Comparator<BioEntity> {
+        HashMap<BioEntity, Double> pvalMap;
+
+        public significanceComparator(HashMap<BioEntity, Double> pvalMap) {
+            this.pvalMap = pvalMap;
+        }
+
+        public int compare(BioEntity o1, BioEntity o2) {
+            return Double.compare((Double)this.pvalMap.get(o1), (Double)this.pvalMap.get(o2));
+        }
+    }
+    
+    public static double exactFisherOneTailed(int a, int b, int c, int d) {
+        double res = 0.0D;
+        int lim = Math.min(a + c, a + b);
+
+        for(int i = 0; a + i <= lim; ++i) {
+            res += getHypergeometricProba(a + i, b - i, c - i, d + i);
+        }
+
+        return res;
+    }
+
+    public static double getHypergeometricProba(int a, int b, int c, int d) {
+        BigDecimal numerator = fact(a + b).multiply(fact(c + d)).multiply(fact(a + c)).multiply(fact(b + d));
+        BigDecimal denominator = fact(a).multiply(fact(b)).multiply(fact(c)).multiply(fact(d)).multiply(fact(a + b + c + d));
+        BigDecimal res = numerator.divide(denominator, MathContext.DECIMAL64);
+        return res.doubleValue();
     }
 }

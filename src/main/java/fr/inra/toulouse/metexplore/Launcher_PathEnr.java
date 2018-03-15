@@ -58,8 +58,11 @@ public class Launcher_PathEnr {
 
     /*****MAPPING PARAMETERS*****/
 
-    @Option(name = "-t", aliases="--type", usage = "Type of biological object selected : 1 for metabolites or 2 for reactions (by default: metabolites).")
-    protected int bioEntityType = 1;
+    @Option(name = "-t", aliases="--type", usage = "1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
+    protected int entityType2Map = 1;
+
+    @Option(name = "-tEnr", aliases="--typeEnr", usage = "1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: pathways).")
+    protected int entityType2Enrich = 3;
 
     @Option(name="-name", usage="Activate this option for a name mapping .")
     protected Boolean nameMapping = false;
@@ -155,7 +158,8 @@ public class Launcher_PathEnr {
                 throw new CmdLineException("-l parameter badly formatted");
             }
 
-            if (launch.bioEntityType < 1 || launch.bioEntityType > 6) {
+            if (launch.entityType2Map < 1 || launch.entityType2Map > 6 ||
+                    launch.entityType2Enrich < 1 || launch.entityType2Enrich > 6) {
                 throw new CmdLineException("Type of biological object must be between 1 and 6.");
             }
 
@@ -239,9 +243,9 @@ public class Launcher_PathEnr {
             Fingerprint fingerprint = new Fingerprint(launch.layerWarning,launch.noFormatCheck,launch.inFileFingerprint,launch.ifNoHeader, launch.columnSeparator,
                     launch.IDSeparator,(launch.nameColumn-1),mappingColumns, inchiLayers,(launch.colFiltered-1));
             Mapping mapping = new Mapping(network, fingerprint.list_entities, inchiLayers, launch.nameMapping,
-                    launch.outFileMapping, launch.galaxy, launch.bioEntityType);
+                    launch.outFileMapping, launch.galaxy, launch.entityType2Map);
             PathwayEnrichment pathEnr = new PathwayEnrichment(network, fingerprint.list_entities, mapping.list_mappedEntities,
-                    launch.outFilePathEnr,launch.galaxy, launch.bioEntityType);
+                    launch.outFilePathEnr,launch.galaxy, launch.entityType2Map, launch.entityType2Enrich);
             write.writeOutputInfo();
         }
         catch (IOException e){

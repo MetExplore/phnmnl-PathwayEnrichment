@@ -471,7 +471,9 @@ public class Test_PathEnr extends TestCase {
                 null);
     }
 
-    /*************Tests in progress with Recon2.02 containing enzymes, protein & genes***********/
+    /*************Tests with Recon2.02 containing enzymes, protein & genes***********/
+
+    /***Mapping***/
 
     public void testMappingIDGene() {
         this.network = (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
@@ -484,11 +486,11 @@ public class Test_PathEnr extends TestCase {
         this.bioEntityType = 6;
         this.setMapping4OneColumnFileByID("10026.1", "10026.1");
     }
+
     public void testMappingIDEnzyme() {
         this.bioEntityType = 4;
         this.setMapping4OneColumnFileByID("_9415_1_c", "_HSA:9415");
     }
-
 
     public void testMappingIDProtein() {
         this.bioEntityType = 5;
@@ -506,9 +508,74 @@ public class Test_PathEnr extends TestCase {
     }*/
     //BUG: there is no name in SBML
 
-    /*
-_HSA:51022: hsa:51022 (TH): null
-_HSA:51022: hsa:51022 (TH): null
-hsa:9374: hsa:9374: null
-     */
+    /**Pathway Enrichment**/
+
+    public void testWriteOutputPathEnrWithGene() {
+        //Test the expected format of the output file obtained by pathway enrichment and with a reaction
+       testMappingNameGene();
+       this.setWriteOutputPathEnr(
+                this.outputFile,
+                "",
+                "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92");
+    }
+
+    public void testWriteOutput4GalaxyWithGene() {
+        //Test the expected format of the output file obtained by pathway enrichment and with a reaction
+        this.setGalaxy();
+        this.outputFile="";
+        testMappingNameGene();
+        this.setWriteOutputPathEnr(
+                "temp/pathEnr.tsv",
+                "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
+                "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92\t51\t0\t1790");
+        this.setBufferTest(this.galaxy,
+                "1 pathways are concerned among the network (on 100 in the network).",
+                null);
+    }
+
+    public void testWriteOutputPathEnrWithProtein() {
+        //Test the expected format of the output file obtained by pathway enrichment and with a reaction
+       testMappingIDProtein();
+        this.setWriteOutputPathEnr(
+                this.outputFile,
+                "",
+                "Fatty acid synthesis\t0.03203040173724213\t0.03203040173724213\t0.03203040173724213\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69");
+    }
+
+    public void itestWriteOutput4GalaxyWithProtein() {
+        //Test the expected format of the output file obtained by pathway enrichment and with a reaction
+        this.setGalaxy();
+        this.outputFile="";
+        testMappingIDProtein();
+        this.setWriteOutputPathEnr(
+                "temp/pathEnr.tsv",
+                "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
+                "Fatty acid synthesis\t0.03203040173724213\t0.03203040173724213\t0.03203040173724213\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69\t19\t0\t4190");
+        this.setBufferTest(this.galaxy,
+                "1 pathways are concerned among the network (on 100 in the network).",
+                null);
+    }
+
+    public void testWriteOutputPathEnrWithEnzyme() {
+        //Test the expected format of the output file obtained by pathway enrichment and with a reaction
+       testMappingIDEnzyme();
+        this.setWriteOutputPathEnr(
+                this.outputFile,
+                "",
+                "Fatty acid synthesis\t0.02199850857568978\t0.02199850857568978\t0.02199850857568978\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69");
+    }
+
+    public void itestWriteOutput4GalaxyWithEnzyme() {
+        //Test the expected format of the output file obtained by pathway enrichment and with a reaction
+        this.setGalaxy();
+        this.outputFile="";
+        testMappingIDEnzyme();
+        this.setWriteOutputPathEnr(
+                "temp/pathEnr.tsv",
+                "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
+                "Fatty acid synthesis\t0.02199850857568978\t0.02199850857568978\t0.02199850857568978\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69\t4190");
+        this.setBufferTest(this.galaxy,
+                "1 pathways are concerned among the network (on 100 in the network).",
+                null);
+    }
 }

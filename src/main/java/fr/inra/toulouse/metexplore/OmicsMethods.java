@@ -23,15 +23,17 @@ public class OmicsMethods {
                return pathway.getListOfInvolvedMetabolite().values();
            case 2:
                return pathway.getReactions().values();
-           case 4:
+          /* case 4:
                Set <BioEntity> enzymes = new HashSet<BioEntity>();
                //System.out.println("ReacSize2: " + pathway.getReactions().size());
                for (BioChemicalReaction r : pathway.getReactions().values()){
                    //System.out.println("EnzSize2: " + r.getEnzList().size());
                    enzymes.addAll(r.getEnzList().values());
                }
-               return enzymes;
-           case 5:
+               return enzymes;*/
+           //BUG: TODO: see in JSBML2BioNetwork why only one enzyme is associated to a reaction
+           // (instead of multiple for protein and genes)
+           case 4 : case 5:
                Set <BioProtein> proteins = new HashSet<BioProtein>();
                //System.out.println("GenesSize2: " + pathway.getGenes().size());
                for (BioGene g : pathway.getGenes()){
@@ -74,7 +76,7 @@ public class OmicsMethods {
         int d = this.getEntitySetInNetwork().size() - (a + b + c);
 
         int fisherTestParameters[] = {a,b,c,d};
-        System.out.println(pathway.getName() + ": " + Arrays.toString(fisherTestParameters));
+        //System.out.println(pathway.getName() + ": " + Arrays.toString(fisherTestParameters));
         return fisherTestParameters;
     }
 

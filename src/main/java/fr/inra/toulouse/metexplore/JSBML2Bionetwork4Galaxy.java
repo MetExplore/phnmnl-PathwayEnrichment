@@ -1122,24 +1122,21 @@ public class JSBML2Bionetwork4Galaxy{
                     DefaultCompart = this.getBioNetwork().findbioCompartmentInList("fake_compartment");
                 }
 
-                String[] var31 = GeneAssoList;
-                int var32 = GeneAssoList.length;
 
                 label202:
-                for(int var33 = 0; var33 < var32; ++var33) {
-                    String GeneAsso = var31[var33];
+                for(int i = 0; i < GeneAssoList.length; ++i) {
+                    String GeneAsso = GeneAssoList[i];
                     if (!GeneAsso.contains("...")) {
                         String[] geneList = GeneAsso.replaceAll(" ", "").split("(?i)and");
                         String enzID_Regex = "";
                         String newEnzId = "";
                         HashMap<String, String> protIDs_REGEX = new HashMap();
                         String[] foundEnzyme = geneList;
-                        int var17 = geneList.length;
 
                         String geneN;
                         String prot_REGEX;
-                        for(int var18 = 0; var18 < var17; ++var18) {
-                            geneN = foundEnzyme[var18];
+                        for(int j = 0; j < geneList.length; ++j) {
+                            geneN = foundEnzyme[j];
                             newEnzId = newEnzId + "_" + geneN.replaceAll("\\.", "_");
                             prot_REGEX = "_" + geneN.replaceAll("\\.", "_") + "_" + regexCompartIds + "{0,1}";
                             enzID_Regex = enzID_Regex + prot_REGEX;

@@ -256,30 +256,47 @@ public class PathwayEnrichmentCalculation {
     public HashMap<BioEntity, Double> benjaminiHochbergCorrection(HashMap<BioEntity, Double> pvalues) {
         ArrayList<BioEntity> orderedEnrichedEntities = this.sortPval(pvalues);
         HashMap<BioEntity, Double> adjPvalues = new HashMap<>();
-        BioEntity p, p_next;
+        BioEntity e, e_next;
         double pval, adjPval;
-
+        Boolean wasAlreadyEqual = false;
+        int nbEquals = 1;
+        HashSet <BioEntity> entityWithEqualsPval = new HashSet<>();
         for(int k = 0; k < orderedEnrichedEntities.size(); ++k) {
-            p = orderedEnrichedEntities.get(k);
-            pval = pvalues.get(p);
-           // System.out.println("Pval : " + p.getName() + ": " + pval);
+            e = orderedEnrichedEntities.get(k);
+            entityWithEqualsPval.add(e);
+            pval = pvalues.get(e);
+            //System.out.println("Pval : " + e.getName() + ": " + pval);
 
             //case of probability equality
-            if (k+1 < orderedEnrichedEntities.size()){
-                p_next = orderedEnrichedEntities.get(k+1);
-                double pval_next = pvalues.get(p_next);
+            if (k + 1 < orderedEnrichedEntities.size()) {
+                e_next = orderedEnrichedEntities.get(k + 1);
+                double pval_next = pvalues.get(e_next);
                 if (pval_next == pval) {
-                    // System.out.println(true);
-                    adjPval = pval * (double) pvalues.size() / ((double) k + 1.5);
-                    adjPvalues.put(p, adjPval);
-                    adjPvalues.put(p_next, adjPval);
-                    continue;
-                }
-            }
+                    entityWithEqualsPval.add(e_next);
+                    nbEquals++;
+                    wasAlreadyEqual = true;
+                } else if (!wasAlreadyEqual) {
+                    //default case
+                    adjPval = pval * (double) pvalues.size() / (double) (k + 1);
+                    adjPvalues.put(e, adjPval);
 
-            //default case
-            adjPval = pval * (double) pvalues.size() / (double) (k + 1);
-            adjPvalues.put(p, adjPval);
+                } else {
+                    double adj_k = 1;
+                    for(int i = 2; i <= nbEquals; i++) {
+                        adj_k = (adj_k + i);
+                    }
+                    adj_k = adj_k/nbEquals;
+                    adjPval = pval * (double) pvalues.size() / adj_k;
+                    for (BioEntity e2 : entityWithEqualsPval) {
+                        adjPvalues.put(e2, adjPval);
+                    }
+                    entityWithEqualsPval = new HashSet<>();
+                    wasAlreadyEqual = false;
+                }
+            } else {
+                adjPval = pval * (double) pvalues.size() / (double) (k + 1);
+                adjPvalues.put(e, adjPval);
+            }
         }
         return adjPvalues;
     }

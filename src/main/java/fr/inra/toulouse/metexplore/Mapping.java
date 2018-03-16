@@ -273,8 +273,8 @@ public class Mapping extends Omics {
         BufferedWriter f = new BufferedWriter(new FileWriter(fo1));
         int nbEntityInNetwork = this.omics.getEntitySetInNetwork().size();
         int nbMappedMetabolites = this.list_fingerprint.size() - this.list_unmappedEntities.size();
-        String coverageInFile = calculPercent(nbMappedMetabolites, this.list_fingerprint.size());
-        String coverageSBML = calculPercent(nbMappedMetabolites, nbEntityInNetwork);
+        String coverageInFile = write.calculPercent(nbMappedMetabolites, this.list_fingerprint.size());
+        String coverageSBML = write.calculPercent(nbMappedMetabolites, nbEntityInNetwork);
 
         //File header
         //TODO: if(!this.inchiMapping) f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value\n");
@@ -298,10 +298,6 @@ public class Mapping extends Omics {
             f.write(m.toString());
         }
         f.close();
-    }
-
-    public String calculPercent(int numerator, int denominator) {
-        return write.round(((double) numerator / (double) denominator) * 100);
     }
 
     public void quickMapping() {

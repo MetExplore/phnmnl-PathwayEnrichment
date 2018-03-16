@@ -65,4 +65,8 @@ public class WritingComportment {
     public String round(double value) {
         return String.valueOf((double) Math.round(value * 100) / 100);
     }
+
+    public String calculPercent(int numerator, int denominator) {
+        return round(((double) numerator / (double) denominator) * 100);
+    }
 }

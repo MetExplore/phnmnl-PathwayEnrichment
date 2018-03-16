@@ -26,7 +26,7 @@ public class PathwayEnrichment extends Omics{
     }
 
     public void computeEnrichmentWithCorrections() throws IOException {
-        System.out.println("Enrichment in progress...");
+        System.out.println(this.typeOfEnrichedEntity + " enrichment in progress...");
 
         if (bioEntityType == 4 || bioEntityType == 5 ) this.parseProtList4Genes();
         this.pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType, this.entityType2Enrich);
@@ -37,8 +37,12 @@ public class PathwayEnrichment extends Omics{
         // need to do the same here to join with it
         this.list_pathwayEnr.add(sortPathByBenHoc(this.pathEnr.bonferroniCorrection(pathEnrWhithPval), pathEnrBenHoc));
         this.list_pathwayEnr.add(pathEnrBenHoc);//same for Benjamini Hochberg
-        String plural = (this.list_pathwayEnr.get(0).size() > 1) ? "s are": " is";
-        write.writeLog(this.list_pathwayEnr.get(0).size() + " " + typeOfEnrichedEntity.toLowerCase() + plural + " concerned among the network (on " + this.omics.getEntitySetInNetwork(this.entityType2Enrich).size() + " in the network).");
+
+        int nbEnriched = this.list_pathwayEnr.get(0).size();
+        int nbEnrichedTypeInNetwork = this.omics.getEntitySetInNetwork(this.entityType2Enrich).size();
+        String plural = (nbEnriched > 1) ? "s are": " is";
+
+        write.writeLog(nbEnriched + " " + typeOfEnrichedEntity.toLowerCase() + plural + " concerned among the network (on " + nbEnrichedTypeInNetwork + " in the network; " + write.calculPercent(nbEnriched,nbEnrichedTypeInNetwork) + "%).");
         writeOutputPathEnr();
     }
 

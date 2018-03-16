@@ -408,7 +408,7 @@ public class Test_PathEnr extends TestCase {
             this.setBufferTest(
                     pathFile,
                     "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\t" +
-                            "Mapped_entities_SBML\tMapped_entities_Fingerprint\tMapped_entities_ID\t" +
+                            "Mapped_metabolites_(SBML)\tMapped_metabolites_(fingerprint)\tMapped_metabolites_ID\t" +
                             "Nb. of mapped\tCoverage (%)"+galColumn,
                     line);
     }
@@ -433,14 +433,13 @@ public class Test_PathEnr extends TestCase {
                         "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67");
     }
 
-    public void itestWriteOutputReacEnr() {
+    public void testWriteOutputReacEnr() {
         this.setMapping4Testo();
         this.entityType2Enrich=2;
         this.setWriteOutputPathEnr(
                 this.outputFile,
                 "",
-                "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
-                        "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67");
+                "UDP-glucuronosyltransferase 1-10 precursor, microsomal\t0.00154320987654321\t0.00154320987654321\t0.00154320987654321\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t25.0");
     }
 
         public void testWriteOutputPathEnr4Galaxy() {
@@ -452,7 +451,7 @@ public class Test_PathEnr extends TestCase {
                 "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
                         "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
         this.setBufferTest(this.galaxy,
-                "1 entities have been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
+                "1 metabolites have been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
                 "1 pathways are concerned among the network (on 97 in the network).");
     }
 

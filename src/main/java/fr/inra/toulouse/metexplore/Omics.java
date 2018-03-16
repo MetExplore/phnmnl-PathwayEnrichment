@@ -21,6 +21,7 @@ public abstract class Omics {
     protected WritingComportment write;
     protected OmicsMethods omics;
     protected int bioEntityType;
+    protected String typeOfMappedEntity;
 
 
     public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
@@ -31,6 +32,7 @@ public abstract class Omics {
         this.write = new WritingComportment(galaxy);
         this.bioEntityType=bioEntityType;
         this.omics = new OmicsMethods(list_mappedEntities,network,bioEntityType);
+        this.typeOfMappedEntity = omics.getTypeOfEntity(bioEntityType).toLowerCase();
     }
 
     public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
@@ -41,6 +43,7 @@ public abstract class Omics {
         this.write = new WritingComportment(galaxy);
         this.bioEntityType=bioEntityType;
         this.omics = new OmicsMethods(list_mappedEntities,network,bioEntityType);
+        this.typeOfMappedEntity = omics.getTypeOfEntity(bioEntityType).toLowerCase();
     }
 
     public void parseProtList4Genes(){

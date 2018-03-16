@@ -46,7 +46,6 @@ public class PathwayEnrichmentCalculation {
             //BUG: TODO: see in JSBML2BioNetwork why only one enzyme is associated to a reaction
             // (instead of multiple for protein and genes)
             }else if(this.methods.bioEntityTYpe == 4 || e instanceof BioProtein) {
-                BioProtein p1 = (BioProtein) e;
                 BioProtein p = network.getProteinList().get(e.getId());
                 HashMap<String, BioGene> list_genes = p.getGeneList();
                 for (BioGene g : list_genes.values()){
@@ -85,10 +84,13 @@ public class PathwayEnrichmentCalculation {
            switch (this.entityType2Enrich){
                case 2:
                    entityType2Enrich.add(r);
+                   break;
                case 3:
                    entityType2Enrich.addAll(r.getPathwayList().values());
+                   break;
                /*case 6:
-                   entityType2Enrich.addAll(r.getListOfGenes().values());*/
+                   entityType2Enrich.addAll(r.getListOfGenes().values());
+                   break;*/
            };
         }
 
@@ -105,7 +107,7 @@ public class PathwayEnrichmentCalculation {
             /*case 1:
                 return ;*/
             case 2:
-                return this.reactionSet;
+                return getMappedEntityInReaction(entityType2Enrich);
             case 3:
                 return getMappedEntityInPathway(entityType2Enrich);
             /*case 4:
@@ -120,9 +122,20 @@ public class PathwayEnrichmentCalculation {
     }
     public Collection getMappedEntityInReaction(BioEntity enrichedEntity) {
         BioChemicalReaction reaction = (BioChemicalReaction) enrichedEntity;
+
         switch (this.methods.bioEntityTYpe) {
             case 1:
-                return reaction.getListOfProducts().values();
+                Set <BioPhysicalEntity> mets = new HashSet<>(reaction.getListOfSubstrates().values());
+                mets.addAll(reaction.getListOfProducts().values());
+                return mets;
+            case 4: case 5:
+                Set <BioProtein> prots = new HashSet<>();
+                for (BioGene g : reaction.getListOfGenes().values()){
+                    prots.addAll(g.getProteinList().values());
+                }
+                return prots;
+            case 6:
+                return reaction.getListOfGenes().values();
         };
         return null;
     }
@@ -164,13 +177,13 @@ public class PathwayEnrichmentCalculation {
     }
 
     public int[] getFisherTestParameters(BioEntity enrichedEntity) {
-        Collection entityInPathway = this.getMappedEntityInPathway(enrichedEntity);
+        Collection mappedEntityInEnrichedEntity = this.getMappedEntityInEnrichedEntity(enrichedEntity);
         //nb of mapped in the pathway
-        int a = methods.intersect(entityInPathway).size();
+        int a = methods.intersect(mappedEntityInEnrichedEntity).size();
         //unmapped metabolites in the fingerprint
         int b = this.list_mappedEntities.size() - a;
         //unmapped metabolites in the pathway
-        int c = entityInPathway.size() - a;
+        int c = mappedEntityInEnrichedEntity.size() - a;
         //remaining metabolites in the network
         int d = methods.getEntitySetInNetwork().size() - (a + b + c);
 

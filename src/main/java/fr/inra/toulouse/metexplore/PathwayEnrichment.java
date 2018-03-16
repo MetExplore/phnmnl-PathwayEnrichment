@@ -14,18 +14,19 @@ public class PathwayEnrichment extends Omics{
     protected String outFilePathEnr;
     protected PathwayEnrichmentCalculation pathEnr;
     protected int entityType2Enrich;
+    protected String typeOfEnrichedEntity;
 
     public PathwayEnrichment (BioNetwork network, ArrayList<String[]> list_fingerprint, HashMap <BioEntity, String> list_mappedEntities,
                               String outFilePathEnr, String galaxy , int entityType2Map, int entityType2Enrich) throws IOException {
         super(galaxy, list_fingerprint, list_mappedEntities, network, entityType2Map);
         this.outFilePathEnr = outFilePathEnr;
         this.entityType2Enrich = entityType2Enrich;
-        System.out.println("Enrich: " + this.entityType2Enrich);
+        this.typeOfEnrichedEntity = omics.getTypeOfEntity(entityType2Enrich);
         this.computeEnrichmentWithCorrections();
     }
 
     public void computeEnrichmentWithCorrections() throws IOException {
-        System.out.println("Pathway enrichment in progress...");
+        System.out.println("Enrichment in progress...");
 
         if (bioEntityType == 4 || bioEntityType == 5 ) this.parseProtList4Genes();
         this.pathEnr = new PathwayEnrichmentCalculation(this.network, this.list_mappedEntities,this.bioEntityType, this.entityType2Enrich);
@@ -36,8 +37,7 @@ public class PathwayEnrichment extends Omics{
         // need to do the same here to join with it
         this.list_pathwayEnr.add(sortPathByBenHoc(this.pathEnr.bonferroniCorrection(pathEnrWhithPval), pathEnrBenHoc));
         this.list_pathwayEnr.add(pathEnrBenHoc);//same for Benjamini Hochberg
-        write.writeLog(this.list_pathwayEnr.get(0).size() + " pathways are concerned among the network (on " + this.network.getPathwayList().size() + " in the network).");
-        System.out.println("SizePath: "+ this.pathEnr.entityType2Enrich);
+        write.writeLog(this.list_pathwayEnr.get(0).size() + " " + typeOfEnrichedEntity.toLowerCase() + "s are concerned among the network (on " + this.omics.getEntitySetInNetwork(this.entityType2Enrich).size() + " in the network).");
         writeOutputPathEnr();
     }
 
@@ -64,8 +64,8 @@ public class PathwayEnrichment extends Omics{
         List <String> list_pathwayMetabolitesSBML;
         List <String> list_pathwayMetabolitesFingerprint;
 
-        f.write("Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_entities_SBML\tMapped_entities_Fingerprint\t" +
-                "Mapped_entities_ID\tNb. of mapped\tCoverage (%)");
+        f.write(this.typeOfEnrichedEntity + "_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_" + typeOfMappedEntity + "s_(SBML)\tMapped_" + typeOfMappedEntity + "s_(fingerprint)\t" +
+                "Mapped_" + typeOfMappedEntity + "s_ID\tNb. of mapped\tCoverage (%)");
         if (this.write.galaxy !="")  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
         else f.write("\n");
 
@@ -84,7 +84,6 @@ public class PathwayEnrichment extends Omics{
             //Extracting metabolites from the mapping list contained in BioPathway
             for (Map.Entry<BioEntity, String> entry : this.list_mappedEntities.entrySet()) {
                 BioEntity bpe = entry.getKey();
-                System.out.println("SizePath: "+ this.pathEnr.getMappedEntityInEnrichedEntity(path).size());
                 if (this.pathEnr.getMappedEntityInEnrichedEntity(path).contains(bpe)) {
                     hm_pathwayMetabolitesFingerprint.put(bpe.getId(), entry.getValue());
                     j++;

@@ -17,8 +17,8 @@ public class OmicsMethods {
         this.bioEntityTYpe=bioEntityType;
     }
 
-    public HashMap getEntitySetInNetwork() {
-        switch (this.bioEntityTYpe){
+    public HashMap getEntitySetInNetwork(int bioEntityType) {
+        switch (bioEntityType){
             case 1:
                 return this.network.getPhysicalEntityList();
             case 2:
@@ -35,6 +35,10 @@ public class OmicsMethods {
         return null;
     }
 
+    public HashMap getEntitySetInNetwork(){
+        return getEntitySetInNetwork(this.bioEntityTYpe);
+    }
+
     public HashSet<BioEntity> intersect(Collection<BioEntity> set1) {
         return intersect(set1,this.list_mappedEntities.keySet());
     }
@@ -45,5 +49,23 @@ public class OmicsMethods {
         if (set1.contains(bpe)) inter.add(bpe);
         }
         return inter;
+    }
+
+    public String getTypeOfEntity(int entityType){
+        switch (entityType) {
+            case 1:
+                return "Metabolite";
+            case 2:
+                return "Reaction";
+            case 3:
+                return "Pathway";
+            case 4:
+                return "Enzyme";
+            case 5:
+                return "Protein";
+            case 6:
+                return "Gene";
+        }
+        return null;
     }
 }

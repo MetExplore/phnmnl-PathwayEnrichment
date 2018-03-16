@@ -5,9 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import static java.lang.System.exit;
@@ -27,7 +24,7 @@ public class Fingerprint {
 
     public Fingerprint (Boolean layerWarning, Boolean noFormatCheck, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
                         int[] mappingColumns, String[] inchiLayers, int filteredColumn) throws IOException {
-        this.fileBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));;
+        this.fileBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));
         this.layerWarning=layerWarning;
         this.noFormatCheck=noFormatCheck;
         this.ifNoHeader=ifNoHeader;
@@ -51,7 +48,7 @@ public class Fingerprint {
 
     public void  extractData() throws IOException {
 
-        Boolean isFiltered = (this.filteredColumn >= 0) ? true : false;
+        Boolean isFiltered = this.filteredColumn >= 0;
         String line;
 
         //if (debug) System.out.println(Arrays.toString(columnNumbers));
@@ -73,7 +70,7 @@ public class Fingerprint {
                 putValueIfExists(lineFormatted, lineInFile, i, columnNumbers[i]);
             }
             try {
-                if (isFiltered == false || lineInFile[this.filteredColumn] != "") { //optional filtering on a specified column
+                if (!isFiltered || !lineInFile[this.filteredColumn].equals("")) { //optional filtering on a specified column
                    // if (debug)
                    //     System.out.println(Arrays.toString(lineFormatted));
                     this.list_entities.add(lineFormatted);//add to hashmap
@@ -112,7 +109,7 @@ public class Fingerprint {
         if (columnInFile >= 0) {
             try {
                 String[] tab_ids = lineInFile[columnInFile].split(IDSeparator);
-                ArrayList <String> ids = new ArrayList <String>();
+                ArrayList <String> ids = new ArrayList<>();
                 for (String id : tab_ids) {
 
                     id = id.replace("\\s$", "").replace("^\\s","").replaceAll("\\s{2,}", "");

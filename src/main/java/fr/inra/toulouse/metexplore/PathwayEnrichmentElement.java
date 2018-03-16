@@ -33,8 +33,8 @@ public class PathwayEnrichmentElement implements Comparable <PathwayEnrichmentEl
 
     public String toString() {
         String line = this.pathName + "\t" + this.p_value + "\t" + this.q_value_Bonf + "\t" + this.q_value_BenHoc
-                + "\t" + this.mappedMetabolitesSBML.toString() + "\t" + this.mappedMetabolitesFingerprint.toString() + "\t" + this.mappedMetabolitesID.toString() + "\t" + this.nb_mapped + "\t" + this.coverage;
-        if (write.galaxy !="")
+                + "\t" + this.mappedMetabolitesSBML + "\t" + this.mappedMetabolitesFingerprint + "\t" + this.mappedMetabolitesID + "\t" + this.nb_mapped + "\t" + this.coverage;
+        if (!write.galaxy.equals(""))
             line += "\t" + this.nb_unmappedInPathway + "\t" + this.nb_unmappedInFingerprint + "\t" + this.nb_remainingInNetwork;
         return line + "\n";
     }

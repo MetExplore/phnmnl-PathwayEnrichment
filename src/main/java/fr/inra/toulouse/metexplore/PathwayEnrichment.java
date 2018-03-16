@@ -45,9 +45,8 @@ public class PathwayEnrichment extends Omics{
     public HashMap<BioEntity, Double> sortPathByBenHoc(HashMap<BioEntity, Double> disorderedPathEnr, HashMap<BioEntity, Double> pathEnrBenHoc) {
         ArrayList<BioEntity> pathBenHoc = new ArrayList(pathEnrBenHoc.keySet());
         HashMap<BioEntity, Double> orderedPathEnr = new HashMap();
-        for (int i = 0; i < pathBenHoc.size(); ++i) {
-            BioEntity path = (BioEntity) pathBenHoc.get(i);
-            double pval = (Double) disorderedPathEnr.get(path);
+        for (BioEntity path : pathBenHoc) {
+            double pval = disorderedPathEnr.get(path);
             orderedPathEnr.put(path, pval);
 
         }
@@ -67,7 +66,7 @@ public class PathwayEnrichment extends Omics{
 
         f.write(this.typeOfEnrichedEntity + "_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_" + typeOfMappedEntity + "s_(SBML)\tMapped_" + typeOfMappedEntity + "s_(fingerprint)\t" +
                 "Mapped_" + typeOfMappedEntity + "s_ID\tNb. of mapped\tCoverage (%)");
-        if (this.write.galaxy !="")  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
+        if (!this.write.galaxy.equals(""))  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
         else f.write("\n");
 
         HashMap<BioEntity, Double> result = this.list_pathwayEnr.get(0);//get pathway enrichment without corrections
@@ -75,9 +74,9 @@ public class PathwayEnrichment extends Omics{
         Iterator itBenHocCorr = this.list_pathwayEnr.get(2).values().iterator();//Same for Benjamini Hochberg
 
         for (Map.Entry<BioEntity, Double> pathEnrEntry : result.entrySet()) {//Loop on pathway enrichment without corrections
-            hm_pathwayMetabolitesFingerprint = new HashMap<String, String>();
-            list_pathwayMetabolitesSBML = new ArrayList<String>();
-            list_pathwayMetabolitesFingerprint = new ArrayList<String>();
+            hm_pathwayMetabolitesFingerprint = new HashMap<>();
+            list_pathwayMetabolitesSBML = new ArrayList<>();
+            list_pathwayMetabolitesFingerprint = new ArrayList<>();
             BioEntity path = pathEnrEntry.getKey();
 
             int j = 0; //number of mapped metabolites contained in a BioPathway
@@ -90,7 +89,7 @@ public class PathwayEnrichment extends Omics{
                     j++;
                 }
             }
-            list_pathwayMetabolitesID = new ArrayList<String>(hm_pathwayMetabolitesFingerprint.keySet());
+            list_pathwayMetabolitesID = new ArrayList<>(hm_pathwayMetabolitesFingerprint.keySet());
             Collections.sort(list_pathwayMetabolitesID);
             for(String id_bpe : list_pathwayMetabolitesID){
                 list_pathwayMetabolitesSBML.add(((BioEntity)omics.getEntitySetInNetwork().get(id_bpe)).getName());
@@ -99,13 +98,13 @@ public class PathwayEnrichment extends Omics{
             String coverage = this.write.round((double) j / (double) this.pathEnr.getMappedEntityInEnrichedEntity(path).size() * (double) 100);
             PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
                     (double)itBonCorr.next(),(double)itBenHocCorr.next(),list_pathwayMetabolitesSBML,list_pathwayMetabolitesFingerprint, list_pathwayMetabolitesID,j,coverage, this.write.galaxy);
-            if (this.write.galaxy != "") this.settings4Galaxy(path, pathEnrElement);
+            if (!this.write.galaxy.equals("")) this.settings4Galaxy(path, pathEnrElement);
             list_pathwayEnrElement.add(pathEnrElement);
         }
 
         Collections.sort(list_pathwayEnrElement);
-        for (int i=0;i< list_pathwayEnrElement.size();i++){
-            f.write(list_pathwayEnrElement.get(i).toString());
+        for (PathwayEnrichmentElement pathwayEnrElement : list_pathwayEnrElement) {
+            f.write(pathwayEnrElement.toString());
         }
         if (f != null) {
             f.close();

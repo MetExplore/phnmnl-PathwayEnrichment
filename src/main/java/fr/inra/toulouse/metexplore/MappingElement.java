@@ -16,7 +16,7 @@ public class MappingElement implements Comparable <MappingElement>{
     }
     public int compareTo(MappingElement m) {
         if (this.isMapped == m.isMapped) return this.inFileName.compareToIgnoreCase(m.inFileName);
-        else if (this.isMapped == true && m.isMapped == false) return -1;
+        else if (this.isMapped && !m.isMapped) return -1;
         return 1;
     }
 

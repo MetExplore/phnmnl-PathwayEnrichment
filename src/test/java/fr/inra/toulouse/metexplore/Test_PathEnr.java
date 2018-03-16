@@ -52,11 +52,7 @@ public class Test_PathEnr extends TestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         File folder = new File("temp");
-        try{
-            FileUtils.forceDelete(folder);
-        }catch (IOException e){
-            ;
-        }
+        FileUtils.forceDelete(folder);
         folder.delete();
     }
 
@@ -89,13 +85,6 @@ public class Test_PathEnr extends TestCase {
         }
     }
 
-    public void deleteFile(String fileName){
-        File f = new File(fileName);
-        if (f.exists()){
-            f.delete();
-        }
-    }
-
     /**********setInChILayers**************/
 
     public void setDefaultInChILayers() {
@@ -103,15 +92,13 @@ public class Test_PathEnr extends TestCase {
     }
 
     public void setInChILayers(String c, String h, String p) {
-        String[] newInchiLayers = {c,h,p};
-        this.inchiLayers = newInchiLayers;
+        this.inchiLayers = new String[]{c,h,p};
     }
 
     /************setMappingColumn************/
 
     public void setDefaultMappingColumn() {
-        int[] mappingColumnDefault = {-1, 4, -1, -1, -1, -1, -1, -1, -1, -1};
-        this.mappingColumn =  mappingColumnDefault;
+        this.mappingColumn = new int[]{-1, 4, -1, -1, -1, -1, -1, -1, -1, -1};
     }
 
     public void setMappingColumn(int mappingType, int mappingColumn) {
@@ -142,7 +129,7 @@ public class Test_PathEnr extends TestCase {
     public void setMapping(String bpe) {
     //Extract the expected metabolite and process a mapping for comparison
 
-        this.expectedMappedMetabolite = new ArrayList<BioEntity>();
+        this.expectedMappedMetabolite = new ArrayList<>();
 
         try {
             this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.nameMapping, this.outputFile,
@@ -186,7 +173,7 @@ public class Test_PathEnr extends TestCase {
     public void setBufferTest(String fileName, String header, String line){
         setBufferReader(fileName);
         try {
-            if(fileName == this.logFile) this.pathEnr.write.writeOutputInfo();
+            if(fileName.equals(this.logFile)) this.pathEnr.write.writeOutputInfo();
             assertEquals(buffer.readLine(), header);
             assertEquals(buffer.readLine(), line);
             assertEquals(buffer.readLine(), null);
@@ -400,7 +387,7 @@ public class Test_PathEnr extends TestCase {
     public void setWriteOutputPathEnr(String pathFile, String typeOfMappedEntity,String typeOfEnrichedEntity, String galColumn, String line) {
     //Test the expected format of the output file obtained by pathway enrichment
         try {
-                this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
+                this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(network,this.fingerprint.list_entities,
                         this.mapping.list_mappedEntities, pathFile,this.galaxy,this.bioEntityType, this.entityType2Enrich);
             }catch (IOException e ){
                 e.printStackTrace();
@@ -496,7 +483,7 @@ public class Test_PathEnr extends TestCase {
     /***Mapping***/
 
     public void testMappingIDGene() {
-        this.network = (new JSBML2Bionetwork4Galaxy("data/recon2.02.xml")).getBioNetwork();
+        network = new JSBML2Bionetwork4Galaxy("data/recon2.02.xml").getBioNetwork();
         this.bioEntityType = 6;
         this.setMapping4OneColumnFileByID("10026.1", "10026.1");
     }

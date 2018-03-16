@@ -33,7 +33,7 @@ public class WritingComportment {
     }
 
     public void writeOutputInfo() throws IOException {
-        if (this.galaxy != "") {//if "writing console log in a file" functionality is activated
+        if (!this.galaxy.equals("")) {//if "writing console log in a file" functionality is activated
             this.log = new File(this.galaxy);
             BufferedWriter b = new BufferedWriter(new FileWriter(this.log, true));
             b.write(text4outputFileInfo);

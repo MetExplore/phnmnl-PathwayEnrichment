@@ -6,7 +6,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +35,7 @@ public class Mapping extends Omics {
         this.outFileMapping = outFileMapping;
         this.nameMapping = nameMapping;
         this.list_unmappedEntities = (ArrayList<String[]>) list_fingerprint.clone();
-        if (this.outFileMapping != "") this.performMapping();
+        if (!this.outFileMapping.equals("")) this.performMapping();
         else this.quickMapping();
     }
 
@@ -58,13 +57,13 @@ public class Mapping extends Omics {
             // Loop for each metabolite from the SBML
             for (BioEntity e : (Collection<BioEntity>) this.omics.getEntitySetInNetwork().values()) {
 
-                this.matchedValues = new ArrayList<String>();
-                this.matchedValuesSBML = new ArrayList<String>();
+                this.matchedValues = new ArrayList<>();
+                this.matchedValuesSBML = new ArrayList<>();
                 this.isMappedBpe = false;
 
                 //Mapping on metabolite identifier associated with a bionetwork, InChI, SMILES and PubCHEM_ID
-                ArrayList<String> associatedValueInSbml = new ArrayList<String>(Arrays.asList(e.getId()));
-                ArrayList<Integer> mappingColumnInfile = new ArrayList<Integer>(Arrays.asList(1));
+                ArrayList<String> associatedValueInSbml = new ArrayList<>(Collections.singletonList(e.getId()));
+                ArrayList<Integer> mappingColumnInfile = new ArrayList<>(Collections.singletonList(1));
                 if (this.nameMapping) {
                     associatedValueInSbml.add(e.getName());
                     mappingColumnInfile.add(0);
@@ -106,7 +105,7 @@ public class Mapping extends Omics {
             //System.out.println(mappedBpe.getName());
             if (isMapped) {
                 if (nbOccurencesBpe > 1) {
-                    if (this.outFileMapping != "") {
+                    if (!this.outFileMapping.equals("")) {
                         warningsDoublets = "[WARNING] There are " + nbOccurencesBpe + " possible matches for " + lineInFile[0] + ".\n";
                         write.writeLog(warningsDoublets);
                     }
@@ -120,7 +119,7 @@ public class Mapping extends Omics {
         }
 
         if (this.list_mappedEntities.size() == 0) {
-            if (warningsDoublets != "")
+            if (!warningsDoublets.equals(""))
                 System.err.println("There is multiple possible match for your whole list of metabolites !\n " +
                         "Please, choose the ID of the desired metabolites among those proposed in the output file.\n " +
                         "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
@@ -132,8 +131,8 @@ public class Mapping extends Omics {
             exit(1);
         }
 
-        if (this.outFileMapping != "") {
-            if (warningsDoublets != "")
+        if (!this.outFileMapping.equals("")) {
+            if (!warningsDoublets.equals(""))
                 write.writeLog("[WARNING] Please, check the corresponding lines in the mapping output file.\n" +
                         "[WARNING] These duplicates will be discarded from the pathway analysis.\n");
             writeOutputMapping();
@@ -151,8 +150,7 @@ public class Mapping extends Omics {
                     if (mappingColumnInfile != 2 ) {
                        list_id = lineInFile[mappingColumnInfile].split(";");
                    }else{
-                        String[] list_id2 = {lineInFile[mappingColumnInfile]};
-                        list_id = list_id2;
+                        list_id = new String[]{lineInFile[mappingColumnInfile]};
                     }
 
                     for (String id : list_id) {
@@ -235,10 +233,7 @@ public class Mapping extends Omics {
             }
         }
         //System.out.println(query + ": " + hit);
-        if (query.equals(hit)) {
-            return true;
-        }
-        return false;
+        return query.equals(hit);
     }
 
     public Boolean testProtEnzMapping(String query, String hit) {
@@ -249,9 +244,7 @@ public class Mapping extends Omics {
             if (m.matches()) {
                 query = m.group(1);
                 //System.out.println(query + ": " + hit);
-                if(query.equals(hit)){
-                    return true;
-                }
+                return query.equals(hit);
             }
 
         } else {
@@ -262,9 +255,7 @@ public class Mapping extends Omics {
                     if (m.matches()) {
                         query = m.group(1);
                         //System.out.println(query + ": " + hit);
-                        if (query.equals(hit)) {
-                            return true;
-                        }
+                        return query.equals(hit);
                     }
                 }
 
@@ -303,8 +294,7 @@ public class Mapping extends Omics {
 
         //Sorting by input file metabolites names (and by true/false mapping) and writing in output file
         Collections.sort(this.list_mappingElement);
-        for (int i = 0; i < this.list_mappingElement.size(); i++) {
-            MappingElement m = this.list_mappingElement.get(i);
+        for (MappingElement m : this.list_mappingElement) {
             f.write(m.toString());
         }
         f.close();

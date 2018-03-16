@@ -5,14 +5,8 @@ import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioEntity;
 import parsebionet.biodata.BioProtein;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public abstract class Omics {
     protected ArrayList<String[]> list_fingerprint;//input file after formatting and filtering
@@ -38,7 +32,7 @@ public abstract class Omics {
     public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
                   BioNetwork network, int bioEntityType){
         this.list_fingerprint = list_fingerprint;
-        this.list_mappedEntities = new HashMap<BioEntity, String>();
+        this.list_mappedEntities = new HashMap<>();
         this.network = network;
         this.write = new WritingComportment(galaxy);
         this.bioEntityType=bioEntityType;
@@ -47,9 +41,9 @@ public abstract class Omics {
     }
 
     public void parseProtList4Genes(){
-        HashMap<String,BioProtein> protList;
+        HashMap<String, BioProtein> protList;
         for (BioGene g : network.getGeneList().values()) {
-            protList = new HashMap();
+            protList = new HashMap<>();
             for (BioProtein p : network.getProteinList().values()) {
                 if(p.getGeneList().values().contains(g)) protList.put(p.getId(),p);
             }

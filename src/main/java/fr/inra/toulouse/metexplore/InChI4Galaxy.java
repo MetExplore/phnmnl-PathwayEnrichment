@@ -3,23 +3,11 @@ package fr.inra.toulouse.metexplore;
 import parsebionet.utils.chemicalStructures.InChI;
 import parsebionet.utils.chemicalStructures.InchiLayer;
 
-import java.util.Arrays;
-
 public class InChI4Galaxy extends InChI {
     protected String wrongLayer = "";
 
-    public InChI4Galaxy() {
-        this.validity = false;
-    }
-
     public InChI4Galaxy(String inchiStringValue, String[] inchiLayers){
         this.inchiString = inchiStringValue;
-        this.setBoolean(inchiLayers);
-    }
-
-    public InChI4Galaxy(String inchiStringValue) {
-        this.inchiString = inchiStringValue;
-        String[] inchiLayers = {"c","h"};
         this.setBoolean(inchiLayers);
     }
 

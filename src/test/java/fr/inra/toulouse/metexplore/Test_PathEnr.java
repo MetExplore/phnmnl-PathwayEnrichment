@@ -19,7 +19,7 @@ public class Test_PathEnr extends TestCase {
     protected String[] inchiLayers;
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
-    //curl  http://metexplore.toulouse.inra.fr:8080/metExploreWebService/biosources/3223
+    // ID biosource:3223
     protected static BioNetwork network = (new JSBML2Bionetwork4Galaxy("data/recon2.02_without_compartment.xml")).getBioNetwork();
     protected Fingerprint fingerprint;
     protected File file;
@@ -397,7 +397,7 @@ public class Test_PathEnr extends TestCase {
                         "\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1");
     }
 
-    public void setWriteOutputPathEnr(String pathFile, String galColumn, String line) {
+    public void setWriteOutputPathEnr(String pathFile, String typeOfMappedEntity,String typeOfEnrichedEntity, String galColumn, String line) {
     //Test the expected format of the output file obtained by pathway enrichment
         try {
                 this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(this.network,this.fingerprint.list_entities,
@@ -407,8 +407,8 @@ public class Test_PathEnr extends TestCase {
             }
             this.setBufferTest(
                     pathFile,
-                    "Pathway_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\t" +
-                            "Mapped_metabolites_(SBML)\tMapped_metabolites_(fingerprint)\tMapped_metabolites_ID\t" +
+                    typeOfEnrichedEntity + "_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\t" +
+                            "Mapped_" + typeOfMappedEntity + "_(SBML)\tMapped_" + typeOfMappedEntity + "_(fingerprint)\tMapped_" + typeOfMappedEntity + "_ID\t" +
                             "Nb. of mapped\tCoverage (%)"+galColumn,
                     line);
     }
@@ -428,6 +428,8 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4Testo();
         this.setWriteOutputPathEnr(
                 this.outputFile,
+                "metabolites",
+                "Pathway",
                 "",
                 "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
                         "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67");
@@ -438,6 +440,8 @@ public class Test_PathEnr extends TestCase {
         this.entityType2Enrich=2;
         this.setWriteOutputPathEnr(
                 this.outputFile,
+                "metabolites",
+                "Reaction",
                 "",
                 "UDP-glucuronosyltransferase 1-10 precursor, microsomal\t0.00154320987654321\t0.00154320987654321\t0.00154320987654321\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t25.0");
     }
@@ -447,12 +451,14 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4Testo();
         this.setWriteOutputPathEnr(
                 this.outputFile,
+                "metabolites",
+                "Pathway",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Steroid metabolism\t0.02314814814814815\t0.02314814814814815\t0.02314814814814815" +
                         "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
         this.setBufferTest(this.galaxy,
-                "1 metabolites have been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
-                "1 pathways are concerned among the network (on 97 in the network).");
+                "1 metabolite has been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
+                "1 pathway is concerned among the network (on 97 in the network).");
     }
 
     public void testWriteOutputPathEnrWithReaction() {
@@ -462,6 +468,8 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
         this.setWriteOutputPathEnr(
                 this.outputFile,
+                "reactions",
+                "Pathway",
                 "",
                 "Citric acid cycle\t0.004750593824228029\t0.004750593824228029\t0.004750593824228029\tfumarase\tfumarase\tR_FUM\t1\t5.0");
     }
@@ -474,10 +482,12 @@ public class Test_PathEnr extends TestCase {
         this.setMapping4OneColumnFileByID("R_FUM", "R_FUM");
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
+                "reactions",
+                "Pathway",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Citric acid cycle\t0.004750593824228029\t0.004750593824228029\t0.004750593824228029\tfumarase\tR_FUM\tR_FUM\t1\t5.0\t19\t0\t4190");
         this.setBufferTest(this.galaxy,
-                "1 pathways are concerned among the network (on 97 in the network).",
+                "1 pathway is concerned among the network (on 97 in the network).",
                 null);
     }
 
@@ -525,6 +535,8 @@ public class Test_PathEnr extends TestCase {
        testMappingNameGene();
        this.setWriteOutputPathEnr(
                 this.outputFile,
+               "metabolites",
+                "Pathway",
                 "",
                 "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92");
     }
@@ -536,6 +548,8 @@ public class Test_PathEnr extends TestCase {
         testMappingNameGene();
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
+                "metabolites",
+                "Pathway",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92\t51\t0\t1790");
         this.setBufferTest(this.galaxy,
@@ -548,6 +562,8 @@ public class Test_PathEnr extends TestCase {
        testMappingIDProtein();
         this.setWriteOutputPathEnr(
                 this.outputFile,
+                "metabolites",
+                "Pathway",
                 "",
                 "Fatty acid synthesis\t0.03203040173724213\t0.03203040173724213\t0.03203040173724213\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69");
     }
@@ -559,6 +575,8 @@ public class Test_PathEnr extends TestCase {
         testMappingIDProtein();
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
+                "metabolites",
+                "Pathway",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Fatty acid synthesis\t0.03203040173724213\t0.03203040173724213\t0.03203040173724213\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69\t19\t0\t4190");
         this.setBufferTest(this.galaxy,
@@ -571,6 +589,8 @@ public class Test_PathEnr extends TestCase {
        testMappingIDEnzyme();
         this.setWriteOutputPathEnr(
                 this.outputFile,
+                "metabolites",
+                "Pathway",
                 "",
                 "Fatty acid synthesis\t0.02199850857568978\t0.02199850857568978\t0.02199850857568978\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69");
     }
@@ -582,6 +602,8 @@ public class Test_PathEnr extends TestCase {
         testMappingIDEnzyme();
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
+                "metabolites",
+                "Pathway",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Fatty acid synthesis\t0.02199850857568978\t0.02199850857568978\t0.02199850857568978\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69\t4190");
         this.setBufferTest(this.galaxy,

@@ -291,7 +291,8 @@ public class Mapping extends Omics {
         f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value_(Input_File)\tMatched_value_(SBML)\n");
 
         //Print on screen and writing in log
-        write.writeLog(nbMappedMetabolites + " " + typeOfMappedEntity + "s have been mapped on " + this.list_fingerprint.size() + " in the fingerprint dataset ("
+        String plural = (nbMappedMetabolites > 1) ? "s have": " has";
+        write.writeLog(nbMappedMetabolites + " " + typeOfMappedEntity + plural + " been mapped on " + this.list_fingerprint.size() + " in the fingerprint dataset ("
                 + coverageInFile + "%) and on " + nbEntityInNetwork + " in the network (" +
                 coverageSBML + "%).\n");
 

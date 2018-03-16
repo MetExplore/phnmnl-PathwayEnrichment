@@ -37,7 +37,8 @@ public class PathwayEnrichment extends Omics{
         // need to do the same here to join with it
         this.list_pathwayEnr.add(sortPathByBenHoc(this.pathEnr.bonferroniCorrection(pathEnrWhithPval), pathEnrBenHoc));
         this.list_pathwayEnr.add(pathEnrBenHoc);//same for Benjamini Hochberg
-        write.writeLog(this.list_pathwayEnr.get(0).size() + " " + typeOfEnrichedEntity.toLowerCase() + "s are concerned among the network (on " + this.omics.getEntitySetInNetwork(this.entityType2Enrich).size() + " in the network).");
+        String plural = (this.list_pathwayEnr.get(0).size() > 1) ? "s are": " is";
+        write.writeLog(this.list_pathwayEnr.get(0).size() + " " + typeOfEnrichedEntity.toLowerCase() + plural + " concerned among the network (on " + this.omics.getEntitySetInNetwork(this.entityType2Enrich).size() + " in the network).");
         writeOutputPathEnr();
     }
 

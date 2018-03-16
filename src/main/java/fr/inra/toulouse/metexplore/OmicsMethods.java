@@ -46,7 +46,7 @@ public class OmicsMethods {
     public HashSet<BioEntity> intersect(Collection<BioEntity> set1, Collection<BioEntity> set2) {
         HashSet<BioEntity> inter = new HashSet();
         for (BioEntity bpe : set2){
-        if (set1.contains(bpe)) inter.add(bpe);
+            if (set1.contains(bpe)) inter.add(bpe);
         }
         return inter;
     }

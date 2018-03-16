@@ -535,7 +535,7 @@ public class Test_PathEnr extends TestCase {
        testMappingNameGene();
        this.setWriteOutputPathEnr(
                 this.outputFile,
-               "metabolites",
+               "genes",
                 "Pathway",
                 "",
                 "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92");
@@ -548,12 +548,12 @@ public class Test_PathEnr extends TestCase {
         testMappingNameGene();
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
-                "metabolites",
+                "genes",
                 "Pathway",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92\t51\t0\t1790");
         this.setBufferTest(this.galaxy,
-                "1 pathways are concerned among the network (on 100 in the network).",
+                "1 pathway is concerned among the network (on 100 in the network).",
                 null);
     }
 
@@ -562,7 +562,7 @@ public class Test_PathEnr extends TestCase {
        testMappingIDProtein();
         this.setWriteOutputPathEnr(
                 this.outputFile,
-                "metabolites",
+                "proteins",
                 "Pathway",
                 "",
                 "Fatty acid synthesis\t0.03203040173724213\t0.03203040173724213\t0.03203040173724213\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69");
@@ -575,7 +575,7 @@ public class Test_PathEnr extends TestCase {
         testMappingIDProtein();
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
-                "metabolites",
+                "proteins",
                 "Pathway",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Fatty acid synthesis\t0.03203040173724213\t0.03203040173724213\t0.03203040173724213\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69\t19\t0\t4190");
@@ -589,7 +589,7 @@ public class Test_PathEnr extends TestCase {
        testMappingIDEnzyme();
         this.setWriteOutputPathEnr(
                 this.outputFile,
-                "metabolites",
+                "enzymes",
                 "Pathway",
                 "",
                 "Fatty acid synthesis\t0.02199850857568978\t0.02199850857568978\t0.02199850857568978\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69");
@@ -602,7 +602,7 @@ public class Test_PathEnr extends TestCase {
         testMappingIDEnzyme();
         this.setWriteOutputPathEnr(
                 "temp/pathEnr.tsv",
-                "metabolites",
+                "enzymes",
                 "Pathway",
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Fatty acid synthesis\t0.02199850857568978\t0.02199850857568978\t0.02199850857568978\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69\t4190");

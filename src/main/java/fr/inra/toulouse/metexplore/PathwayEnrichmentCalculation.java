@@ -259,8 +259,9 @@ public class PathwayEnrichmentCalculation {
         BioEntity e, e_next;
         double pval, adjPval;
         Boolean wasAlreadyEqual = false;
-        int nbEquals = 1;
         HashSet <BioEntity> entityWithEqualsPval = new HashSet<>();
+        int k_adj = 0;
+
         for(int k = 0; k < orderedEnrichedEntities.size(); ++k) {
             e = orderedEnrichedEntities.get(k);
             entityWithEqualsPval.add(e);
@@ -273,30 +274,25 @@ public class PathwayEnrichmentCalculation {
                 double pval_next = pvalues.get(e_next);
                 if (pval_next == pval) {
                     entityWithEqualsPval.add(e_next);
-                    nbEquals++;
-                    wasAlreadyEqual = true;
-                } else if (!wasAlreadyEqual) {
-                    //default case
-                    adjPval = pval * (double) pvalues.size() / (double) (k + 1);
-                    adjPvalues.put(e, adjPval);
-
-                } else {
-                    double adj_k = 1;
-                    for(int i = 2; i <= nbEquals; i++) {
-                        adj_k = (adj_k + i);
+                    if (!wasAlreadyEqual) {
+                        k_adj = k;
                     }
-                    adj_k = adj_k/nbEquals;
-                    adjPval = pval * (double) pvalues.size() / adj_k;
+                    wasAlreadyEqual = true;
+                    continue;
+                } else if (wasAlreadyEqual) {
+                    adjPval = pval * (double) pvalues.size() / (double) (k_adj + 1);
                     for (BioEntity e2 : entityWithEqualsPval) {
                         adjPvalues.put(e2, adjPval);
                     }
                     entityWithEqualsPval = new HashSet<>();
                     wasAlreadyEqual = false;
+                    continue;
                 }
-            } else {
-                adjPval = pval * (double) pvalues.size() / (double) (k + 1);
-                adjPvalues.put(e, adjPval);
+
             }
+            //default case
+            adjPval = pval * (double) pvalues.size() / (double) (k + 1);
+            adjPvalues.put(e, adjPval);
         }
         return adjPvalues;
     }

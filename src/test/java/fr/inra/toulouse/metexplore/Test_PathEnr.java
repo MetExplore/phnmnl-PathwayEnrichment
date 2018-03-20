@@ -194,7 +194,7 @@ public class Test_PathEnr extends TestCase {
             dummyFile.write(header + "\n");
             dummyFile.write(inputLine);
             dummyFile.close();
-            this.fingerprint = new Fingerprint(false,this.noFormatCheck,this.dummyFile, this.ifNoHeader, this.separator,";",0,
+            this.fingerprint = new Fingerprint(false,this.noFormatCheck,"",this.dummyFile, this.ifNoHeader, this.separator,";",0,
                     this.mappingColumn,this.inchiLayers,this.filteredColumn);
         } catch (IOException e) {
             e.printStackTrace();

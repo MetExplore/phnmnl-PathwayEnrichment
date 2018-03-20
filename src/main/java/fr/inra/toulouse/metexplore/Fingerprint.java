@@ -1,9 +1,6 @@
 package fr.inra.toulouse.metexplore;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
@@ -18,13 +15,16 @@ public class Fingerprint {
     protected Boolean ifNoHeader, noFormatCheck, layerWarning;
     protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
     protected String[] databases = {"InChI","ChEBI","SMILES","PubChem ID","InChIKey","KEGG ID","HMDB ID","ChemSpider ID", "weight"};
-    protected BufferedReader fileBuffer;
+    protected BufferedReader inBuffer;
+    protected BufferedWriter outBuffer;
+    protected Boolean writeChecking;
 
-    //TODO: excel parsing
+    //TODO: parsing for Excel files
 
-    public Fingerprint (Boolean layerWarning, Boolean noFormatCheck, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
+    public Fingerprint (Boolean layerWarning, Boolean noFormatCheck, String checkingFile, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
                         int[] mappingColumns, String[] inchiLayers, int filteredColumn) throws IOException {
-        this.fileBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));
+
+        this.inBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));
         this.layerWarning=layerWarning;
         this.noFormatCheck=noFormatCheck;
         this.ifNoHeader=ifNoHeader;
@@ -42,8 +42,36 @@ public class Fingerprint {
         }
         this.inchiLayers=inchiLayers;
         this.filteredColumn=filteredColumn;
+        this.writeChecking = !checkingFile.equals("");
+
+        if (this.writeChecking) {
+            setFileChecking();
+        }
         extractData();
-        //TODO: check e.g. inchi lines selected begin with INCHI=
+        
+        if (this.writeChecking) {
+            outBuffer.close();
+        }
+    }
+    
+    public void setFileChecking(){
+        File f = new File("format_checking.tsv");
+        if (f.isFile()) {
+            //write a new file if already exists
+            f.delete();
+        }
+        try {
+            f.createNewFile();
+
+            this.outBuffer = new BufferedWriter(new FileWriter(f));
+            if (layerWarning) {
+                this.outBuffer.write("Line number\tBioentity name\tDatabase\tInChI layer\tWrong value\n");
+            } else {
+                this.outBuffer.write("Line number\tBioentity name\tDatabase\tWrong value\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void  extractData() throws IOException {
@@ -54,12 +82,12 @@ public class Fingerprint {
         //if (debug) System.out.println(Arrays.toString(columnNumbers));
 
         if(!this.ifNoHeader){
-            fileBuffer.readLine(); //skip the header
+            inBuffer.readLine(); //skip the header
             this.nbLine = 2;
         }
 
         //Loop on each lines from the input file
-        while ((line = fileBuffer.readLine()) != null) {
+        while ((line = inBuffer.readLine()) != null) {
 
             String[] lineInFile = line.replaceAll("\"", "").split(this.separator);//splitting by tabulation
             String[] lineFormatted = new String[columnNumbers.length];
@@ -80,12 +108,12 @@ public class Fingerprint {
             }
             nbLine++;
         }
-        if (fileBuffer != null) fileBuffer.close();
+        if (inBuffer != null) inBuffer.close();
         if (this.list_entities.size() < 1) {//no extraction = error generation
             System.err.println("File badly formatted");
             exit(1);
         }else if(!noFormatCheck && !testWrongColumn()){
-            if (warnings.isEmpty()) System.out.println("All your databases identifiers seems valid.");
+            if (warnings.isEmpty()) System.out.println("All your databases identifiers seem valid.");
             else System.out.println(warnings);
         }
 
@@ -137,33 +165,53 @@ public class Fingerprint {
 
     public void checkIDFormat(String id, String[] lineInFile, int columnInTable){
         String[] patterns = {"^CHEBI:[0-9]+$",".*","^[0-9]*$","^[A-Z]{14}-[A-Z]{10}-[A-Z]$","^[A-Z]{1,2}[0-9]{5}$","^HMDB[0-9]{5}$","^[0-9]*$"};
-        String[] warning = {"[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), ", " is badly formatted: " + id + "\n"};
         String[] databases_subset = new String[databases.length-2];
         System.arraycopy(databases, 1, databases_subset, 0, databases.length-2);
+        String database ="", layer="";
 
         if (columnInTable == 10){
             try {
                 Float.parseFloat(id);
             } catch (NumberFormatException e) {
-                setWarnings(warning,"weight",columnInTable);
+                database = "weight";
             }
         } else if (columnInTable > 2){
             if(!Pattern.matches(patterns[columnInTable-3], id)) {
-                setWarnings(warning,databases_subset[columnInTable - 3],columnInTable);
+                database = databases_subset[columnInTable - 3];
             }
         }else if (columnInTable == 2){
             InChI4Galaxy inchi = new InChI4Galaxy(id, this.inchiLayers);
             if(!inchi.validity) {
-                String message = "InChI";
-                if (this.layerWarning) message+= " (wrong layer: " + inchi.wrongLayer +")";
-                setWarnings(warning,message,columnInTable);
+                database = "InChI";
+                if (this.layerWarning) layer+= inchi.wrongLayer;
             }
+        }
+
+        if(!database.equals("")) {
+            setWarnings(id, lineInFile,database,layer,columnInTable);
         }
     }
 
-    public void setWarnings(String[] warning, String database, int columnInTable) {
-        warnings += warning[0] + database + warning[1];
+    public void setWarnings(String id, String[] lineInFile, String database, String layer, int columnInTable) {
+
+        if(this.writeChecking) {
+            try {
+                if (layerWarning) {
+                    this.outBuffer.write(this.nbLine + "\t" + lineInFile[this.nameColumn] + "\t" + database + "\t" + layer + "\t" + id + "\n");
+                } else {
+                    this.outBuffer.write(this.nbLine + "\t" + lineInFile[this.nameColumn] + "\t" + database + "\t" + id + "\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (this.layerWarning) database += " (wrong layer: " + layer +")";
+
+        warnings += "[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), "
+                + database + " is badly formatted: " + id + "\n";
         nbWarningPerDatabases[columnInTable-2] = nbWarningPerDatabases[columnInTable-2] + 1;
+
     }
 
 }

@@ -236,6 +236,17 @@ public class Mapping extends Omics {
         return query.equals(hit);
     }
 
+    public Boolean testNameMapping(String query, String hit){
+        if (Pattern.compile("").matcher(query).matches()) {
+            hit = hit.substring(4, hit.length());
+            if (Pattern.compile("(.+)\\.\\d$").matcher(query).matches()) {
+                query = query.substring(0, query.length() - 2);
+            }
+        }
+        //System.out.println(query + ": " + hit);
+        return query.equals(hit);
+    }
+
     public Boolean testProtEnzMapping(String query, String hit) {
         Matcher m = Pattern.compile("_HSA:(.+)").matcher(hit);
         if (m.matches()) {

@@ -445,7 +445,7 @@ public class Test_PathEnr extends TestCase {
                         "\ttestosterone 3-glucosiduronic acid\tTestosterone glucuronide\tM_tststeroneglc\t1\t1.67\t59\t0\t2532");
         this.setBufferTest(this.galaxy,
                 "1 metabolite has been mapped on 1 in the fingerprint dataset (100.0%) and on 2592 in the network (0.04%).",
-                "1 pathway is concerned among the network (on 97 in the network).");
+                "1 pathway is concerned among the network (on 97 in the network; 1.03%).");
     }
 
     public void testWriteOutputPathEnrWithReaction() {
@@ -474,7 +474,7 @@ public class Test_PathEnr extends TestCase {
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Citric acid cycle\t0.004750593824228029\t0.004750593824228029\t0.004750593824228029\tfumarase\tR_FUM\tR_FUM\t1\t5.0\t19\t0\t4190");
         this.setBufferTest(this.galaxy,
-                "1 pathway is concerned among the network (on 97 in the network).",
+                "1 pathway is concerned among the network (on 97 in the network; 1.03%).",
                 null);
     }
 
@@ -540,7 +540,7 @@ public class Test_PathEnr extends TestCase {
                 "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
                 "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92\t51\t0\t1790");
         this.setBufferTest(this.galaxy,
-                "1 pathway is concerned among the network (on 100 in the network).",
+                "1 pathway is concerned among the network (on 100 in the network; 1.0%).",
                 null);
     }
 

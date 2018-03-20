@@ -72,9 +72,11 @@ public class PathwayEnrichmentCalculation {
 
     public HashMap<BioEntity, Double> computeEnrichment() {
         HashSet<BioEntity> entityType2Enrich = new HashSet<>();
+        this.parseProtList4Genes();
 
-       for ( BioChemicalReaction r : this.reactionSet){
+        for ( BioChemicalReaction r : this.reactionSet){
             //System.out.println("Reac: " + r.getName() + ": " + r.getListOfGeneNames().size());
+
            switch (this.entityType2Enrich){
                case 2:
                    entityType2Enrich.add(r);
@@ -82,9 +84,15 @@ public class PathwayEnrichmentCalculation {
                case 3:
                    entityType2Enrich.addAll(r.getPathwayList().values());
                    break;
-               /*case 6:
+               case 4: case 5:
+                   for (BioGene g : r.getListOfGenes().values()){
+                       //System.out.println("##: " + g.proteinList.values().size());
+                       entityType2Enrich.addAll(g.proteinList.values());
+                   }
+                   break;
+               case 6:
                    entityType2Enrich.addAll(r.getListOfGenes().values());
-                   break;*/
+                   break;
            }
         }
 
@@ -353,5 +361,16 @@ public class PathwayEnrichmentCalculation {
         BigDecimal denominator = fact(a).multiply(fact(b)).multiply(fact(c)).multiply(fact(d)).multiply(fact(a + b + c + d));
         BigDecimal res = numerator.divide(denominator, MathContext.DECIMAL64);
         return res.doubleValue();
+    }
+
+    public void parseProtList4Genes(){
+        HashMap<String, BioProtein> protList;
+        for (BioGene g : this.network.getGeneList().values()) {
+            protList = new HashMap<>();
+            for (BioProtein p : this.network.getProteinList().values()) {
+                if(p.getGeneList().values().contains(g)) protList.put(p.getId(),p);
+            }
+            g.setProteinList(protList);
+        }
     }
 }

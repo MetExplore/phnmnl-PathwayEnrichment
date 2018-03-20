@@ -40,14 +40,4 @@ public abstract class Omics {
         this.typeOfMappedEntity = omics.getTypeOfEntity(bioEntityType).toLowerCase();
     }
 
-    public void parseProtList4Genes(){
-        HashMap<String, BioProtein> protList;
-        for (BioGene g : network.getGeneList().values()) {
-            protList = new HashMap<>();
-            for (BioProtein p : network.getProteinList().values()) {
-                if(p.getGeneList().values().contains(g)) protList.put(p.getId(),p);
-            }
-            g.setProteinList(protList);
-        }
-    }
 }

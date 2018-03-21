@@ -51,7 +51,6 @@ public class PathwayEnrichment extends Omics{
         for (BioEntity path : pathBenHoc) {
             double pval = disorderedPathEnr.get(path);
             orderedPathEnr.put(path, pval);
-
         }
         return orderedPathEnr;
     }
@@ -87,7 +86,7 @@ public class PathwayEnrichment extends Omics{
             //Extracting metabolites from the mapping list contained in BioPathway
             for (Map.Entry<BioEntity, String> entry : this.list_mappedEntities.entrySet()) {
                 BioEntity bpe = entry.getKey();
-                if (this.pathEnr.getMappedEntityInEnrichedEntity(path).contains(bpe)) {
+                if (this.pathEnr.getEntityListInEnrichedEntity(path).contains(bpe)) {
                     hm_pathwayMetabolitesFingerprint.put(bpe.getId(), entry.getValue());
                     j++;
                 }
@@ -98,7 +97,7 @@ public class PathwayEnrichment extends Omics{
                 list_pathwayMetabolitesSBML.add(((BioEntity)omics.getEntitySetInNetwork().get(id_bpe)).getName());
                 list_pathwayMetabolitesFingerprint.add(hm_pathwayMetabolitesFingerprint.get(id_bpe));
             }
-            String coverage = this.write.round((double) j / (double) this.pathEnr.getMappedEntityInEnrichedEntity(path).size() * (double) 100);
+            String coverage = this.write.round((double) j / (double) this.pathEnr.getEntityListInEnrichedEntity(path).size() * (double) 100);
             PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
                     (double)itBonCorr.next(),(double)itBenHocCorr.next(),list_pathwayMetabolitesSBML,list_pathwayMetabolitesFingerprint, list_pathwayMetabolitesID,j,coverage, this.write.galaxy);
             if (!this.write.galaxy.equals("")) this.settings4Galaxy(path, pathEnrElement);

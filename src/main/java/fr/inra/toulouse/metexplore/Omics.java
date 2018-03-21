@@ -1,9 +1,7 @@
 package fr.inra.toulouse.metexplore;
 
-import parsebionet.biodata.BioGene;
 import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioEntity;
-import parsebionet.biodata.BioProtein;
 
 import java.util.ArrayList;
 import java.util.HashMap;

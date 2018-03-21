@@ -8,7 +8,7 @@ import static java.lang.System.exit;
 
 public class Fingerprint {
 
-    protected int nameColumn, filteredColumn, nbLine = 3;
+    protected int nameColumn, filteredColumn, nbLine = 2;
     protected int[] columnNumbers, nbWarningPerDatabases;
     protected String separator, IDSeparator, warnings ="";
     protected String[] inchiLayers;
@@ -45,7 +45,7 @@ public class Fingerprint {
         this.writeChecking = !checkingFile.equals("");
 
         if (this.writeChecking) {
-            setFileChecking();
+            setFileChecking(checkingFile);
         }
         extractData();
         
@@ -54,8 +54,8 @@ public class Fingerprint {
         }
     }
     
-    public void setFileChecking(){
-        File f = new File("format_checking.tsv");
+    public void setFileChecking(String checkingFile){
+        File f = new File(checkingFile);
         if (f.isFile()) {
             //write a new file if already exists
             f.delete();
@@ -83,7 +83,7 @@ public class Fingerprint {
 
         if(!this.ifNoHeader){
             inBuffer.readLine(); //skip the header
-            this.nbLine = 2;
+            this.nbLine--;
         }
 
         //Loop on each lines from the input file

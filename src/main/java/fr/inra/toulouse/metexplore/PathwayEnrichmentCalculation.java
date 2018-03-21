@@ -86,8 +86,13 @@ public class PathwayEnrichmentCalculation {
                    break;
                case 4: case 5:
                    for (BioGene g : r.getListOfGenes().values()){
-                       //System.out.println("##: " + g.proteinList.values().size());
-                       entityType2Enrich.addAll(g.proteinList.values());
+                       //Rare case of some proteins which do not have any mapped genes
+                       // (sometimes it works in gene to protein list but not in protein to gene list
+                       // for getEntityListInEnrichedEntity step : problem in JSBML2Bionetwork parsing?
+                       // because of alternative splicing not taken in account?)
+                       for(BioProtein p : g.proteinList.values()){
+                              entityType2Enrich.add(p);
+                       }
                    }
                    break;
                case 6:
@@ -96,31 +101,32 @@ public class PathwayEnrichmentCalculation {
            }
         }
 
+       System.out.println("SizeEnrich: " + entityType2Enrich.size());
        HashMap<BioEntity, Double> res = new HashMap<>();
        for (BioEntity p : entityType2Enrich){
-            //System.out.println("PathName: " + p.getName() + ": " + p.getGenes().size());
+            System.out.println("PathName: " + p.getName());
             res.put(p, this.getPvalue(p));
         }
         return res;
     }
 
-    public Collection getMappedEntityInEnrichedEntity(BioEntity entityType2Enrich) {
+    public Collection getEntityListInEnrichedEntity(BioEntity entityType2Enrich) {
         switch (this.entityType2Enrich){
             case 1:
-                return getMappedEntityInMetabolite(entityType2Enrich);
+                return getEntityListInMetabolite(entityType2Enrich);
             case 2:
-                return getMappedEntityInReaction(entityType2Enrich);
+                return getEntityListInReaction(entityType2Enrich);
             case 3:
-                return getMappedEntityInPathway(entityType2Enrich);
+                return getEntityListInPathway(entityType2Enrich);
             case 4: case 5:
-                return getMappedEntityInProtein(entityType2Enrich);
+                return getEntityListInProtein(entityType2Enrich);
             case 6:
-                return getMappedEntityInGene(entityType2Enrich);
+                return getEntityListInGene(entityType2Enrich);
         }
         return null;
     }
 
-    public Collection getMappedEntityInReaction(BioEntity enrichedEntity) {
+    public Collection getEntityListInReaction(BioEntity enrichedEntity) {
         BioChemicalReaction reaction = (BioChemicalReaction) enrichedEntity;
 
         switch (this.methods.bioEntityTYpe) {
@@ -140,7 +146,7 @@ public class PathwayEnrichmentCalculation {
         return null;
     }
 
-    public Collection getMappedEntityInPathway(BioEntity enrichedEntity) {
+    public Collection getEntityListInPathway(BioEntity enrichedEntity) {
         BioPathway pathway = (BioPathway) enrichedEntity;
         switch (this.methods.bioEntityTYpe){
             case 1:
@@ -171,32 +177,32 @@ public class PathwayEnrichmentCalculation {
         return null;
     }
 
-    public Collection getMappedEntityInGene(BioEntity enrichedEntity) {
+    public Collection getEntityListInGene(BioEntity enrichedEntity) {
         BioGene g = (BioGene) enrichedEntity;
         Set <String> list_reactions_ID = network.getReactionsFromGene(g.getId());
-        HashSet list_mapped = new HashSet();
+        HashSet list_entities = new HashSet();
 
             switch (this.methods.bioEntityTYpe) {
                 case 1:
                     for (String reac_ID : list_reactions_ID) {
                         BioChemicalReaction reaction = network.getBiochemicalReactionList().get(reac_ID);
-                        list_mapped.addAll(reaction.getListOfSubstrates().values());
-                        list_mapped.addAll(reaction.getListOfProducts().values());
+                        list_entities.addAll(reaction.getListOfSubstrates().values());
+                        list_entities.addAll(reaction.getListOfProducts().values());
                     }
                 case 2:
                     for (String reac_ID : list_reactions_ID) {
-                        list_mapped.add(network.getBiochemicalReactionList().get(reac_ID));
+                        list_entities.add(network.getBiochemicalReactionList().get(reac_ID));
                     }
                 case 4: case 5:
-                   list_mapped.addAll(g.getProteinList().values());
+                    list_entities.addAll(g.getProteinList().values());
             }
-        return list_mapped;
+        return list_entities;
     }
 
-    public Collection getMappedEntityInProtein(BioEntity enrichedEntity) {
+    public Collection getEntityListInProtein(BioEntity enrichedEntity) {
         BioProtein p = (BioProtein) enrichedEntity;
         HashMap<String, BioGene> list_genes = p.getGeneList();
-        Set <BioEntity> list_mapped = new HashSet<>();
+        Set <BioEntity> list_entities = new HashSet<>();
         for (BioGene g : list_genes.values()) {
             Set <String> list_reactions_ID = network.getReactionsFromGene(g.getId());
 
@@ -204,40 +210,40 @@ public class PathwayEnrichmentCalculation {
                 case 1:
                     for (String reac_ID : list_reactions_ID) {
                         BioChemicalReaction reaction = network.getBiochemicalReactionList().get(reac_ID);
-                        list_mapped.addAll(reaction.getListOfSubstrates().values());
-                        list_mapped.addAll(reaction.getListOfProducts().values());
+                        list_entities.addAll(reaction.getListOfSubstrates().values());
+                        list_entities.addAll(reaction.getListOfProducts().values());
                     }
                 case 2:
                     for (String reac_ID : list_reactions_ID) {
-                        list_mapped.add(network.getBiochemicalReactionList().get(reac_ID));
+                        list_entities.add(network.getBiochemicalReactionList().get(reac_ID));
                     }
                 case 6:
-                    list_mapped.add(g);
+                    list_entities.add(g);
             }
         }
-        return list_mapped;
+        return list_entities;
     }
 
-    public Collection getMappedEntityInMetabolite(BioEntity enrichedEntity) {
+    public Collection getEntityListInMetabolite(BioEntity enrichedEntity) {
         BioPhysicalEntity m = (BioPhysicalEntity) enrichedEntity;
         Set <BioChemicalReaction> reactionContainingMetabolites = new HashSet<>();
         reactionContainingMetabolites.addAll(m.getReactionsAsProduct().values());
         reactionContainingMetabolites.addAll(m.getReactionsAsSubstrate().values());
-        Set <BioEntity> list_mapped = new HashSet<>();
+        Set <BioEntity> list_entities = new HashSet<>();
         for (BioChemicalReaction r : reactionContainingMetabolites) {
 
             switch (this.methods.bioEntityTYpe) {
                 case 2:
-                   list_mapped.add(r);
+                    list_entities.add(r);
                 case 4: case 5:
                     for (BioGene g : r.getListOfGenes().values()) {
-                        list_mapped.addAll(g.proteinList.values());
+                        list_entities.addAll(g.proteinList.values());
                     }
                 case 6:
-                    list_mapped.addAll(r.getListOfGenes().values());
+                    list_entities.addAll(r.getListOfGenes().values());
             }
         }
-        return list_mapped;
+        return list_entities;
     }
 
     public double getPvalue(BioEntity enrichedEntity) throws IllegalArgumentException {
@@ -247,13 +253,13 @@ public class PathwayEnrichmentCalculation {
     }
 
     public int[] getFisherTestParameters(BioEntity enrichedEntity) {
-        Collection mappedEntityInEnrichedEntity = this.getMappedEntityInEnrichedEntity(enrichedEntity);
+        Collection entityListInEnrichedEntity = this.getEntityListInEnrichedEntity(enrichedEntity);
         //nb of mapped in the pathway
-        int a = methods.intersect(mappedEntityInEnrichedEntity).size();
+        int a = methods.intersect(entityListInEnrichedEntity).size();
         //unmapped metabolites in the fingerprint
         int b = this.list_mappedEntities.size() - a;
         //unmapped metabolites in the pathway
-        int c = mappedEntityInEnrichedEntity.size() - a;
+        int c = entityListInEnrichedEntity.size() - a;
         //remaining metabolites in the network
         int d = methods.getEntitySetInNetwork().size() - (a + b + c);
 
@@ -317,13 +323,14 @@ public class PathwayEnrichmentCalculation {
 
     public HashMap<BioEntity, Double> bonferroniCorrection(HashMap<BioEntity, Double> pvalues) {
         HashMap<BioEntity, Double> adjPvalues = new HashMap<>();
-
-        for (BioEntity p : pvalues.keySet()){
-            double pval = pvalues.get(p);
+        System.out.println("Pval: " + pvalues.size());
+        for (BioEntity e : pvalues.keySet()){
+            System.out.println("En: " + e.getId());
+            double pval = pvalues.get(e);
             double adjPval = pval * (double)pvalues.size();
-            adjPvalues.put(p, adjPval);
+            adjPvalues.put(e, adjPval);
         }
-
+        System.out.println("AdjSize: " + adjPvalues.size());
         return adjPvalues;
     }
 

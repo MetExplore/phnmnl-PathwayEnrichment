@@ -39,11 +39,11 @@ public class OmicsMethods {
         return getEntitySetInNetwork(this.bioEntityTYpe);
     }
 
-    public HashSet<BioEntity> intersect(Collection<BioEntity> set1) {
+    public HashSet<BioEntity> intersect(Collection<? extends BioEntity> set1) {
         return intersect(set1,this.list_mappedEntities.keySet());
     }
 
-    public HashSet<BioEntity> intersect(Collection<BioEntity> set1, Collection<BioEntity> set2) {
+    public HashSet<BioEntity> intersect(Collection<? extends BioEntity> set1, Collection<BioEntity> set2) {
         HashSet<BioEntity> inter = new HashSet<>();
         for (BioEntity bpe : set2){
             if (set1.contains(bpe)) inter.add(bpe);

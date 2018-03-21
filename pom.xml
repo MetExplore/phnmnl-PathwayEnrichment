@@ -26,7 +26,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>fr.inra.toulouse.metexplore.Launcher_PathEnr</mainClass>
+                            <mainClass>fr.inra.toulouse.metexplore.launcher.Launcher_PathEnr</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

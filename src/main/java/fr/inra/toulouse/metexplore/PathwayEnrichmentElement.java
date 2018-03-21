@@ -6,14 +6,30 @@ public class PathwayEnrichmentElement implements Comparable <PathwayEnrichmentEl
 
     protected String pathName, mappedMetabolitesSBML, mappedMetabolitesFingerprint, mappedMetabolitesID, coverage,
             p_value, q_value_Bonf, q_value_BenHoc;
-    protected int nb_mapped, nb_unmappedInPathway, nb_unmappedInFingerprint, nb_remainingInNetwork;
+    protected int nb_mapped;
+    protected int nb_unmappedInPathway;
+    protected int nb_unmappedInFingerprint;
+
+    public void setNb_unmappedInPathway(int nb_unmappedInPathway) {
+        this.nb_unmappedInPathway = nb_unmappedInPathway;
+    }
+
+    public void setNb_unmappedInFingerprint(int nb_unmappedInFingerprint) {
+        this.nb_unmappedInFingerprint = nb_unmappedInFingerprint;
+    }
+
+    public void setNb_remainingInNetwork(int nb_remainingInNetwork) {
+        this.nb_remainingInNetwork = nb_remainingInNetwork;
+    }
+
+    protected int nb_remainingInNetwork;
     protected WritingComportment write;
 
     public PathwayEnrichmentElement(String pathName, double p_value, double q_value_Bonf, double q_value_BenHoc,
                                     List<String> mappedMetabolitesSBML, List<String> mappedMetabolitesFingerprint,
-                                    List<String> mappedMetabolitesID, int nb_mapped, String coverage, String galaxy) {
+                                    List<String> mappedMetabolitesID, int nb_mapped, String coverage) {
 
-        this.write = new WritingComportment(galaxy);
+        this.write = new WritingComportment("");
         this.pathName = pathName;
         this.p_value = write.removeSciNot(p_value);
         this.q_value_Bonf = write.removeSciNot(q_value_Bonf);

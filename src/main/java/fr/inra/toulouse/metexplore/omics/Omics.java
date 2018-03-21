@@ -1,5 +1,7 @@
-package fr.inra.toulouse.metexplore;
+package fr.inra.toulouse.metexplore.omics;
 
+import fr.inra.toulouse.metexplore.OmicsMethods;
+import fr.inra.toulouse.metexplore.WritingComportment;
 import parsebionet.biodata.BioNetwork;
 import parsebionet.biodata.BioEntity;
 
@@ -8,8 +10,18 @@ import java.util.HashMap;
 
 public abstract class Omics {
     protected ArrayList<String[]> list_fingerprint;//input file after formatting and filtering
+
+    public HashMap<BioEntity, String> getList_mappedEntities() {
+        return list_mappedEntities;
+    }
+
     protected HashMap<BioEntity, String> list_mappedEntities; //list of mapped metabolites used for analysis
     protected BioNetwork network;
+
+    public WritingComportment getWrite() {
+        return write;
+    }
+
     protected WritingComportment write;
     protected OmicsMethods omics;
     protected int bioEntityType;

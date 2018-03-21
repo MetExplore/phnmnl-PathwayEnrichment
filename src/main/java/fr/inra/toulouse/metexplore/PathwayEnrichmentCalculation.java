@@ -101,10 +101,8 @@ public class PathwayEnrichmentCalculation {
            }
         }
 
-       System.out.println("SizeEnrich: " + entityType2Enrich.size());
        HashMap<BioEntity, Double> res = new HashMap<>();
        for (BioEntity p : entityType2Enrich){
-            System.out.println("PathName: " + p.getName());
             res.put(p, this.getPvalue(p));
         }
         return res;
@@ -323,14 +321,11 @@ public class PathwayEnrichmentCalculation {
 
     public HashMap<BioEntity, Double> bonferroniCorrection(HashMap<BioEntity, Double> pvalues) {
         HashMap<BioEntity, Double> adjPvalues = new HashMap<>();
-        System.out.println("Pval: " + pvalues.size());
         for (BioEntity e : pvalues.keySet()){
-            System.out.println("En: " + e.getId());
             double pval = pvalues.get(e);
             double adjPval = pval * (double)pvalues.size();
             adjPvalues.put(e, adjPval);
         }
-        System.out.println("AdjSize: " + adjPvalues.size());
         return adjPvalues;
     }
 

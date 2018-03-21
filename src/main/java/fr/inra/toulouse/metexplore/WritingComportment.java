@@ -7,6 +7,10 @@ import java.io.IOException;
 
 public class WritingComportment {
 
+    public String getGalaxy() {
+        return galaxy;
+    }
+
     protected String galaxy;
     static String text4outputFileInfo = "";
     protected File log;

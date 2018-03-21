@@ -214,4 +214,7 @@ public class Fingerprint {
 
     }
 
+    public ArrayList<String[]> getList_entities() {
+        return list_entities;
+    }
 }

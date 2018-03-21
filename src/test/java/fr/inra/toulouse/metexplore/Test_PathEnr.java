@@ -1,5 +1,7 @@
 package fr.inra.toulouse.metexplore;
 
+import fr.inra.toulouse.metexplore.omics.Mapping;
+import fr.inra.toulouse.metexplore.omics.PathwayEnrichment;
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
 import parsebionet.biodata.BioEntity;
@@ -25,7 +27,7 @@ public class Test_PathEnr extends TestCase {
     protected File file;
     protected BufferedReader buffer;
     protected Mapping mapping;
-    protected fr.inra.toulouse.metexplore.PathwayEnrichment pathEnr;
+    protected PathwayEnrichment pathEnr;
 
     public void setUp() throws Exception {
         //Initialization of the parameters before each tests
@@ -138,10 +140,10 @@ public class Test_PathEnr extends TestCase {
             this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.nameMapping, this.outputFile,
                     this.galaxy, this.bioEntityType);
             this.file = new File(this.outputFile);
-            OmicsMethods methods = new OmicsMethods(this.mapping.list_mappedEntities, network, this.bioEntityType);
+            OmicsMethods methods = new OmicsMethods(this.mapping.getList_mappedEntities(), network, this.bioEntityType);
             this.expectedMappedMetabolite.add((BioEntity) methods.getEntitySetInNetwork().get(bpe));
             assertEquals(this.expectedMappedMetabolite.iterator().next().getName(),
-                    this.mapping.list_mappedEntities.keySet().iterator().next().getName());
+                    this.mapping.getList_mappedEntities().keySet().iterator().next().getName());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -176,7 +178,7 @@ public class Test_PathEnr extends TestCase {
     public void setBufferTest(String fileName, String header, String line) {
         setBufferReader(fileName);
         try {
-            if (fileName.equals(this.logFile)) this.pathEnr.write.writeOutputInfo();
+            if (fileName.equals(this.logFile)) this.pathEnr.getWrite().writeOutputInfo();
             assertEquals(buffer.readLine(), header);
             assertEquals(buffer.readLine(), line);
             assertEquals(buffer.readLine(), null);
@@ -400,8 +402,8 @@ public class Test_PathEnr extends TestCase {
     public void setWriteOutputPathEnr(String pathFile, String typeOfMappedEntity,String typeOfEnrichedEntity, String galColumn, String line) {
     //Test the expected format of the output file obtained by pathway enrichment
         try {
-                this.pathEnr = new fr.inra.toulouse.metexplore.PathwayEnrichment(network,this.fingerprint.list_entities,
-                        this.mapping.list_mappedEntities, pathFile,this.galaxy,this.bioEntityType, this.entityType2Enrich);
+                this.pathEnr = new PathwayEnrichment(network,this.fingerprint.list_entities,
+                        this.mapping.getList_mappedEntities(), pathFile,this.galaxy,this.bioEntityType, this.entityType2Enrich);
             }catch (IOException e ){
                 e.printStackTrace();
             }

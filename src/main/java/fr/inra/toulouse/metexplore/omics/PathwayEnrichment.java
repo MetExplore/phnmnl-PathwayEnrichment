@@ -1,5 +1,7 @@
-package fr.inra.toulouse.metexplore;
+package fr.inra.toulouse.metexplore.omics;
 
+import fr.inra.toulouse.metexplore.PathwayEnrichmentCalculation;
+import fr.inra.toulouse.metexplore.PathwayEnrichmentElement;
 import parsebionet.biodata.*;
 
 import java.io.BufferedWriter;
@@ -68,7 +70,7 @@ public class PathwayEnrichment extends Omics{
 
         f.write(this.typeOfEnrichedEntity + "_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_" + typeOfMappedEntity + "s_(SBML)\tMapped_" + typeOfMappedEntity + "s_(fingerprint)\t" +
                 "Mapped_" + typeOfMappedEntity + "s_ID\tNb. of mapped\tCoverage (%)");
-        if (!this.write.galaxy.equals(""))  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
+        if (!this.write.getGalaxy().equals(""))  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
         else f.write("\n");
 
         HashMap<BioEntity, Double> result = this.list_pathwayEnr.get(0);//get pathway enrichment without corrections
@@ -99,8 +101,8 @@ public class PathwayEnrichment extends Omics{
             }
             String coverage = this.write.round((double) j / (double) this.pathEnr.getEntityListInEnrichedEntity(path).size() * (double) 100);
             PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
-                    (double)itBonCorr.next(),(double)itBenHocCorr.next(),list_pathwayMetabolitesSBML,list_pathwayMetabolitesFingerprint, list_pathwayMetabolitesID,j,coverage, this.write.galaxy);
-            if (!this.write.galaxy.equals("")) this.settings4Galaxy(path, pathEnrElement);
+                    (double)itBonCorr.next(),(double)itBenHocCorr.next(),list_pathwayMetabolitesSBML,list_pathwayMetabolitesFingerprint, list_pathwayMetabolitesID,j,coverage);
+            if (!this.write.getGalaxy().equals("")) this.settings4Galaxy(path, pathEnrElement);
             list_pathwayEnrElement.add(pathEnrElement);
         }
 
@@ -115,8 +117,8 @@ public class PathwayEnrichment extends Omics{
 
     public void settings4Galaxy(BioEntity pathway, PathwayEnrichmentElement pathEl) {
         int fisherTestParameters[] = this.pathEnr.getFisherTestParameters(pathway);
-        pathEl.nb_unmappedInFingerprint = fisherTestParameters[1];
-        pathEl.nb_unmappedInPathway = fisherTestParameters[2];
-        pathEl.nb_remainingInNetwork = fisherTestParameters[3];
+        pathEl.setNb_unmappedInFingerprint(fisherTestParameters[1]);
+        pathEl.setNb_unmappedInPathway(fisherTestParameters[2]);
+        pathEl.setNb_remainingInNetwork(fisherTestParameters[3]);
     }
 }

@@ -1,5 +1,7 @@
-package fr.inra.toulouse.metexplore;
+package fr.inra.toulouse.metexplore.omics;
 
+import fr.inra.toulouse.metexplore.InChI4Galaxy;
+import fr.inra.toulouse.metexplore.MappingElement;
 import parsebionet.biodata.*;
 
 import java.io.BufferedWriter;

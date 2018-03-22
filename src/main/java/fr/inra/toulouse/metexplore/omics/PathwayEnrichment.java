@@ -70,9 +70,10 @@ public class PathwayEnrichment extends Omics{
         List <String> list_pathwayMetabolitesSBML;
         List <String> list_pathwayMetabolitesFingerprint;
 
-        f.write(this.typeOfEnrichedEntity + "_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_" + typeOfMappedEntity + "s_(SBML)\tMapped_" + typeOfMappedEntity + "s_(fingerprint)\t" +
-                "Mapped_" + typeOfMappedEntity + "s_ID\tNb. of mapped\tCoverage (%)");
-        if (!this.galaxy.equals(""))  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
+        f.write(this.typeOfEnrichedEntity + " name\tCoverage (%)\tNb. of mapped\tP-value\tBonferroni corrected p-value" +
+                "\tBH corrected p-value\tMapped " + typeOfMappedEntity + "s (SBML)\tMapped " + typeOfMappedEntity + "s (fingerprint)\t" +
+                "Mapped " + typeOfMappedEntity + "s ID");
+        if (!this.galaxy.equals(""))  f.write("\tNb. of unmapped (pathway)\tNb. of unmapped (fingerprint)\tNb. of remaining (network)\n");
         else f.write("\n");
 
         HashMap<BioEntity, Double> result = this.list_pathwayEnr.get(0);//get pathway enrichment without corrections

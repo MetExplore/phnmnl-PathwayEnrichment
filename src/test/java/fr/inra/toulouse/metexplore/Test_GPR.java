@@ -38,9 +38,8 @@ public class Test_GPR extends Test {
     }*/
     //BUG: there is no name in SBML
 
-    /**
-     * Pathway Enrichment
-     **/
+
+    /*** Pathway Enrichment ***/
 
     public void testWriteOutputPathEnrWithGene() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
@@ -50,7 +49,7 @@ public class Test_GPR extends Test {
                 "genes",
                 "Pathway",
                 "",
-                "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92");
+                "Phosphatidylinositol phosphate metabolism\t1.92\t1\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1");
     }
 
     public void testWriteOutput4GalaxyWithGene() {
@@ -62,8 +61,8 @@ public class Test_GPR extends Test {
                 "temp/pathEnr.tsv",
                 "genes",
                 "Pathway",
-                "\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network",
-                "Phosphatidylinositol phosphate metabolism\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t1\t1.92\t51\t0\t1790");
+                "\tNb. of unmapped (pathway)\tNb. of unmapped (fingerprint)\tNb. of remaining (network)",
+                "Phosphatidylinositol phosphate metabolism\t1.92\t1\t0.02823018458197611\t0.02823018458197611\t0.02823018458197611\t10026.1\t10026.1\t10026.1\t51\t0\t1790");
         this.setBufferTest(this.galaxy,
                 "1 pathway is concerned among the network (on 100 in the network; 1.0%).",
                 null);
@@ -77,7 +76,7 @@ public class Test_GPR extends Test {
                 "proteins",
                 "Pathway",
                 "",
-                "Fatty acid synthesis\t0.03203040173724213\t0.03203040173724213\t0.03203040173724213\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69");
+                "Fatty acid synthesis\t1.69\t1\t0.03203040173724213\t0.03203040173724213\t0.03203040173724213\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415");
     }
 
     public void itestWriteOutput4GalaxyWithProtein() {
@@ -104,7 +103,7 @@ public class Test_GPR extends Test {
                 "enzymes",
                 "Pathway",
                 "",
-                "Fatty acid synthesis\t0.02199850857568978\t0.02199850857568978\t0.02199850857568978\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t1.69");
+                "Fatty acid synthesis\t1.69\t1\t0.02199850857568978\t0.02199850857568978\t0.02199850857568978\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415");
     }
 
     public void itestWriteOutput4GalaxyWithEnzyme() {
@@ -144,7 +143,7 @@ public class Test_GPR extends Test {
                 "proteins",
                 "Gene",
                 "",
-                "hsa:9415\t0.0005428881650380022\t0.0005428881650380022\t0.0005428881650380022\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415\t1\t100.0");
+                "hsa:9415\t100.0\t1\t0.0005428881650380022\t0.0005428881650380022\t0.0005428881650380022\thsa:9415 (TH)\t_9415_1_c\t_HSA:9415");
 
     }
 

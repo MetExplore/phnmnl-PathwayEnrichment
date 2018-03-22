@@ -48,8 +48,9 @@ public class EnrichedEntity implements Comparable <EnrichedEntity>, WritingCompo
     }
 
     public String toString(Boolean galaxyCompliance) {
-        String line = this.pathName + "\t" + this.p_value + "\t" + this.q_value_Bonf + "\t" + this.q_value_BenHoc
-                + "\t" + this.mappedMetabolitesSBML + "\t" + this.mappedMetabolitesFingerprint + "\t" + this.mappedMetabolitesID + "\t" + this.nb_mapped + "\t" + this.coverage;
+        String line = this.pathName + "\t" + this.coverage + "\t" + this.nb_mapped + "\t" + this.p_value +
+                "\t" + this.q_value_Bonf + "\t" + this.q_value_BenHoc + "\t" + this.mappedMetabolitesSBML
+                + "\t" + this.mappedMetabolitesFingerprint + "\t" + this.mappedMetabolitesID;
         if (galaxyCompliance)
             line += "\t" + this.nb_unmappedInPathway + "\t" + this.nb_unmappedInFingerprint + "\t" + this.nb_remainingInNetwork;
         return line + "\n";

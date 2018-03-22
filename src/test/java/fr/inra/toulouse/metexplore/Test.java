@@ -254,9 +254,9 @@ public class Test extends TestCase implements WritingComportment {
         }
         this.setBufferTest(
                 pathFile,
-                typeOfEnrichedEntity + "_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\t" +
-                        "Mapped_" + typeOfMappedEntity + "_(SBML)\tMapped_" + typeOfMappedEntity + "_(fingerprint)\tMapped_" + typeOfMappedEntity + "_ID\t" +
-                        "Nb. of mapped\tCoverage (%)"+galColumn,
+                typeOfEnrichedEntity + " name\tCoverage (%)\tNb. of mapped\tP-value\tBonferroni corrected p-value\tBH corrected p-value\t" +
+                        "Mapped " + typeOfMappedEntity + " (SBML)\tMapped " + typeOfMappedEntity + " (fingerprint)\tMapped "
+                        + typeOfMappedEntity + " ID" +galColumn,
                 line);
     }
 

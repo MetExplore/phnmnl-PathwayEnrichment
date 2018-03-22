@@ -13,7 +13,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
 
     /******FILES PARAMETERS*****/
 
-    @Option(name="-i", aliases="--inFile", usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
+    @Option(name="-i", aliases="--inFile", required = true, usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
     protected String inFileFingerprint ;
 
     @Option(name="-o1", usage="Output file name for checking format process (by default: disabled).")
@@ -21,7 +21,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
 
     /******PARSING PARAMETERS*****/
 
-    @Option(name="--check", usage="Activate this option to check database identifier format.")
+    @Option(name="-noCheck", usage="Activate this option to check database identifier format.")
     protected boolean noFormatCheck = false;
 
     @Option(name="--header", usage="Activate this option if the fingerprint dataset contains no header.")
@@ -104,12 +104,20 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
         }
 
         //Error messages for bad parameters
-        if(this.inFileFingerprint==null){
-            throw new CmdLineException("-i parameter required");
-        }
-        if (!this.noFormatCheck && !this.inchiLayers.equals("c,h")) {
-            this.layerWarning = true;
-
+        if (!this.noFormatCheck){
+            if(!this.inchiLayers.equals("c,h")) {
+                this.layerWarning = true;
+            }
+        }else {
+            if(!this.checkingFile.equals("")){
+                this.logContent = writeLog(logContent,"[WARNING] Checking format option has been disabled.\n " +
+                        "[WARNING] To prevent checking file to be empty, it has been activated by default. \n");
+                this.noFormatCheck = false;
+            }
+            if(this.layerWarning){
+                this.logContent = writeLog(logContent,"[WARNING] Checking format option has been disabled.\n " +
+                        "[WARNING] Without checking, layer warnings option will be useless. \n");
+            }
         }
 
         if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", this.inchiLayers)) {

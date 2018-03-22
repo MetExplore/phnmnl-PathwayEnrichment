@@ -24,7 +24,7 @@ public class Launcher_mapping extends Launcher_Fingerprint {
     protected int entityType2Map = 1;
 
     @Option(name = "-name", usage = "Activate this option for a name mapping .")
-    protected Boolean nameMapping = false;
+    protected int nameMapping = -1;
 
     @Option(name = "-prec", aliases = "--precision", usage = "Indicate the allowed error in ppm (used in mass mapping).")
     protected int weightPrecision = 2;
@@ -39,6 +39,14 @@ public class Launcher_mapping extends Launcher_Fingerprint {
 
         if (this.entityType2Map < 1 || this.entityType2Map > 6) {
             throw new CmdLineException("Type of mapped entity must be between 1 and 6.");
+        }
+
+        if(this.nameMapping > 0 && this.nameColumn > 0 && this.nameColumn != this.nameMapping) {
+            this.nameColumn = -1;
+        this.logContent = writeLog(this.logContent,"[WARNING] You have set both name column"
+        + "and name mapping parameters and with different parameters.\n" +
+                "[WARNING] By default, the name mapping is activated with the column number of this parameter\n." +
+                "[WARNING] The column number of the column name parameter is ignored.\n");
         }
     }
 

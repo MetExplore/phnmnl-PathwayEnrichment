@@ -18,8 +18,8 @@ import java.util.List;
 
 public class Test extends TestCase implements WritingComportment {
     protected String separator, outputFile, galaxy, checkingFile, logContent, logFile = "temp/information.txt", dummyFile = "temp/dummy.tsv";
-    protected int filteredColumn, bioEntityType, entityType2Enrich, weightPrecision;
-    protected Boolean ifNoHeader, nameMapping, noFormatCheck, layerWarning;
+    protected int nameMapping, filteredColumn, bioEntityType, entityType2Enrich, weightPrecision;
+    protected Boolean ifNoHeader, noFormatCheck, layerWarning;
     protected String[] inchiLayers;
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
@@ -60,7 +60,7 @@ public class Test extends TestCase implements WritingComportment {
         this.setDefaultInChILayers();
         this.setDefaultMappingColumn();
         this.noFormatCheck = false;
-        this.nameMapping = false;
+        this.nameMapping = -1;
         this.fingerprint = null;
         this.mapping = null;
         this.pathEnr = null;

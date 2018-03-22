@@ -97,7 +97,7 @@ public class Test_Mapping extends Test{
 
     public void testMappingName () {
         //Test the success of a mapping with the name of the network from a dataset containing an only column
-        this.nameMapping = true;
+        this.nameMapping = 1;
         this.setMapping4OneColumnFileByID("Taurine", "M_taur");
     }
 
@@ -109,7 +109,7 @@ public class Test_Mapping extends Test{
 
     public void testMappingNameReaction () {
         //Test the success of a mapping with the ID of the network from a dataset containing an only column
-        this.nameMapping = true;
+        this.nameMapping = 1;
         this.bioEntityType = 2;
         this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
     }
@@ -122,7 +122,7 @@ public class Test_Mapping extends Test{
 
     public void testMappingNamePathway () {
         //Test the success of a mapping with the name of a pathway
-        this.nameMapping = true;
+        this.nameMapping = 1;
         this.bioEntityType = 3;
         this.setMapping4OneColumnFileByID("Fatty acid oxidation", "Fatty acid oxidation");
     }

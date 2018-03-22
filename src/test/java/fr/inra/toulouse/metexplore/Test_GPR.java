@@ -12,7 +12,7 @@ public class Test_GPR extends Test {
     }
 
     public void testMappingNameGene() {
-        this.nameMapping = true;
+        this.nameMapping = -1;
         this.bioEntityType = 6;
         this.setMapping4OneColumnFileByID("10026.1", "10026.1");
     }

@@ -22,7 +22,7 @@ public class Mapping extends Omics {
     protected String[] inchiLayers;
     protected ArrayList<String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappedEntity> list_MappedEntity = new ArrayList<MappedEntity>(); //list of mapped metabolites used only for writing mapping output into a file
-    protected Boolean nameMapping;
+    protected int nameMapping;
     protected int weightPrecision;
 
     //for performMapping function
@@ -31,7 +31,7 @@ public class Mapping extends Omics {
     protected Boolean isMappedBpe;
 
     public Mapping(String logContent, BioNetwork network, ArrayList<String[]> list_fingerprint,
-                   String[] inchiLayers, Boolean nameMapping, int weightPrecision, String outFileMapping, String galaxy,
+                   String[] inchiLayers, int nameMapping, int weightPrecision, String outFileMapping, String galaxy,
                    int entityType2Map) throws IOException {
         super(logContent, galaxy, list_fingerprint, network, entityType2Map);
         this.weightPrecision = weightPrecision;
@@ -68,7 +68,7 @@ public class Mapping extends Omics {
                 //Mapping on metabolite identifier associated with a bionetwork, InChI, SMILES and PubCHEM_ID
                 ArrayList<String> associatedValueInSbml = new ArrayList<>(Collections.singletonList(e.getId()));
                 ArrayList<Integer> mappingColumnInfile = new ArrayList<>(Collections.singletonList(1));
-                if (this.nameMapping) {
+                if (this.nameMapping > 0) {
                     associatedValueInSbml.add(e.getName());
                     mappingColumnInfile.add(0);
                 }

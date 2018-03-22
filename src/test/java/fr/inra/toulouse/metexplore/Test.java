@@ -18,7 +18,7 @@ import java.util.List;
 
 public class Test extends TestCase implements WritingComportment {
     protected String separator, outputFile, galaxy, checkingFile, logContent, logFile = "temp/information.txt", dummyFile = "temp/dummy.tsv";
-    protected int filteredColumn, bioEntityType, entityType2Enrich;
+    protected int filteredColumn, bioEntityType, entityType2Enrich, weightPrecision;
     protected Boolean ifNoHeader, nameMapping, noFormatCheck, layerWarning;
     protected String[] inchiLayers;
     protected int[] mappingColumn;
@@ -33,7 +33,7 @@ public class Test extends TestCase implements WritingComportment {
     protected static int nbTestsRecFlat = 0, nbTestsRecFull = 0;
 
 
-    //Complicated instantiation mode to deals with appropriate SBML and both Maven and hand by hand tests running modes
+    //Instantiation mode to deals with appropriate SBML and both Maven and hand by hand tests running modes
     public Test(){
         String classe = this.getClass().getSimpleName();
         if(classe.equals("Test_Mapping") || classe.equals("Test_PathEnr")){
@@ -74,6 +74,7 @@ public class Test extends TestCase implements WritingComportment {
         this.filteredColumn = -1;
         this.bioEntityType = 1;
         this.entityType2Enrich = 3;
+        this.weightPrecision = 2;
     }
 
     protected void tearDown() throws Exception {
@@ -205,7 +206,8 @@ public class Test extends TestCase implements WritingComportment {
         this.expectedMappedMetabolite = new ArrayList<>();
 
         try {
-            this.mapping = new Mapping(this.logContent,this.network, this.fingerprint.getEntityList(), this.inchiLayers, this.nameMapping, this.outputFile,
+            this.mapping = new Mapping(this.logContent,this.network, this.fingerprint.getEntityList(),
+                    this.inchiLayers, this.nameMapping, this.weightPrecision, this.outputFile,
                     this.galaxy, this.bioEntityType);
             this.logContent = mapping.getLogContent();
             this.file = new File(this.outputFile);
@@ -272,7 +274,7 @@ public class Test extends TestCase implements WritingComportment {
      *              TEST
      *****************************/
 
-    public void testToPreventMavenErrorWhenBuilding(){
+    public void testToPreventMavenErrorDuringBuild(){
         assertTrue(true);
     }
 }

@@ -74,6 +74,17 @@ public class Test_Mapping extends Test{
         this.setMapping4OneColumnFile(5,0,"XOAAWQZATWQOTB-UHFFFAOYSA-N", "M_taur");
     }
 
+    public void testMappingMass () {
+        //Test the success of a mapping with the Inchikey
+        this.weightPrecision = 2;
+        this.setMapping4OneColumnFile(9,0,"125.01453", "M_taur");
+    }
+
+    public void testMappingPubChem () {
+        //Test the success of a mapping with the Inchikey
+        this.setMapping4OneColumnFile(4,0,"4068592", "M_taur");
+    }
+
     public void testMappingKegg () {
         //Test the success of a mapping with the KEGG ID
         this.setMapping4OneColumnFile(6,0,"C00160", "M_glyclt");

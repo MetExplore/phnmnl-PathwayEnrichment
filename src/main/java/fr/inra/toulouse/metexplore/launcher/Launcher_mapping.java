@@ -26,6 +26,9 @@ public class Launcher_mapping extends Launcher_Fingerprint {
     @Option(name = "-name", usage = "Activate this option for a name mapping .")
     protected Boolean nameMapping = false;
 
+    @Option(name = "-prec", aliases = "--precision", usage = "Indicate the allowed error in ppm (used in mass mapping).")
+    protected int weightPrecision = 2;
+
     protected BioNetwork network;
     protected Fingerprint fingerprint;
 
@@ -44,7 +47,7 @@ public class Launcher_mapping extends Launcher_Fingerprint {
         this.fingerprint = (Fingerprint) super.analyse(parser, args);
         this.network = (new JSBML2Bionetwork(this.sbml)).getBioNetwork();
         Mapping map = new Mapping(logContent, network, fingerprint.getList_entities(), this.tab_inchiLayers,
-                this.nameMapping, this.outFileMapping, this.galaxyFile, this.entityType2Map);
+                this.nameMapping, this.weightPrecision, this.outFileMapping, this.galaxyFile, this.entityType2Map);
         this.logContent = map.getLogContent();
         return map;
     }

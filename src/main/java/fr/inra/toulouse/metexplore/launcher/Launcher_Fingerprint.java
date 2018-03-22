@@ -81,7 +81,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name = "-csid", aliases = "--chemspider", usage = "Number of the file's column containing the ChemSpider identifier.")
     protected int csidColumn = -1;
 
-    @Option(name = "-weight", usage = "Number of the file's column containing the weight of the metabolites.")
+    @Option(name = "-mass", usage = "Number of the file's column containing the isotopic mass of the metabolites.")
     protected int weightColumn = -1;
 
     public static Boolean testInchiParameter(String[] args) {
@@ -133,7 +133,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             int i = 0;
             Boolean ifMappingParameter = false;
             for (String arg : args) {
-                if (Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|weight)", arg)) {
+                if (Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|mass)", arg)) {
                     ifMappingParameter = true;
                     break;
                 }

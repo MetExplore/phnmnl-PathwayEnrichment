@@ -23,6 +23,7 @@ public class Mapping extends Omics {
     protected ArrayList<String[]> list_unmappedEntities; //list of non-mapped metabolites
     protected List<MappedEntity> list_MappedEntity = new ArrayList<MappedEntity>(); //list of mapped metabolites used only for writing mapping output into a file
     protected Boolean nameMapping;
+    protected int weightPrecision;
 
     //for performMapping function
     protected ArrayList <String> matchedValues;
@@ -30,9 +31,10 @@ public class Mapping extends Omics {
     protected Boolean isMappedBpe;
 
     public Mapping(String logContent, BioNetwork network, ArrayList<String[]> list_fingerprint,
-                   String[] inchiLayers, Boolean nameMapping, String outFileMapping, String galaxy,
+                   String[] inchiLayers, Boolean nameMapping, int weightPrecision, String outFileMapping, String galaxy,
                    int entityType2Map) throws IOException {
         super(logContent, galaxy, list_fingerprint, network, entityType2Map);
+        this.weightPrecision = weightPrecision;
         this.inchiLayers = inchiLayers;
         this.outFileMapping = outFileMapping;
         this.nameMapping = nameMapping;
@@ -72,6 +74,7 @@ public class Mapping extends Omics {
                 }
                 if (this.entityType2Map == 1) {
                     BioPhysicalEntity bpe = (BioPhysicalEntity) e;
+                    bpe.setMolecularWeight();
                     associatedValueInSbml.addAll(Arrays.asList(bpe.getInchi(), bpe.getSmiles(), bpe.getPubchemCID(), bpe.getMolecularWeight()));
                     mappingColumnInfile.addAll(Arrays.asList(2, 4, 5, 10));
                 }
@@ -85,10 +88,10 @@ public class Mapping extends Omics {
 
                 if (this.entityType2Map == 1) {
                     //Mapping on CHEBI, InChIKey or KEGG
-                    String[] associatedValueInSbml2 = {"inchikey", "chebi", "kegg.compound", "hmdb", "chemspider"};
+                    String[] associatedValueInSbml2 = {"inchikey", "chebi", "kegg.compound", "hmdb", "chemspider", "pubchem.compound"};
                     //TODO?: regex to take account for SBML diversity
                     //TODO: regex for multiple chebi (CHEBI:[1-9]*)
-                    int[] mappingColumnInfile2 = {6, 3, 7, 8, 9};
+                    int[] mappingColumnInfile2 = {6, 3, 7, 8, 9, 5};
                     for (int i = 0; i < associatedValueInSbml2.length; i++) {
                         mapping4BiorefCase(lineInFile, associatedValueInSbml2[i], mappingColumnInfile2[i], (BioPhysicalEntity) e);
                     }
@@ -150,7 +153,7 @@ public class Mapping extends Omics {
                     //Splitting database ID values from the fingerprint dataset, if there is more than one per case
                     String[] list_id;
                     if (mappingColumnInfile != 2 ) {
-                       list_id = lineInFile[mappingColumnInfile].split(";");
+                        list_id = lineInFile[mappingColumnInfile].split(";");
                    }else{
                         list_id = new String[]{lineInFile[mappingColumnInfile]};
                     }
@@ -163,15 +166,17 @@ public class Mapping extends Omics {
                                 this.matchedValuesSBML.add(associatedValueInSbml);
                                 //need to print SBML value only if it is a InChI mapping
                                 // (layers selection can compare two different string)
-                            }catch (NullPointerException e){
+                            } catch (NullPointerException e) {
                                 ifEquals = false;
                                 //System.out.println("#Warning: " + lineInFile[0] + " have encounter an error with an InChI format. Please, check it validity.");
                                 //TODO: check that in Fingerprint class
                             }
+                        }else if (mappingColumnInfile == 10 && !associatedValueInSbml.equals("NA")) {
+                            ifEquals = compareMass(Double.parseDouble(id),Double.parseDouble(associatedValueInSbml),weightPrecision);
                         }else if(mappingColumnInfile == 1 && (this.entityType2Map==5 || this.entityType2Map == 4)){
-                            ifEquals = testProtEnzMapping(id,associatedValueInSbml);
+                            ifEquals = compareProtEnz(id,associatedValueInSbml);
                         }else if(mappingColumnInfile == 1 && this.entityType2Map==6){
-                            ifEquals = testGenesMapping(id,associatedValueInSbml);
+                            ifEquals = compareGenes(id,associatedValueInSbml);
                         }else{
                             ifEquals = associatedValueInSbml.equals(id);
                         }
@@ -227,7 +232,16 @@ public class Mapping extends Omics {
         return (!(lineInFile[mappingColumnInfile]).equals("NA") && !(lineInFile[mappingColumnInfile]).equals(""));
     }
 
-    public Boolean testGenesMapping(String query, String hit){
+    public static Boolean compareMass(Double query, Double hit, int error) {
+        Double res = error * 10e-6 * hit;
+        if (query <= hit + res && query >= hit - res) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public Boolean compareGenes(String query, String hit){
         if (hit.startsWith("hsa:")) {
             hit = hit.substring(4, hit.length());
             if (Pattern.compile("(.+)\\.\\d$").matcher(query).matches()) {
@@ -238,7 +252,7 @@ public class Mapping extends Omics {
         return query.equals(hit);
     }
 
-    public Boolean testNameMapping(String query, String hit){
+    public Boolean compareName(String query, String hit){
         if (Pattern.compile("").matcher(query).matches()) {
             hit = hit.substring(4, hit.length());
             if (Pattern.compile("(.+)\\.\\d$").matcher(query).matches()) {
@@ -249,7 +263,7 @@ public class Mapping extends Omics {
         return query.equals(hit);
     }
 
-    public Boolean testProtEnzMapping(String query, String hit) {
+    public Boolean compareProtEnz(String query, String hit) {
         Matcher m = Pattern.compile("_HSA:(.+)").matcher(hit);
         if (m.matches()) {
             hit = m.group(1);

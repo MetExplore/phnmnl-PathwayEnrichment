@@ -1,7 +1,7 @@
 package fr.inra.toulouse.metexplore.launcher;
 
-import fr.inra.toulouse.metexplore.Fingerprint;
-import fr.inra.toulouse.metexplore.JSBML2Bionetwork4Galaxy;
+import fr.inra.toulouse.metexplore.io.Fingerprint;
+import fr.inra.toulouse.metexplore.io.JSBML2Bionetwork;
 import fr.inra.toulouse.metexplore.omics.Mapping;
 import fr.inra.toulouse.metexplore.omics.Omics;
 import org.kohsuke.args4j.CmdLineException;
@@ -42,7 +42,7 @@ public class Launcher_mapping extends Launcher_Fingerprint {
     public Omics analyse(CmdLineParser parser, String[] args) throws IOException {
 
         this.fingerprint = (Fingerprint) super.analyse(parser, args);
-        this.network = (new JSBML2Bionetwork4Galaxy(this.sbml)).getBioNetwork();
+        this.network = (new JSBML2Bionetwork(this.sbml)).getBioNetwork();
         Mapping map = new Mapping(logContent, network, fingerprint.getList_entities(), this.tab_inchiLayers,
                 this.nameMapping, this.outFileMapping, this.galaxyFile, this.entityType2Map);
         this.logContent = map.getLogContent();

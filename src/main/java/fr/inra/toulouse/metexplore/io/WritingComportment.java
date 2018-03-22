@@ -1,4 +1,4 @@
-package fr.inra.toulouse.metexplore;
+package fr.inra.toulouse.metexplore.io;
 
 import java.io.BufferedWriter;
 import java.io.File;

@@ -2,7 +2,7 @@ package fr.inra.toulouse.metexplore.launcher;
 
 import java.io.IOException;
 
-import fr.inra.toulouse.metexplore.WritingComportment;
+import fr.inra.toulouse.metexplore.io.WritingComportment;
 import fr.inra.toulouse.metexplore.omics.Omics;
 import fr.inra.toulouse.metexplore.omics.PathwayEnrichment;
 import org.kohsuke.args4j.CmdLineParser;

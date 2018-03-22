@@ -1,4 +1,6 @@
-package fr.inra.toulouse.metexplore;
+package fr.inra.toulouse.metexplore.omicsComponents;
+
+import fr.inra.toulouse.metexplore.io.WritingComportment;
 
 import java.util.List;
 

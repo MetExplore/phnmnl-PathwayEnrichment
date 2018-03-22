@@ -1,5 +1,8 @@
 package fr.inra.toulouse.metexplore;
 
+import fr.inra.toulouse.metexplore.io.JSBML2Bionetwork;
+import fr.inra.toulouse.metexplore.io.WritingComportment;
+import fr.inra.toulouse.metexplore.io.Fingerprint;
 import fr.inra.toulouse.metexplore.omics.Mapping;
 import fr.inra.toulouse.metexplore.omics.PathwayEnrichment;
 import junit.framework.TestCase;
@@ -14,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Test_PathEnr extends TestCase implements OmicsMethods, WritingComportment{
+public class Test_PathEnr extends TestCase implements WritingComportment {
     protected String separator, outputFile, galaxy, checkingFile, logContent, logFile = "temp/information.txt", dummyFile = "temp/dummy.tsv";
     protected int filteredColumn, bioEntityType, entityType2Enrich;
     protected Boolean ifNoHeader, nameMapping, noFormatCheck, layerWarning;
@@ -22,7 +25,7 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
     protected int[] mappingColumn;
     protected List<BioEntity> expectedMappedMetabolite;
     // ID biosource:3223
-    protected static BioNetwork network = (new JSBML2Bionetwork4Galaxy("data/recon2.02_without_compartment.xml")).getBioNetwork();
+    protected static BioNetwork network = (new JSBML2Bionetwork("data/recon2.02_without_compartment.xml")).getBioNetwork();
     protected Fingerprint fingerprint;
     protected File file;
     protected BufferedReader buffer;
@@ -138,11 +141,11 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
         this.expectedMappedMetabolite = new ArrayList<>();
 
         try {
-            this.mapping = new Mapping(this.logContent,this.network, this.fingerprint.list_entities, this.inchiLayers, this.nameMapping, this.outputFile,
+            this.mapping = new Mapping(this.logContent,this.network, this.fingerprint.getEntityList(), this.inchiLayers, this.nameMapping, this.outputFile,
                     this.galaxy, this.bioEntityType);
             this.logContent = mapping.getLogContent();
             this.file = new File(this.outputFile);
-            this.expectedMappedMetabolite.add((BioEntity) getEntitySetInNetwork(this.network, this.bioEntityType).get(bpe));
+            this.expectedMappedMetabolite.add((BioEntity) mapping.getEntitySetInNetwork().get(bpe));
             assertEquals(this.expectedMappedMetabolite.iterator().next().getName(),
                     this.mapping.getList_mappedEntities().keySet().iterator().next().getName());
         } catch (IOException e) {
@@ -232,7 +235,7 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
         this.setMappingAllColumn();
         this.createDummyFileWithMultipleColumns("nameMetabolite\tidSBML\tinchi\tchebi\tsmiles\tpubchem\tinchikeys\tkegg\thmd\tchemspider\tweight");
         String[] expectedLine = {"nameMetabolite", "idSBML", "inchi", "chebi", "smiles", "pubchem", "inchikeys", "kegg", "hmd", "chemspider", "weight"};
-        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).iterator().next()));
+        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.getEntityList()).iterator().next()));
     }
 
     public void testSeparator() {
@@ -242,14 +245,14 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
         this.separator = ";";
         this.createDummyFileWithMultipleColumns("nameMetabolite;idSBML;inchi;chebi;smiles;pubchem;inchikeys;kegg;hmd;chemspider;weight");
         String[] expectedLine = {"nameMetabolite", "idSBML", "inchi", "chebi", "smiles", "pubchem", "inchikeys", "kegg", "hmd", "chemspider", "weight"};
-        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.list_entities).iterator().next()));
+        assertEquals(Arrays.toString(expectedLine), Arrays.toString((this.fingerprint.getEntityList()).iterator().next()));
     }
 
     public void testHeader() {
         //Test that each possible mapping values are correctly extracted
         this.ifNoHeader = true;
         this.createDummyFileWithOnlyColumn("M_taur");
-        assertTrue(this.fingerprint.list_entities.size() == 2);
+        assertTrue(this.fingerprint.getEntityList().size() == 2);
     }
 
     public void testFiltered() {
@@ -257,13 +260,13 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
         this.filteredColumn = 24;
         this.createDummyFileWithMultipleColumns("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\tplsda|randomforest|svm\n" +
                 "Pantothenic acid\tCHEBI:7916\tC9H17NO5\tCC(C)(CO)C(O)C(=O)NCCC(O)=O\tInChI=1S/C9H17NO5/c1-9(2,5-11)7(14)8(15)10-4-3-6(12)13/h7,11,14H,3-5H2,1-2H3,(H,10,15)(H,12,13)\tPantothenic acid\t218,102478\t1,00727647\t219,10975447\tNA\t[(M-H)]-\t1\t4,77\t5\t3,5599610222\t0,2982536819\t0,0837800414\t3012837,77207209\t131428,160471926\t0,043622714\t0,5206814567\t7916\tNA\tpantothenic acid");
-        assertTrue(this.fingerprint.list_entities.size() == 1);
+        assertTrue(this.fingerprint.getEntityList().size() == 1);
 
         //Without the filtering, test that all the lines have been extracted
         this.filteredColumn = -1;
         this.createDummyFileWithMultipleColumns("Testosterone glucuronide\tCHEBI:28835\tC25H36O8\t[H][C@@]12CCC3=CC(=O)CC[C@]3(C)[C@@]1([H])CC[C@]1(C)[C@H](CC[C@@]21[H])O[C@@H]1O[C@@H]([C@@H](O)[C@H](O)[C@H]1O)C(O)=O\tInChI=1S/C25H36O8/c1-24-9-7-13(26)11-12(24)3-4-14-15-5-6-17(25(15,2)10-8-16(14)24)32-23-20(29)18(27)19(28)21(33-23)22(30)31/h11,14-21,23,27-29H,3-10H2,1-2H3,(H,30,31)/t14-,15-,16-,17-,18-,19-,20+,21-,23+,24-,25-/m0/s1\tTestosterone glucuronide\t463,2329\t1,00727647\t464,24017647\tNA\t[(M-H)]-\t1\t7,9\t4\t2,1475578771\t0,5701078279\t0,265467969\t178149,617939526\t12351,5841321731\t0,0693326445\t0,2611714128\t28835\tNA\ttestosterone 17-glucosiduronic acid\tplsda|randomforest|svm\n" +
                 "Pantothenic acid\tCHEBI:7916\tC9H17NO5\tCC(C)(CO)C(O)C(=O)NCCC(O)=O\tInChI=1S/C9H17NO5/c1-9(2,5-11)7(14)8(15)10-4-3-6(12)13/h7,11,14H,3-5H2,1-2H3,(H,10,15)(H,12,13)\tPantothenic acid\t218,102478\t1,00727647\t219,10975447\tNA\t[(M-H)]-\t1\t4,77\t5\t3,5599610222\t0,2982536819\t0,0837800414\t3012837,77207209\t131428,160471926\t0,043622714\t0,5206814567\t7916\tNA\tpantothenic acid");
-        assertTrue(this.fingerprint.list_entities.size() == 2);
+        assertTrue(this.fingerprint.getEntityList().size() == 2);
     }
 
     public void testCheckingFormat() {
@@ -406,7 +409,7 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
     public void setWriteOutputPathEnr(String pathFile, String typeOfMappedEntity,String typeOfEnrichedEntity, String galColumn, String line) {
     //Test the expected format of the output file obtained by pathway enrichment
         try {
-                this.pathEnr = new PathwayEnrichment(this.logContent,network,this.fingerprint.list_entities,
+                this.pathEnr = new PathwayEnrichment(this.logContent,network,this.fingerprint.getEntityList(),
                         this.mapping.getList_mappedEntities(), pathFile,this.galaxy,this.bioEntityType, this.entityType2Enrich);
             }catch (IOException e ){
                 e.printStackTrace();
@@ -501,7 +504,7 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
     /***Mapping***/
 
     public void testMappingIDGene() {
-        network = new JSBML2Bionetwork4Galaxy("data/recon2.02.xml").getBioNetwork();
+        network = new JSBML2Bionetwork("data/recon2.02.xml").getBioNetwork();
         this.bioEntityType = 6;
         this.setMapping4OneColumnFileByID("10026.1", "10026.1");
     }
@@ -616,7 +619,7 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
                 null);
     }
 
-    public void testWriteOutputProtEnrWithGene() {
+    public void itestWriteOutputProtEnrWithGene() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
         testMappingNameGene();
         this.entityType2Enrich=5;
@@ -625,10 +628,10 @@ public class Test_PathEnr extends TestCase implements OmicsMethods, WritingCompo
                 "genes",
                 "Protein",
                 "",
-                "10026.1 (TH)\t0.0005428881650380022\t0.0005428881650380022\t0.0005428881650380022\t10026.1\t10026.1\t10026.1\t1\t100.0");
+                "10026.1 (TH)\t0.0005428881650380022\t0.002714440825190011\t0.002714440825190011\t10026.1\t10026.1\t10026.1\t1\t100.0");
     }
 
-    public void itestWriteOutputGeneEnrWithProt() {
+    public void testWriteOutputGeneEnrWithProt() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
         testMappingIDProtein();
         this.entityType2Enrich=6;

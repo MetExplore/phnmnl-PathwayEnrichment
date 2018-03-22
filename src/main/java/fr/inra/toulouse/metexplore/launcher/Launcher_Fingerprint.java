@@ -1,7 +1,7 @@
 package fr.inra.toulouse.metexplore.launcher;
 
-import fr.inra.toulouse.metexplore.Fingerprint;
-import fr.inra.toulouse.metexplore.WritingComportment;
+import fr.inra.toulouse.metexplore.io.Fingerprint;
+import fr.inra.toulouse.metexplore.io.WritingComportment;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;

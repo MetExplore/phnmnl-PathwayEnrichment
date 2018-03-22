@@ -1,4 +1,4 @@
-package fr.inra.toulouse.metexplore;
+package fr.inra.toulouse.metexplore.omicsComponents;
 
 public class MappedEntity implements Comparable <MappedEntity>{
 

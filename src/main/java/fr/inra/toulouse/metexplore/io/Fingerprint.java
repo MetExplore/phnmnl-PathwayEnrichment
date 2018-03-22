@@ -1,4 +1,6 @@
-package fr.inra.toulouse.metexplore;
+package fr.inra.toulouse.metexplore.io;
+
+import fr.inra.toulouse.metexplore.biodata.InChI;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -6,7 +8,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.System.exit;
 
-public class Fingerprint implements WritingComportment{
+public class Fingerprint implements WritingComportment {
 
     protected int nameColumn, filteredColumn, nbLine = 2;
     protected int[] columnNumbers, nbWarningPerDatabases;
@@ -18,6 +20,10 @@ public class Fingerprint implements WritingComportment{
     protected BufferedReader inBuffer;
     protected BufferedWriter outBuffer;
     protected Boolean writeChecking;
+
+    public ArrayList<String[]> getEntityList() {
+        return list_entities;
+    }
 
     public String getLogContent() {
         return logContent;
@@ -185,7 +191,7 @@ public class Fingerprint implements WritingComportment{
                 database = databases_subset[columnInTable - 3];
             }
         }else if (columnInTable == 2){
-            InChI4Galaxy inchi = new InChI4Galaxy(id, this.inchiLayers);
+            InChI inchi = new InChI(id, this.inchiLayers);
             if(!inchi.validity) {
                 database = "InChI";
                 if (this.layerWarning) layer+= inchi.wrongLayer;

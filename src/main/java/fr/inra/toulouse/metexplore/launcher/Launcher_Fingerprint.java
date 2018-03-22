@@ -1,6 +1,7 @@
 package fr.inra.toulouse.metexplore.launcher;
 
 import fr.inra.toulouse.metexplore.Fingerprint;
+import fr.inra.toulouse.metexplore.WritingComportment;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -8,7 +9,7 @@ import org.kohsuke.args4j.Option;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-public class Launcher_Fingerprint extends Launcher{
+public class Launcher_Fingerprint extends Launcher implements WritingComportment{
 
     /******FILES PARAMETERS*****/
 
@@ -124,7 +125,7 @@ public class Launcher_Fingerprint extends Launcher{
         }
         if (ifLayerMappingParameter && !ifInchiMappingParameter) {
             this.inchiColumn = 2;
-            write.writeLog("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+            this.logContent = writeLog(logContent,"[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
                     "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
         } else {
 
@@ -140,7 +141,7 @@ public class Launcher_Fingerprint extends Launcher{
             }
             if (!ifMappingParameter) {
                 this.idSBMLColumn = 2;
-                write.writeLog("[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
+                this.logContent = writeLog(logContent,"[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
             }
 
             //All mapping parameters are disabled
@@ -151,7 +152,7 @@ public class Launcher_Fingerprint extends Launcher{
                     && this.weightColumn < 1) {
                 this.nameColumn = 1;
                 this.idSBMLColumn = 2;
-                write.writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
+                this.logContent = writeLog(logContent,"[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
             } else {
                 for (String arg : args) {
                     if (Pattern.matches("-nameCol", arg) && Pattern.matches("-[ ]*", args[i + 1])) {
@@ -179,28 +180,21 @@ public class Launcher_Fingerprint extends Launcher{
         }
     }
 
-    public Object exec(CmdLineParser parser, String[] args) throws IOException {
+    public Object analyse(CmdLineParser parser, String[] args) throws IOException {
         Fingerprint fingerprint = null;
 
-        try {
-            parser.parseArgument(args);
-            this.printInfo(parser, args);
-        } catch (CmdLineException e) {
-            this.printError(parser, e, args);
-        }
-
         //Regex for inchiLayers parameter
-
         this.tab_inchiLayers = this.inchiLayers.replaceAll(" ", "").split(",");
         int[] mappingColumns = {(this.idSBMLColumn - 1), (this.inchiColumn - 1), (this.chebiColumn - 1),
                 (this.smilesColumn - 1), (this.pubchemColumn - 1), (this.inchikeyColumn - 1),
                 (this.keggColumn - 1), (this.hmdbColumn - 1), (this.csidColumn - 1), (this.weightColumn - 1)};
 
         try {
-            fingerprint = new Fingerprint(this.layerWarning, this.noFormatCheck, this.checkingFile,
+            fingerprint = new Fingerprint(this.logContent, this.layerWarning, this.noFormatCheck, this.checkingFile,
                     this.inFileFingerprint, this.ifNoHeader, this.columnSeparator,
                     this.IDSeparator, (this.nameColumn - 1), mappingColumns, tab_inchiLayers,
                     (this.colFiltered - 1));
+            this.logContent = fingerprint.getLogContent();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -208,13 +202,34 @@ public class Launcher_Fingerprint extends Launcher{
         return fingerprint;
     }
 
+    public static void exec(Launcher_Fingerprint launch, String[] args) {
+        startTime = System.nanoTime();
+        CmdLineParser parser = new CmdLineParser(launch);
+
+        try {
+            parser.parseArgument(args);
+            launch.printInfo(parser, args);
+        } catch (CmdLineException e) {
+            launch.printError(parser, e, args);
+        }
+
+        if (!launch.galaxyFile.equals("")) {
+            logFile = launch.createFile(launch.galaxyFile);
+            launch.logContent = "";
+        }
+
+        try {
+            launch.analyse(parser, args);
+            if (!launch.galaxyFile.equals("")) launch.writeOutput(launch.logContent, logFile);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        timeCalculation(System.nanoTime() - startTime);
+    }
+
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
-        Launcher_Fingerprint launch = new Launcher_Fingerprint();
-        try {
-            launch.exec(new CmdLineParser(launch), args);
-        }catch (IOException e){}
-        timeCalculation(System.nanoTime() - startTime);
+        exec(new Launcher_Fingerprint(), args);
     }
 
 }

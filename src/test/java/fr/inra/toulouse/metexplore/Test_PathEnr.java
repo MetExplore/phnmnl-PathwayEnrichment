@@ -14,8 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Test_PathEnr extends TestCase {
-    protected String separator, outputFile, galaxy, checkingFile, logFile = "temp/information.txt", dummyFile = "temp/dummy.tsv";
+public class Test_PathEnr extends TestCase implements OmicsMethods, WritingComportment{
+    protected String separator, outputFile, galaxy, checkingFile, logContent, logFile = "temp/information.txt", dummyFile = "temp/dummy.tsv";
     protected int filteredColumn, bioEntityType, entityType2Enrich;
     protected Boolean ifNoHeader, nameMapping, noFormatCheck, layerWarning;
     protected String[] inchiLayers;
@@ -48,6 +48,7 @@ public class Test_PathEnr extends TestCase {
         this.galaxy = "";
         this.outputFile = "temp/output.tsv";
         this.checkingFile = "";
+        this.logContent = "";
         this.filteredColumn = -1;
         this.bioEntityType = 1;
         this.entityType2Enrich = 3;
@@ -137,11 +138,11 @@ public class Test_PathEnr extends TestCase {
         this.expectedMappedMetabolite = new ArrayList<>();
 
         try {
-            this.mapping = new Mapping(this.network, this.fingerprint.list_entities, this.inchiLayers, this.nameMapping, this.outputFile,
+            this.mapping = new Mapping(this.logContent,this.network, this.fingerprint.list_entities, this.inchiLayers, this.nameMapping, this.outputFile,
                     this.galaxy, this.bioEntityType);
+            this.logContent = mapping.getLogContent();
             this.file = new File(this.outputFile);
-            OmicsMethods methods = new OmicsMethods(this.mapping.getList_mappedEntities(), network, this.bioEntityType);
-            this.expectedMappedMetabolite.add((BioEntity) methods.getEntitySetInNetwork().get(bpe));
+            this.expectedMappedMetabolite.add((BioEntity) getEntitySetInNetwork(this.network, this.bioEntityType).get(bpe));
             assertEquals(this.expectedMappedMetabolite.iterator().next().getName(),
                     this.mapping.getList_mappedEntities().keySet().iterator().next().getName());
         } catch (IOException e) {
@@ -178,7 +179,10 @@ public class Test_PathEnr extends TestCase {
     public void setBufferTest(String fileName, String header, String line) {
         setBufferReader(fileName);
         try {
-            if (fileName.equals(this.logFile)) this.pathEnr.getWrite().writeOutputInfo();
+            if (fileName.equals(this.logFile)) {
+                this.logContent = this.pathEnr.getLogContent();
+                writeOutput(this.logContent,this.file);
+            }
             assertEquals(buffer.readLine(), header);
             assertEquals(buffer.readLine(), line);
             assertEquals(buffer.readLine(), null);
@@ -199,7 +203,7 @@ public class Test_PathEnr extends TestCase {
             dummyFile.write(header + "\n");
             dummyFile.write(inputLine);
             dummyFile.close();
-            this.fingerprint = new Fingerprint(this.layerWarning, this.noFormatCheck, this.checkingFile, this.dummyFile, this.ifNoHeader, this.separator, ";", 0,
+            this.fingerprint = new Fingerprint(this.logContent,this.layerWarning, this.noFormatCheck, this.checkingFile, this.dummyFile, this.ifNoHeader, this.separator, ";", 0,
                     this.mappingColumn, this.inchiLayers, this.filteredColumn);
         } catch (IOException e) {
             e.printStackTrace();
@@ -402,7 +406,7 @@ public class Test_PathEnr extends TestCase {
     public void setWriteOutputPathEnr(String pathFile, String typeOfMappedEntity,String typeOfEnrichedEntity, String galColumn, String line) {
     //Test the expected format of the output file obtained by pathway enrichment
         try {
-                this.pathEnr = new PathwayEnrichment(network,this.fingerprint.list_entities,
+                this.pathEnr = new PathwayEnrichment(this.logContent,network,this.fingerprint.list_entities,
                         this.mapping.getList_mappedEntities(), pathFile,this.galaxy,this.bioEntityType, this.entityType2Enrich);
             }catch (IOException e ){
                 e.printStackTrace();
@@ -423,7 +427,6 @@ public class Test_PathEnr extends TestCase {
         }catch (IOException e){
             e.printStackTrace();
         }
-        WritingComportment.text4outputFileInfo="";
     }
 
     public void testWriteOutputPathEnr() {

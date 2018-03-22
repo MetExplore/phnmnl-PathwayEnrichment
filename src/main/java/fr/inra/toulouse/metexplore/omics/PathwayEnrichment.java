@@ -1,7 +1,7 @@
 package fr.inra.toulouse.metexplore.omics;
 
 import fr.inra.toulouse.metexplore.PathwayEnrichmentCalculation;
-import fr.inra.toulouse.metexplore.PathwayEnrichmentElement;
+import fr.inra.toulouse.metexplore.EnrichedEntity;
 import parsebionet.biodata.*;
 
 import java.io.BufferedWriter;
@@ -18,12 +18,12 @@ public class PathwayEnrichment extends Omics{
     protected int entityType2Enrich;
     protected String typeOfEnrichedEntity;
 
-    public PathwayEnrichment (BioNetwork network, ArrayList<String[]> list_fingerprint, HashMap <BioEntity, String> list_mappedEntities,
+    public PathwayEnrichment (String logContent, BioNetwork network, ArrayList<String[]> list_fingerprint, HashMap <BioEntity, String> list_mappedEntities,
                               String outFilePathEnr, String galaxy , int entityType2Map, int entityType2Enrich) throws IOException {
-        super(galaxy, list_fingerprint, list_mappedEntities, network, entityType2Map);
+        super(logContent, galaxy, list_fingerprint, list_mappedEntities, network, entityType2Map);
         this.outFilePathEnr = outFilePathEnr;
         this.entityType2Enrich = entityType2Enrich;
-        this.typeOfEnrichedEntity = omics.getTypeOfEntity(entityType2Enrich);
+        this.typeOfEnrichedEntity = getTypeOfEntity(entityType2Enrich);
         this.computeEnrichmentWithCorrections();
     }
 
@@ -40,10 +40,10 @@ public class PathwayEnrichment extends Omics{
         this.list_pathwayEnr.add(pathEnrBenHoc);//same for Benjamini Hochberg
 
         int nbEnriched = this.list_pathwayEnr.get(0).size();
-        int nbEnrichedTypeInNetwork = this.omics.getEntitySetInNetwork(this.entityType2Enrich).size();
+        int nbEnrichedTypeInNetwork = getEntitySetInNetwork(network,this.entityType2Enrich).size();
         String plural = (nbEnriched > 1) ? "s are": " is";
 
-        write.writeLog(nbEnriched + " " + typeOfEnrichedEntity.toLowerCase() + plural + " concerned among the network (on " + nbEnrichedTypeInNetwork + " in the network; " + write.calculPercent(nbEnriched,nbEnrichedTypeInNetwork) + "%).");
+        this.logContent = writeLog(logContent,nbEnriched + " " + typeOfEnrichedEntity.toLowerCase() + plural + " concerned among the network (on " + nbEnrichedTypeInNetwork + " in the network; " + calculPercent(nbEnriched,nbEnrichedTypeInNetwork) + "%).");
         writeOutputPathEnr();
     }
 
@@ -62,7 +62,7 @@ public class PathwayEnrichment extends Omics{
         File fo2 = new File(this.outFilePathEnr);
         fo2.createNewFile();
         BufferedWriter f = new BufferedWriter(new FileWriter(fo2));
-        List <PathwayEnrichmentElement> list_pathwayEnrElement = new ArrayList<PathwayEnrichmentElement>(); //list of pathway enrichment instantiation for sorting
+        List <EnrichedEntity> list_enrichedEntity = new ArrayList<EnrichedEntity>(); //list of pathway enrichment instantiation for sorting
         HashMap <String, String> hm_pathwayMetabolitesFingerprint;
         List <String> list_pathwayMetabolitesID;
         List <String> list_pathwayMetabolitesSBML;
@@ -70,7 +70,7 @@ public class PathwayEnrichment extends Omics{
 
         f.write(this.typeOfEnrichedEntity + "_name\tp-value\tBonferroni_corrected_p_value\tBH_corrected_p_value\tMapped_" + typeOfMappedEntity + "s_(SBML)\tMapped_" + typeOfMappedEntity + "s_(fingerprint)\t" +
                 "Mapped_" + typeOfMappedEntity + "s_ID\tNb. of mapped\tCoverage (%)");
-        if (!this.write.getGalaxy().equals(""))  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
+        if (!this.galaxy.equals(""))  f.write("\tNb. of unmapped in pathway\tNb. of unmapped in fingerprint\tNb. of remaining in network\n");
         else f.write("\n");
 
         HashMap<BioEntity, Double> result = this.list_pathwayEnr.get(0);//get pathway enrichment without corrections
@@ -96,26 +96,26 @@ public class PathwayEnrichment extends Omics{
             list_pathwayMetabolitesID = new ArrayList<>(hm_pathwayMetabolitesFingerprint.keySet());
             Collections.sort(list_pathwayMetabolitesID);
             for(String id_bpe : list_pathwayMetabolitesID){
-                list_pathwayMetabolitesSBML.add(((BioEntity)omics.getEntitySetInNetwork().get(id_bpe)).getName());
+                list_pathwayMetabolitesSBML.add(((BioEntity)getEntitySetInNetwork(network,this.bioEntityType).get(id_bpe)).getName());
                 list_pathwayMetabolitesFingerprint.add(hm_pathwayMetabolitesFingerprint.get(id_bpe));
             }
-            String coverage = this.write.round((double) j / (double) this.pathEnr.getEntityListInEnrichedEntity(path).size() * (double) 100);
-            PathwayEnrichmentElement pathEnrElement = new PathwayEnrichmentElement(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
+            String coverage = round((double) j / (double) this.pathEnr.getEntityListInEnrichedEntity(path).size() * (double) 100);
+            EnrichedEntity pathEnrElement = new EnrichedEntity(pathEnrEntry.getKey().getName(),pathEnrEntry.getValue(),
                     (double)itBonCorr.next(),(double)itBenHocCorr.next(),list_pathwayMetabolitesSBML,list_pathwayMetabolitesFingerprint, list_pathwayMetabolitesID,j,coverage);
-            if (!this.write.getGalaxy().equals("")) this.settings4Galaxy(path, pathEnrElement);
-            list_pathwayEnrElement.add(pathEnrElement);
+            if (!this.galaxy.equals("")) this.settings4Galaxy(path, pathEnrElement);
+            list_enrichedEntity.add(pathEnrElement);
         }
 
-        Collections.sort(list_pathwayEnrElement);
-        for (PathwayEnrichmentElement pathwayEnrElement : list_pathwayEnrElement) {
-            f.write(pathwayEnrElement.toString());
+        Collections.sort(list_enrichedEntity);
+        for (EnrichedEntity enrichedEntity : list_enrichedEntity) {
+            f.write(enrichedEntity.toString(!galaxy.equals("")));
         }
         if (f != null) {
             f.close();
         }
     }
 
-    public void settings4Galaxy(BioEntity pathway, PathwayEnrichmentElement pathEl) {
+    public void settings4Galaxy(BioEntity pathway, EnrichedEntity pathEl) {
         int fisherTestParameters[] = this.pathEnr.getFisherTestParameters(pathway);
         pathEl.setNb_unmappedInFingerprint(fisherTestParameters[1]);
         pathEl.setNb_unmappedInPathway(fisherTestParameters[2]);

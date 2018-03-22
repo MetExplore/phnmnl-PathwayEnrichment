@@ -6,11 +6,11 @@ import java.util.regex.Pattern;
 
 import static java.lang.System.exit;
 
-public class Fingerprint {
+public class Fingerprint implements WritingComportment{
 
     protected int nameColumn, filteredColumn, nbLine = 2;
     protected int[] columnNumbers, nbWarningPerDatabases;
-    protected String separator, IDSeparator, warnings ="";
+    protected String separator, IDSeparator, warnings ="", logContent;
     protected String[] inchiLayers;
     protected Boolean ifNoHeader, noFormatCheck, layerWarning;
     protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
@@ -19,11 +19,16 @@ public class Fingerprint {
     protected BufferedWriter outBuffer;
     protected Boolean writeChecking;
 
+    public String getLogContent() {
+        return logContent;
+    }
+
     //TODO: parsing for Excel files
 
-    public Fingerprint (Boolean layerWarning, Boolean noFormatCheck, String checkingFile, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
+    public Fingerprint (String logContent, Boolean layerWarning, Boolean noFormatCheck, String checkingFile, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
                         int[] mappingColumns, String[] inchiLayers, int filteredColumn) throws IOException {
 
+        this.logContent = logContent;
         this.inBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));
         this.layerWarning=layerWarning;
         this.noFormatCheck=noFormatCheck;
@@ -113,8 +118,8 @@ public class Fingerprint {
             System.err.println("File badly formatted");
             exit(1);
         }else if(!noFormatCheck && !testWrongColumn()){
-            if (warnings.isEmpty()) System.out.println("All your databases identifiers seem valid.");
-            else System.out.println(warnings);
+            if (warnings.isEmpty()) this.logContent = writeLog(this.logContent,"All your databases identifiers seem valid.\n");
+            else this.logContent = writeLog(this.logContent,warnings);
         }
 
         /*for (String[] lineInFile : list_entities) {

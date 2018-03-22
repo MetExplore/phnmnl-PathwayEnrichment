@@ -1,12 +1,12 @@
 package fr.inra.toulouse.metexplore;
 
-public class MappingElement implements Comparable <MappingElement>{
+public class MappedEntity implements Comparable <MappedEntity>{
 
     protected Boolean isMapped;
     protected String inFileName, sbmlName, ID, inFileVal, sbmlVal;
 
-    public MappingElement(Boolean isMapped, String inFileName, String sbmlName, String ID,
-                          String inFileVal, String sbmlVal) {
+    public MappedEntity(Boolean isMapped, String inFileName, String sbmlName, String ID,
+                        String inFileVal, String sbmlVal) {
         this.isMapped = isMapped;
         this.inFileName = inFileName;
         this.sbmlName = sbmlName;
@@ -14,7 +14,7 @@ public class MappingElement implements Comparable <MappingElement>{
         this.inFileVal = inFileVal;
         this.sbmlVal = sbmlVal;
     }
-    public int compareTo(MappingElement m) {
+    public int compareTo(MappedEntity m) {
         if (this.isMapped == m.isMapped) return this.inFileName.compareToIgnoreCase(m.inFileName);
         else if (this.isMapped && !m.isMapped) return -1;
         return 1;

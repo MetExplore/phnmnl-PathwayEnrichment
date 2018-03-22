@@ -5,54 +5,41 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class WritingComportment {
+public interface WritingComportment {
 
-    public String getGalaxy() {
-        return galaxy;
-    }
-
-    protected String galaxy;
-    static String text4outputFileInfo = "";
-    protected File log;
-    static int nbInstance = 0;
-
-    public WritingComportment (String galaxyOut) {
-        nbInstance++;
-        this.galaxy = galaxyOut;
-        if(this.galaxy != "") {
-            this.log = new File(this.galaxy);
-            if (nbInstance == 1) {
-                //avoid to erase the file if this class is called more than one time
-                if (this.log.isFile()) {
-                    //write a new file if already exists
-                    this.log.delete();
-                }
-                try {
-                    this.log.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    default File createFile (String galaxyFile) {
+        File log = null;
+        if (galaxyFile != "") {
+            log = new File(galaxyFile);
+            if (log.isFile()) {
+                //write a new file if already exists
+                log.delete();
+            }
+            try {
+                log.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
+        return log;
     }
 
-    public void writeOutputInfo() throws IOException {
-        if (!this.galaxy.equals("")) {//if "writing console log in a file" functionality is activated
-            this.log = new File(this.galaxy);
-            BufferedWriter b = new BufferedWriter(new FileWriter(this.log, true));
+    default void writeOutput(String text4outputFileInfo, File galaxyFile) throws IOException {
+        if (!galaxyFile.equals("")) {//if "writing console log in a file" functionality is activated
+            BufferedWriter b = new BufferedWriter(new FileWriter(galaxyFile, true));
             b.write(text4outputFileInfo);
             b.close();
         }
     }
 
-    public void writeLog(String message) {
+    default String writeLog(String log, String message) {
         //Avoid to skip a line
         System.out.println(message.replaceAll("\n$", ""));
-        //TODO: regex, enlever celui de la fin
-        text4outputFileInfo += message;
+        log += message;
+        return log;
     }
 
-    public String removeSciNot(double value) {
+    default String removeSciNot(double value) {
         String tmp = (String.valueOf(value));
         if (value < 1e-3) {
             String[] splitting = tmp.split("E");
@@ -66,11 +53,11 @@ public class WritingComportment {
         return tmp;
     }
 
-    public String round(double value) {
+    default String round(double value) {
         return String.valueOf((double) Math.round(value * 100) / 100);
     }
 
-    public String calculPercent(int numerator, int denominator) {
+    default String calculPercent(int numerator, int denominator) {
         return round(((double) numerator / (double) denominator) * 100);
     }
 }

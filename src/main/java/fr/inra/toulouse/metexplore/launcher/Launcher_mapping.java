@@ -35,27 +35,21 @@ public class Launcher_mapping extends Launcher_Fingerprint {
         super.printInfo(parser, args);
 
         if (this.entityType2Map < 1 || this.entityType2Map > 6) {
-            throw new CmdLineException("Type of biological object must be between 1 and 6.");
+            throw new CmdLineException("Type of mapped entity must be between 1 and 6.");
         }
     }
 
-    public Omics exec(CmdLineParser parser, String[] args) throws IOException {
+    public Omics analyse(CmdLineParser parser, String[] args) throws IOException {
 
-        this.fingerprint = (Fingerprint) super.exec(parser, args);
+        this.fingerprint = (Fingerprint) super.analyse(parser, args);
         this.network = (new JSBML2Bionetwork4Galaxy(this.sbml)).getBioNetwork();
-
-        return new Mapping(network, fingerprint.getList_entities(), this.tab_inchiLayers,
-                this.nameMapping, this.outFileMapping, this.galaxy, this.entityType2Map);
+        Mapping map = new Mapping(logContent, network, fingerprint.getList_entities(), this.tab_inchiLayers,
+                this.nameMapping, this.outFileMapping, this.galaxyFile, this.entityType2Map);
+        this.logContent = map.getLogContent();
+        return map;
     }
 
     public static void main(String[] args) {
-        Launcher_mapping launch = new Launcher_mapping();
-        try {
-            launch.exec(new CmdLineParser(launch), args);
-            launch.write.writeOutputInfo();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        timeCalculation(System.nanoTime() - startTime);
+        exec(new Launcher_mapping(), args);
     }
 }

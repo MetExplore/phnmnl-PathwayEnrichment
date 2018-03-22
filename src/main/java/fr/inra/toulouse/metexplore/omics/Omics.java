@@ -8,7 +8,7 @@ import parsebionet.biodata.BioEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public abstract class Omics {
+public abstract class Omics implements WritingComportment, OmicsMethods{
     protected ArrayList<String[]> list_fingerprint;//input file after formatting and filtering
 
     public HashMap<BioEntity, String> getList_mappedEntities() {
@@ -26,28 +26,34 @@ public abstract class Omics {
     protected OmicsMethods omics;
     protected int bioEntityType;
     protected String typeOfMappedEntity;
+    protected String galaxy;
 
+    public String getLogContent() {
+        return logContent;
+    }
 
-    public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
+    protected String logContent;
+
+    public Omics (String logContent, String galaxy, ArrayList<String[]> list_fingerprint,
                        HashMap<BioEntity, String> list_mappedEntities, BioNetwork network, int bioEntityType){
+        this.logContent = logContent;
+        this.galaxy = galaxy;
         this.list_fingerprint = list_fingerprint;
         this.list_mappedEntities = list_mappedEntities;
         this.network = network;
-        this.write = new WritingComportment(galaxy);
         this.bioEntityType=bioEntityType;
-        this.omics = new OmicsMethods(list_mappedEntities,network,bioEntityType);
-        this.typeOfMappedEntity = omics.getTypeOfEntity(bioEntityType).toLowerCase();
+        this.typeOfMappedEntity = getTypeOfEntity(bioEntityType).toLowerCase();
     }
 
-    public Omics (String galaxy, ArrayList<String[]> list_fingerprint,
+    public Omics (String logContent, String galaxy, ArrayList<String[]> list_fingerprint,
                   BioNetwork network, int bioEntityType){
+        this.logContent = logContent;
+        this.galaxy = galaxy;
         this.list_fingerprint = list_fingerprint;
         this.list_mappedEntities = new HashMap<>();
         this.network = network;
-        this.write = new WritingComportment(galaxy);
         this.bioEntityType=bioEntityType;
-        this.omics = new OmicsMethods(list_mappedEntities,network,bioEntityType);
-        this.typeOfMappedEntity = omics.getTypeOfEntity(bioEntityType).toLowerCase();
+        this.typeOfMappedEntity = getTypeOfEntity(bioEntityType).toLowerCase();
     }
 
 }

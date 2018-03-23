@@ -16,7 +16,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name="-i", aliases="-inFile", required = true, usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
     protected String inFileFingerprint ;
 
-    @Option(name="-o1", usage="Output file name for checking format process (by default: disabled).")
+    @Option(name="-o1", aliases = "--outCheck", usage="Output file name for checking format process (by default: disabled).")
     protected String checkingFile = "";
 
     /******PARSING PARAMETERS*****/
@@ -147,7 +147,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 }
                 i++;
             }
-            if (!ifMappingParameter) {
+            if (!ifMappingParameter && weightColumn < 1) {
                 this.idSBMLColumn = 2;
                 this.logContent = writeLog(logContent,"[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
             }
@@ -181,7 +181,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 i = 0;
                 for (String arg : args) {
                     //this.nameColumn < 0 : case for name mapping in corresponding Launcher
-                    if (this.nameColumn < 0 && Pattern.matches("-nameCol", arg) && Pattern.matches("-.*", args[i + 1])) {
+                    if (this.nameColumn < 1 && Pattern.matches("-nameCol", arg) && Pattern.matches("-.*", args[i + 1])) {
                         throw new CmdLineException("Name column must be positive.\n");
                     } else {
                         i++;

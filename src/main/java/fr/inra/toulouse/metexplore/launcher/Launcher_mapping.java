@@ -9,6 +9,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import parsebionet.biodata.BioNetwork;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class Launcher_mapping extends Launcher_Fingerprint {
 
@@ -48,6 +49,17 @@ public class Launcher_mapping extends Launcher_Fingerprint {
                 "[WARNING] The column number of the column name parameter is ignored.\n");
         }else if(this.nameMapping > 0 && this.nameColumn < 0){
             this.nameColumn = this.nameMapping;
+        }
+
+        for (String arg : args) {
+            if (Pattern.matches("-+prec.*", arg)) {
+                if (this.weightColumn < 0){
+                    this.weightColumn = 2;
+                    this.logContent = writeLog(this.logContent,"[WARNING] Precision has been set without specify isotopic mass column in the fingerprint.\n" +
+                            "[WARNING] By default, it has been set to the 2nd column.");
+                }
+                break;
+            }
         }
 
         super.printInfo(parser, args);

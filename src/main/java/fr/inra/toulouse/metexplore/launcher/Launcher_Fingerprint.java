@@ -141,7 +141,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             int i = 0;
             Boolean ifMappingParameter = false;
             for (String arg : args) {
-                if (Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|mass)", arg)) {
+                if (Pattern.matches("-(nameCol|name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|mass)$", arg)) {
                     ifMappingParameter = true;
                     break;
                 }
@@ -153,17 +153,35 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             }
 
             //All mapping parameters are disabled
+            ifMappingParameter = false;
             i = 0;
             if (this.nameColumn < 1 && this.chebiColumn < 1 && this.inchiColumn < 1 && this.idSBMLColumn < 1 &&
                     this.smilesColumn < 1 && this.pubchemColumn < 1 && this.inchikeyColumn < 1
                     && this.keggColumn < 1 && this.hmdbColumn < 1 && this.csidColumn < 1
                     && this.weightColumn < 1) {
-                this.nameColumn = 1;
-                this.idSBMLColumn = 2;
-                this.logContent = writeLog(logContent,"[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
-            } else {
+                //case for name mapping in corresponding Launcher and avoid a -name option in Fingerprint launcher
                 for (String arg : args) {
-                    if (Pattern.matches("-nameCol", arg) && Pattern.matches("-[ ]*", args[i + 1])) {
+                    if (Pattern.matches("-name$", arg)) {
+                        ifMappingParameter = true;
+                        if (Pattern.matches("^-.*", args[i + 1])) {
+                            this.nameColumn = 1;
+                            this.idSBMLColumn = 2;
+                            this.logContent = writeLog(logContent, "[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
+                        }
+                    }else {
+                        i++;
+                    }
+                }
+                if (!ifMappingParameter){
+                    this.nameColumn = 1;
+                    this.idSBMLColumn = 2;
+                    this.logContent = writeLog(logContent, "[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
+                }
+            } else {
+                i = 0;
+                for (String arg : args) {
+                    //this.nameColumn < 0 : case for name mapping in corresponding Launcher
+                    if (this.nameColumn < 0 && Pattern.matches("-nameCol", arg) && Pattern.matches("-.*", args[i + 1])) {
                         throw new CmdLineException("Name column must be positive.\n");
                     } else {
                         i++;
@@ -174,7 +192,6 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     }
 
     public void printError(CmdLineParser parser, CmdLineException e, String[] args) {
-        super.printError(parser, e);
         if (e.getMessage().equals("Option \"-l (--layers)\" takes an operand")) {
             this.inchiLayers = "";
             Boolean ifInchiMappingParameter = testInchiParameter(args);

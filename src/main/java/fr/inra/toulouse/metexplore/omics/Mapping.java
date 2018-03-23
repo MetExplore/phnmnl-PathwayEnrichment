@@ -163,7 +163,6 @@ public class Mapping extends Omics {
                         if (mappingColumnInfile == 2) {
                             try {
                                 ifEquals = (new InChI(((BioPhysicalEntity) bpe).getInchi(), this.inchiLayers)).equals(new InChI(id, this.inchiLayers));
-                                this.matchedValuesSBML.add(associatedValueInSbml);
                                 //need to print SBML value only if it is a InChI mapping
                                 // (layers selection can compare two different string)
                             } catch (NullPointerException e) {
@@ -183,6 +182,7 @@ public class Mapping extends Omics {
 
                         //Call to the "equal" function of the InChI4Galaxy class (allow mapping on selected layers functionality)
                         if (ifEquals) {
+                            this.matchedValuesSBML.add(associatedValueInSbml);
                             this.matchedValues.add(id);
                             this.isMappedBpe = true;
                             return;
@@ -210,6 +210,7 @@ public class Mapping extends Omics {
                         for (String id : list_id) {
                             for (BioRef val : key.getValue()) {
                                 if (id.equals(val.id)) {
+                                    this.matchedValuesSBML.add(associatedValueInSbml);
                                     this.matchedValues.add(id);
                                     this.isMappedBpe = true;
                                     return;
@@ -306,7 +307,7 @@ public class Mapping extends Omics {
         //File header
         //TODO: if(!this.inchiMapping) f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value\n");
         //else
-        f.write("Mapped\tName_(Input_File)\tName_(SBML)\tSBML_ID\tMatched_value_(Input_File)\tMatched_value_(SBML)\n");
+        f.write("Mapped\tName (Fingerprint)\tName (SBML)\tSBML ID\tMatched value (Fingerprint)\tMatched value (SBML)\n");
 
         //Print on screen and writing in log
         String plural = (nbMappedMetabolites > 1) ? "s have": " has";

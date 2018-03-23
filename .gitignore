@@ -20,3 +20,7 @@ temp/
 *.~lock*
 
 src/main/java/fr/inra/toulouse/metexplore/tests/
+
+resultRuns*
+
+temp*

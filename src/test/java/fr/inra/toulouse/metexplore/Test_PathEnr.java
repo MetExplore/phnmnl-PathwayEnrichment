@@ -42,7 +42,7 @@ public class Test_PathEnr extends Test{
     public void testWriteOutputPathEnrWithReaction() {
         //Test the expected format of the output file obtained by pathway enrichment and with a reaction
         this.bioEntityType = 2;
-        this.nameMapping = -1;
+        this.nameMapping = 1;
         this.setMapping4OneColumnFileByID("fumarase", "R_FUM");
         this.setWriteOutputPathEnr(
                 this.outputFile,

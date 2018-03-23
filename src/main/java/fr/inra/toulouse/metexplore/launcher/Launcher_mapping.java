@@ -35,7 +35,6 @@ public class Launcher_mapping extends Launcher_Fingerprint {
     @SuppressWarnings("deprecation")
     public void printInfo(CmdLineParser parser, String[] args) throws CmdLineException {
 
-        super.printInfo(parser, args);
 
         if (this.entityType2Map < 1 || this.entityType2Map > 6) {
             throw new CmdLineException("Type of mapped entity must be between 1 and 6.");
@@ -47,7 +46,11 @@ public class Launcher_mapping extends Launcher_Fingerprint {
         + "and name mapping parameters and with different parameters.\n" +
                 "[WARNING] By default, the name mapping is activated with the column number of this parameter\n." +
                 "[WARNING] The column number of the column name parameter is ignored.\n");
+        }else if(this.nameMapping > 0 && this.nameColumn < 0){
+            this.nameColumn = this.nameMapping;
         }
+
+        super.printInfo(parser, args);
     }
 
     public Omics analyse(CmdLineParser parser, String[] args) throws IOException {

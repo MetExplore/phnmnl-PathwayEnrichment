@@ -13,7 +13,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
 
     /******FILES PARAMETERS*****/
 
-    @Option(name="-i", aliases="--inFile", required = true, usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
+    @Option(name="-i", aliases="-inFile", required = true, usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
     protected String inFileFingerprint ;
 
     @Option(name="-o1", usage="Output file name for checking format process (by default: disabled).")
@@ -24,20 +24,20 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name="-noCheck", usage="Activate this option to check database identifier format.")
     protected boolean noFormatCheck = false;
 
-    @Option(name="--header", usage="Activate this option if the fingerprint dataset contains no header.")
+    @Option(name="-header", usage="Activate this option if the fingerprint dataset contains no header.")
     protected boolean ifNoHeader = false;
 
-    @Option(name="-sep", aliases="--separator", usage="Character used as separator for columns in the dataset (by default: tabulation).")
+    @Option(name="-sep", aliases="-separator", usage="Character used as separator for columns in the dataset (by default: tabulation).")
     protected String columnSeparator = "\t";
     //TODO: --adv without interface
     //TODO: Check separator
 
-    @Option(name="-sepID", aliases="--separatorID", usage="Character used as separator if there are multiple values in a database column of the dataset (by default: ,).")
+    @Option(name="-sepID", aliases="-separatorID", usage="Character used as separator if there are multiple values in a database column of the dataset (by default: ,).")
     protected String IDSeparator = ";";
     //TODO: warning if ',' separator because of the InChI
     //TODO: remove this separator in Fingerprint class for InChI only
 
-    @Option(name="-f", aliases="--filter", usage="Number of the filtered column")
+    @Option(name="-f", aliases="-filter", usage="Number of the filtered column")
     protected int colFiltered = -1;
 
     @Option(name="-lWarn", aliases="-layersWarning", usage="When format checking option is activated, points out badly formatted InChI layers")
@@ -48,40 +48,40 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name = "-nameCol", usage = "Number of the file's column containing the bio-entity name (by default: 1st column).")
     protected int nameColumn = 1;
 
-    @Option(name = "-l", aliases = "--layers", usage = "List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
+    @Option(name = "-l", aliases = "-layers", usage = "List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
             " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
     protected String inchiLayers = "c,h";
 
     protected String[] tab_inchiLayers;
 
-    @Option(name = "-inchi", usage = "Number of the file's column containing the InChI data.")
+    @Option(name = "-inchi", aliases = "-InChI", usage = "Number of the file's column containing the InChI data.")
     protected int inchiColumn = -1;
 
-    @Option(name = "-chebi", usage = "Number of the file's column containing the ChEBI data.")
+    @Option(name = "-chebi",  aliases = {"-ChEBI", "-CHEBI"}, usage = "Number of the file's column containing the ChEBI data.")
     protected int chebiColumn = -1;
 
-    @Option(name = "-idSBML", usage = "Number of the file's column containing the SBML identifier (by default: 2nd column).")
+    @Option(name = "-idSBML", aliases = {"-id", "-idSbml", "-idsbml"}, usage = "Number of the file's column containing the SBML identifier (by default: 2nd column).")
     protected int idSBMLColumn = -1;
 
-    @Option(name = "-smiles", usage = "Number of the file's column containing the SMILES data.")
+    @Option(name = "-smiles", aliases = "-SMILES", usage = "Number of the file's column containing the SMILES data.")
     protected int smilesColumn = -1;
 
-    @Option(name = "-pubchem", usage = "Number of the file's column containing the PubChem identifier.")
+    @Option(name = "-pubchem", aliases = {"-pub", "-pubChem"}, usage = "Number of the file's column containing the PubChem identifier.")
     protected int pubchemColumn = -1;
 
-    @Option(name = "-inchikey", usage = "Number of the file's column containing the InChIKey.")
+    @Option(name = "-inchikey", aliases = {"-inchiKey", "-key"}, usage = "Number of the file's column containing the InChIKey.")
     protected int inchikeyColumn = -1;
 
-    @Option(name = "-kegg", usage = "Number of the file's column containing the KEGG identifier.")
+    @Option(name = "-kegg", aliases = "-KEGG", usage = "Number of the file's column containing the KEGG identifier.")
     protected int keggColumn = -1;
 
-    @Option(name = "-hmdb", usage = "Number of the file's column containing the HMDB identifier.")
+    @Option(name = "-hmdb", aliases = "-HMDB", usage = "Number of the file's column containing the HMDB identifier.")
     protected int hmdbColumn = -1;
 
-    @Option(name = "-csid", aliases = "--chemspider", usage = "Number of the file's column containing the ChemSpider identifier.")
+    @Option(name = "-csid", aliases = {"-chemspider", "-chemSpider"}, usage = "Number of the file's column containing the ChemSpider identifier.")
     protected int csidColumn = -1;
 
-    @Option(name = "-mass", usage = "Number of the file's column containing the isotopic mass of the metabolites.")
+    @Option(name = "-mass", aliases = "-weight", usage = "Number of the file's column containing the isotopic mass of the metabolites.")
     protected int weightColumn = -1;
 
     public static Boolean testInchiParameter(String[] args) {

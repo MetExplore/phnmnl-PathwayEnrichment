@@ -11,10 +11,10 @@ import org.kohsuke.args4j.CmdLineException;
 
 public class Launcher_PathEnr extends Launcher_mapping implements WritingComportment{
 
-    @Option(name = "-o3", aliases = "--outPath", usage = "Output file name for pathway enrichment result (by default: pathwayEnrichment.tsv).")
+    @Option(name = "-o3", aliases = "-outPath", usage = "Output file name for pathway enrichment result (by default: pathwayEnrichment.tsv).")
     protected String outFilePathEnr = "pathwayEnrichment.tsv";
 
-    @Option(name = "-tEnr", aliases = "--typeEnr", usage = "1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: pathways).")
+    @Option(name = "-tEnr", aliases = "-typeEnr", usage = "1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: pathways).")
     protected int entityType2Enrich = 3;
 
     @SuppressWarnings("deprecation")

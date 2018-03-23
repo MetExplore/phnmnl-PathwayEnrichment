@@ -12,21 +12,21 @@ import java.io.IOException;
 
 public class Launcher_mapping extends Launcher_Fingerprint {
 
-    @Option(name = "-o2", aliases = "--outMap", usage = "Output file name for mapping result (by default: mapping.tsv).")
+    @Option(name = "-o2", aliases = "-outMap", usage = "Output file name for mapping result (by default: mapping.tsv).")
     protected String outFileMapping = "mapping.tsv";
 
-    @Option(name = "-s", aliases = "--sbml", usage = "SBML file name (by default: Recon v2.02).")
+    @Option(name = "-s", aliases = "-sbml", usage = "SBML file name (by default: Recon v2.02).")
     protected String sbml = "data/recon2.02_without_compartment.xml";
 
     /*****MAPPING PARAMETERS*****/
 
-    @Option(name = "-t", aliases = "--type", usage = "1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
+    @Option(name = "-t", aliases = "-type", usage = "1 for metabolites, 2 for reactions, 3 for pathway, 4 for enzyme, 5 for protein, 6 for gene (by default: metabolites).")
     protected int entityType2Map = 1;
 
     @Option(name = "-name", usage = "Activate this option for a name mapping .")
     protected int nameMapping = -1;
 
-    @Option(name = "-prec", aliases = "--precision", usage = "Indicate the allowed error in ppm (used in mass mapping).")
+    @Option(name = "-prec", aliases = "-precision", usage = "Indicate the allowed error in ppm (used in mass mapping).")
     protected int weightPrecision = 2;
 
     protected BioNetwork network;

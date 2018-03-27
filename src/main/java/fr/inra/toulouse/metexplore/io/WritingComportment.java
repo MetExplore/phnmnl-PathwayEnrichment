@@ -34,7 +34,7 @@ public interface WritingComportment {
 
     default String writeLog(String log, String message) {
         //Avoid to skip a line
-        System.out.println(message.replaceAll("\n$", ""));
+        System.err.println(message.replaceAll("\n$", ""));
         log += message;
         return log;
     }

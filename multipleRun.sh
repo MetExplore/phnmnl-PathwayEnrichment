@@ -2,7 +2,7 @@
 
 VERSION=1.1
 #TESTS=('')
-TESTS=('-t 2' '-t 4' '-t 5' ' -t 6 -idSBML 3' '-t 5 -tEnr 6' '-t 4 -tEnr 6' '-t 6 -idSBML 3 -tEnr 5' '-t 1' '' '-tEnr 2' '-f 13' '-idSBML 2' '-chebi 3' '-inchi 4' '-inchi 4 -l c,h,t' '-inchi 4 -l t,h,c' '-l c,h,t' '-inchi 4 -l' '-l' '-inchikey 5' '-kegg 6' '-pubchem 7' '-hmdb 8' '-csid 9' '-mass 12 -prec 2' '-name 1 -nameCol 2' '-nameCol -1 -name 1' '-s data/recon2.02_without_compartment.xml' '--header' '-sep \t' '-sepID ;' '-inchi 4 -l c,h,t -lWarn -o1 temp/checking_format.tsv' '-inchi 4 -o1 temp/checking_format.tsv' '-noCheck -o1 temp/checking_format2.tsv')
+TESTS=('-t 2' '-t 4' '-t 5' ' -t 6 -idSBML 3' '-t 5 -tEnr 6' '-t 4 -tEnr 6' '-t 6 -idSBML 3 -tEnr 5' '-t 1' '' '-tEnr 2' '-f 13' '-idSBML 2' '-chebi 3' '-inchi 4' '-inchi 4 -l c,h,t' '-inchi 4 -l t,h,c' '-l c,h,t' '-inchi 4 -l' '-l' '-inchikey 5' '-kegg 6' '-pubchem 7' '-hmdb 8' '-csid 9' '-mass 12 -prec 2' '-prec 2' '-name 1 -nameCol 2' '-nameCol -1 -name 1' '-s data/recon2.02_without_compartment.xml' '--header' '-sep \t' '-sepID ;' '-inchi 4 -l c,h,t -lWarn -o1 temp/checking_format.tsv' '-inchi 4 -o1 temp/checking_format.tsv' '-noCheck -o1 temp/checking_format2.tsv')
 echo '' > resultRuns.log
 NB_RUN=0;
 

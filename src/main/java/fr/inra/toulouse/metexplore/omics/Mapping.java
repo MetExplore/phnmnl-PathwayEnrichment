@@ -171,7 +171,11 @@ public class Mapping extends Omics {
                                 //TODO: check that in Fingerprint class
                             }
                         }else if (mappingColumnInfile == 10 && !associatedValueInSbml.equals("NA")) {
-                            ifEquals = compareMass(Double.parseDouble(id),Double.parseDouble(associatedValueInSbml),weightPrecision);
+                            try {
+                                ifEquals = compareMass(Double.parseDouble(id),Double.parseDouble(associatedValueInSbml),weightPrecision);
+                            }catch (NumberFormatException e){
+                                //catch conversion in double errors if mass column is wrongly set (e.g., by default on 2nd column)
+                            }
                         }else if(mappingColumnInfile == 1 && (this.entityType2Map==5 || this.entityType2Map == 4)){
                             ifEquals = compareProtEnz(id,associatedValueInSbml);
                         }else if(mappingColumnInfile == 1 && this.entityType2Map==6){

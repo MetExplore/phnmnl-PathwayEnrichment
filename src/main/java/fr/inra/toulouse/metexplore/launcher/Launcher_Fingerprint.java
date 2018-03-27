@@ -192,12 +192,12 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     }
 
     public void printError(CmdLineParser parser, CmdLineException e, String[] args) {
-        if (e.getMessage().equals("Option \"-l (--layers)\" takes an operand")) {
+        if (e.getMessage().equals("Option \"-l (-layers)\" takes an operand")) {
             this.inchiLayers = "";
             Boolean ifInchiMappingParameter = testInchiParameter(args);
             if (!ifInchiMappingParameter) {
                 this.inchiColumn = 2;
-                System.out.println("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+                this.logContent = writeLog(logContent,"[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
                         "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
             }
         } else {

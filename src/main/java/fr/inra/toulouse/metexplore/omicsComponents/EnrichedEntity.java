@@ -8,9 +8,11 @@ public class EnrichedEntity implements Comparable <EnrichedEntity>, WritingCompo
 
     protected String pathName, mappedMetabolitesSBML, mappedMetabolitesFingerprint, mappedMetabolitesID, coverage,
             p_value, q_value_Bonf, q_value_BenHoc;
-    protected int nb_mapped;
-    protected int nb_unmappedInPathway;
-    protected int nb_unmappedInFingerprint;
+    protected int nb_mapped, nb_unmappedInPathway, nb_unmappedInFingerprint, nb_remainingInNetwork;
+
+    public int getNb_mapped() {
+        return nb_mapped;
+    }
 
     public void setNb_unmappedInPathway(int nb_unmappedInPathway) {
         this.nb_unmappedInPathway = nb_unmappedInPathway;
@@ -23,8 +25,6 @@ public class EnrichedEntity implements Comparable <EnrichedEntity>, WritingCompo
     public void setNb_remainingInNetwork(int nb_remainingInNetwork) {
         this.nb_remainingInNetwork = nb_remainingInNetwork;
     }
-
-    protected int nb_remainingInNetwork;
 
     public EnrichedEntity(String pathName, double p_value, double q_value_Bonf, double q_value_BenHoc,
                           List<String> mappedMetabolitesSBML, List<String> mappedMetabolitesFingerprint,

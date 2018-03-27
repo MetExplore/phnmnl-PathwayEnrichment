@@ -34,7 +34,11 @@ public interface WritingComportment {
 
     default String writeLog(String log, String message) {
         //Avoid to skip a line
-        System.err.println(message.replaceAll("\n$", ""));
+        if (message.contains("[WARNING]")) {
+            System.err.println(message.replaceAll("\n$", ""));
+        }else{
+            System.out.println(message.replaceAll("\n$", ""));
+        }
         log += message;
         return log;
     }

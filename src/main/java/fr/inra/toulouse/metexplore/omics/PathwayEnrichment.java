@@ -111,7 +111,9 @@ public class PathwayEnrichment extends Omics{
 
         Collections.sort(list_enrichedEntity);
         for (EnrichedEntity enrichedEntity : list_enrichedEntity) {
-            f.write(enrichedEntity.toString(!galaxy.equals("")));
+            //avoid error in prot,genes or enzyme enrichment: only one line contains no mapped entities
+            if(enrichedEntity.getNb_mapped() > 0)
+                f.write(enrichedEntity.toString(!galaxy.equals("")));
         }
         if (f != null) {
             f.close();

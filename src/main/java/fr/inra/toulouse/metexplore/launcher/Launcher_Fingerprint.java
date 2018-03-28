@@ -115,13 +115,16 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             }
         }else {
             if(!this.checkingFile.equals("")){
-                this.logContent = writeLog(logContent,"[WARNING] Checking format option has been disabled.\n " +
-                        "[WARNING] To prevent checking file to be empty, it has been activated by default. \n");
+                this.logContent = writeLog(logContent,"[WARNING] Checking format option has been disabled.\n" +
+                        "[WARNING] To prevent checking file to be empty, it has been activated by default.\n");
                 this.noFormatCheck = false;
+                if(!this.inchiLayers.equals("c,h")) {
+                    this.layerWarning = true;
+                }
             }
-            if(this.layerWarning){
-                this.logContent = writeLog(logContent,"[WARNING] Checking format option has been disabled.\n " +
-                        "[WARNING] Without checking, layer warnings option will be useless. \n");
+            if(this.layerWarning && this.noFormatCheck){
+                this.logContent = writeLog(logContent,"[WARNING] Checking format option has been disabled.\n" +
+                        "[WARNING] Without checking, layer warnings option will be useless.\n");
             }
         }
 

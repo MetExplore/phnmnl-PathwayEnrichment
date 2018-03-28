@@ -41,21 +41,18 @@ public class Launcher_mapping extends Launcher_Fingerprint {
             throw new CmdLineException("Type of mapped entity must be between 1 and 6.");
         }
 
-        if(this.nameMapping > 0 && this.nameColumn > 0 && this.nameColumn != this.nameMapping) {
-            this.nameColumn = -1;
+        if(this.nameColumn != this.nameMapping && this.nameColumn > 0) {
+            this.nameColumn = this.nameMapping;
         this.logContent = writeLog(this.logContent,"[WARNING] You have set both name column"
         + " and name mapping parameters and with different parameters.\n" +
-                "[WARNING] By default, the name mapping is activated with the column number of this parameter.\n" +
-                "[WARNING] The column number of the column name parameter is ignored.\n");
-        }else if(this.nameMapping > 0 && this.nameColumn < 0){
-            this.nameColumn = this.nameMapping;
+                "[WARNING] By default, the name mapping is activated with the column number of this parameter.\n");
         }
 
         for (String arg : args) {
             if (Pattern.matches("-+prec.*", arg)) {
                 if (this.weightColumn < 0){
                     this.weightColumn = 2;
-                    this.logContent = writeLog(this.logContent,"[WARNING] Precision has been set without specify isotopic mass column in the fingerprint.\n" +
+                    writeLog("[WARNING] Precision has been set without specify isotopic mass column in the fingerprint.\n" +
                             "[WARNING] By default, it has been set to the 2nd column.");
                 }
                 break;
@@ -63,6 +60,8 @@ public class Launcher_mapping extends Launcher_Fingerprint {
         }
 
         super.printInfo(parser, args);
+
+        System.out.println(this.nameColumn + ":" + this.nameMapping);
     }
 
     public Omics analyse(CmdLineParser parser, String[] args) throws IOException {

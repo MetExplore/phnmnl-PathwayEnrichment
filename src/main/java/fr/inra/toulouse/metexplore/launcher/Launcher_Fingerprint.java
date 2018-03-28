@@ -46,7 +46,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     /*****MAPPING PARAMETERS*****/
 
     @Option(name = "-nameCol", usage = "Number of the file's column containing the bio-entity name (by default: 1st column).")
-    protected int nameColumn = 1;
+    protected int nameColumn = -1;
 
     @Option(name = "-l", aliases = "-layers", usage = "List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
             " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
@@ -115,7 +115,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             }
         }else {
             if(!this.checkingFile.equals("")){
-                this.logContent = writeLog(logContent,"[WARNING] Checking format option has been disabled.\n" +
+                writeLog("[WARNING] Checking format option has been disabled.\n" +
                         "[WARNING] To prevent checking file to be empty, it has been activated by default.\n");
                 this.noFormatCheck = false;
                 if(!this.inchiLayers.equals("c,h")) {
@@ -123,7 +123,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 }
             }
             if(this.layerWarning && this.noFormatCheck){
-                this.logContent = writeLog(logContent,"[WARNING] Checking format option has been disabled.\n" +
+                writeLog("[WARNING] Checking format option has been disabled.\n" +
                         "[WARNING] Without checking, layer warnings option will be useless.\n");
             }
         }
@@ -141,7 +141,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
         }
         if (ifLayerMappingParameter && !ifInchiMappingParameter) {
             this.inchiColumn = 2;
-            this.logContent = writeLog(logContent,"[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+            writeLog("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
                     "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
         } else {
 
@@ -157,7 +157,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             }
             if (!ifMappingParameter && weightColumn < 1) {
                 this.idSBMLColumn = 2;
-                this.logContent = writeLog(logContent,"[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
+                writeLog("[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
             }
 
             //All mapping parameters are disabled
@@ -174,7 +174,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                         if (Pattern.matches("^-.*", args[i + 1])) {
                             this.nameColumn = 1;
                             this.idSBMLColumn = 2;
-                            this.logContent = writeLog(logContent, "[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
+                            writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
                         }
                     }else {
                         i++;
@@ -183,14 +183,15 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 if (!ifMappingParameter){
                     this.nameColumn = 1;
                     this.idSBMLColumn = 2;
-                    this.logContent = writeLog(logContent, "[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
+                    writeLog( "[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
                 }
             } else {
                 i = 0;
                 for (String arg : args) {
                     //this.nameColumn < 0 : case for name mapping in corresponding Launcher
                     if (this.nameColumn < 1 && Pattern.matches("-nameCol", arg) && Pattern.matches("-.*", args[i + 1])) {
-                        throw new CmdLineException("Name column must be positive.\n");
+                        writeLog( "[WARNING] Name parameter must be positive. By default, it was set to the 1rst column.\n");
+                        this.nameColumn = 1;
                     } else {
                         i++;
                     }
@@ -205,7 +206,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             Boolean ifInchiMappingParameter = testInchiParameter(args);
             if (!ifInchiMappingParameter) {
                 this.inchiColumn = 2;
-                this.logContent = writeLog(logContent,"[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
+                writeLog("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
                         "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
             }
         } else {
@@ -245,6 +246,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
         } catch (CmdLineException e) {
             launch.printError(parser, e, args);
         }
+
 
         if (!launch.galaxyFile.equals("")) {
             logFile = launch.createFile(launch.galaxyFile);

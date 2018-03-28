@@ -55,5 +55,7 @@ public abstract class Launcher implements WritingComportment{
         }
     }
 
-
+    public void writeLog(String warning){
+        this.logContent = writeLog(this.logContent,warning);
+    }
 }

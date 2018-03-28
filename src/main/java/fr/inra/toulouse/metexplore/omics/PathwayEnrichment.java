@@ -45,7 +45,7 @@ public class PathwayEnrichment extends Omics{
         int nbEnrichedTypeInNetwork = getEntitySetInNetwork(this.entityType2Enrich).size();
         String plural = (nbEnriched > 1) ? "s are": " is";
 
-        this.logContent = writeLog(logContent,nbEnriched + " " + typeOfEnrichedEntity.toLowerCase() + plural + " concerned among the network (on " + nbEnrichedTypeInNetwork + " in the network; " + calculPercent(nbEnriched,nbEnrichedTypeInNetwork) + "%).");
+        writeLog(nbEnriched + " " + typeOfEnrichedEntity.toLowerCase() + plural + " concerned among the network (on " + nbEnrichedTypeInNetwork + " in the network; " + calculPercent(nbEnriched,nbEnrichedTypeInNetwork) + "%).");
         writeOutputPathEnr();
     }
 

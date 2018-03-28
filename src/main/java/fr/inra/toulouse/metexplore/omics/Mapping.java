@@ -112,7 +112,7 @@ public class Mapping extends Omics {
                 if (nbOccurencesBpe > 1) {
                     if (!this.outFileMapping.equals("")) {
                         warningsDoublets = "[WARNING] There are " + nbOccurencesBpe + " possible matches for " + lineInFile[0] + ".\n";
-                        this.logContent = writeLog(logContent,warningsDoublets);
+                        writeLog(warningsDoublets);
                     }
                 } else {
                     this.list_mappedEntities.put(mappedBpe, lineInFile[0]);
@@ -138,7 +138,7 @@ public class Mapping extends Omics {
 
         if (!this.outFileMapping.equals("")) {
             if (!warningsDoublets.equals(""))
-                this.logContent = writeLog(logContent,"[WARNING] Please, check the corresponding lines in the mapping output file.\n" +
+                writeLog("[WARNING] Please, check the corresponding lines in the mapping output file.\n" +
                         "[WARNING] These duplicates will be discarded from the pathway analysis.\n");
             writeOutputMapping();
         }
@@ -316,7 +316,7 @@ public class Mapping extends Omics {
         //Print on screen and writing in log
         String plural = (nbMappedMetabolites > 1) ? "s have": " has";
 
-        this.logContent = writeLog(logContent,nbMappedMetabolites + " " + typeOfMappedEntity + plural + " been mapped on " + this.list_fingerprint.size() + " in the fingerprint dataset ("
+        writeLog(nbMappedMetabolites + " " + typeOfMappedEntity + plural + " been mapped on " + this.list_fingerprint.size() + " in the fingerprint dataset ("
                 + coverageInFile + "%) and on " + nbEntityInNetwork + " in the network (" +
                 coverageSBML + "%).\n");
 

@@ -61,7 +61,6 @@ public class Launcher_mapping extends Launcher_Fingerprint {
 
         super.printInfo(parser, args);
 
-        System.out.println(this.nameColumn + ":" + this.nameMapping);
     }
 
     public Omics analyse(CmdLineParser parser, String[] args) throws IOException {

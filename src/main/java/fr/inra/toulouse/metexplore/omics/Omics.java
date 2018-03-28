@@ -104,4 +104,7 @@ public abstract class Omics implements WritingComportment{
         return null;
     }
 
+    public void writeLog(String warning){
+        this.logContent = writeLog(this.logContent,warning);
+    }
 }

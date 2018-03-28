@@ -44,8 +44,8 @@ public class Launcher_mapping extends Launcher_Fingerprint {
         if(this.nameMapping > 0 && this.nameColumn > 0 && this.nameColumn != this.nameMapping) {
             this.nameColumn = -1;
         this.logContent = writeLog(this.logContent,"[WARNING] You have set both name column"
-        + "and name mapping parameters and with different parameters.\n" +
-                "[WARNING] By default, the name mapping is activated with the column number of this parameter\n." +
+        + " and name mapping parameters and with different parameters.\n" +
+                "[WARNING] By default, the name mapping is activated with the column number of this parameter.\n" +
                 "[WARNING] The column number of the column name parameter is ignored.\n");
         }else if(this.nameMapping > 0 && this.nameColumn < 0){
             this.nameColumn = this.nameMapping;

@@ -13,7 +13,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
 
     /******FILES PARAMETERS*****/
 
-    @Option(name="-i", aliases="-inFile", required = true, usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
+    @Option(name="-i", aliases="-inFile", usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
     protected String inFileFingerprint ;
 
     @Option(name="-o1", aliases = "--outCheck", usage="Output file name for checking format process (by default: disabled).")
@@ -98,6 +98,11 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     public void printInfo(CmdLineParser parser, String[] args) throws CmdLineException{
 
         super.printInfo(parser);
+
+        //required=true in @option required -i with -h and -v !
+        if(this.inFileFingerprint==null){
+            throw new CmdLineException("-i parameter required");
+        }
 
         if(!this.noFormatCheck && !this.inchiLayers.equals("c,h")){
             this.layerWarning = true;

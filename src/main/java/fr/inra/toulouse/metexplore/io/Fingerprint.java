@@ -19,7 +19,6 @@ public class Fingerprint implements WritingComportment {
     protected String[] databases = {"InChI","ChEBI","SMILES","PubChem ID","InChIKey","KEGG ID","HMDB ID","ChemSpider ID", "weight"};
     protected BufferedReader inBuffer;
     protected BufferedWriter outBuffer;
-    protected Boolean writeChecking;
 
     public ArrayList<String[]> getEntityList() {
         return list_entities;
@@ -31,7 +30,7 @@ public class Fingerprint implements WritingComportment {
 
     //TODO: parsing for Excel files
 
-    public Fingerprint (String logContent, Boolean layerWarning, Boolean noFormatCheck, String checkingFile, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
+    public Fingerprint (String logContent, Boolean layerWarning, Boolean noFormatCheck, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
                         int[] mappingColumns, String[] inchiLayers, int filteredColumn) throws IOException {
 
         this.logContent = logContent;
@@ -53,20 +52,13 @@ public class Fingerprint implements WritingComportment {
         }
         this.inchiLayers=inchiLayers;
         this.filteredColumn=filteredColumn;
-        this.writeChecking = !checkingFile.equals("");
 
-        if (this.writeChecking) {
-            setFileChecking(checkingFile);
-        }
         extractData();
-        
-        if (this.writeChecking) {
-            outBuffer.close();
-        }
+
     }
     
-    public void setFileChecking(String checkingFile){
-        File f = new File(checkingFile);
+    public void setFileChecking(){
+        File f = new File("checking_format.tsv");
         if (f.isFile()) {
             //write a new file if already exists
             f.delete();
@@ -125,12 +117,18 @@ public class Fingerprint implements WritingComportment {
             exit(1);
         }else if(!noFormatCheck && !testWrongColumn()){
             if (warnings.isEmpty()) this.logContent = writeLog(this.logContent,"All your databases identifiers seem valid.\n");
-            else this.logContent = writeLog(this.logContent,warnings);
+            else{
+                setFileChecking();
+                this.outBuffer.write(warnings);
+                outBuffer.close();
+                this.logContent = writeLog(this.logContent,"[WARNING] Some database identifiers are badly formatted, please take a look to \"checking_format.tsv\".\n");
+            }
         }
 
         /*for (String[] lineInFile : list_entities) {
             System.out.println(Arrays.toString(lineInFile));
         }*/
+
     }
 
     public Boolean testWrongColumn() {
@@ -205,23 +203,13 @@ public class Fingerprint implements WritingComportment {
 
     public void setWarnings(String id, String[] lineInFile, String database, String layer, int columnInTable) {
 
-        if(this.writeChecking) {
-            try {
-                if (layerWarning) {
-                    this.outBuffer.write(this.nbLine + "\t" + lineInFile[this.nameColumn] + "\t" + database + "\t" + layer + "\t" + id + "\n");
-                } else {
-                    this.outBuffer.write(this.nbLine + "\t" + lineInFile[this.nameColumn] + "\t" + database + "\t" + id + "\n");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (layerWarning) {
+            this.warnings += this.nbLine + "\t" + lineInFile[this.nameColumn] + "\t" + database + "\t" + layer + "\t" + id + "\n";
+        } else {
+            this.warnings += this.nbLine + "\t" + lineInFile[this.nameColumn] + "\t" + database + "\t" + id + "\n";
         }
 
-        if (this.layerWarning) database += " (wrong layer: " + layer +")";
-
-        warnings += "[WARNING] For " + lineInFile[this.nameColumn] + " (line n°" + this.nbLine + "), "
-                + database + " is badly formatted: " + id + "\n";
-        nbWarningPerDatabases[columnInTable-2] = nbWarningPerDatabases[columnInTable-2] + 1;
+        nbWarningPerDatabases[columnInTable - 2] = nbWarningPerDatabases[columnInTable - 2] + 1;
 
     }
 

@@ -16,9 +16,6 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name="-i", aliases="-inFile", usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
     protected String inFileFingerprint ;
 
-    @Option(name="-o1", aliases = "--outCheck", usage="Output file name for checking format process (by default: disabled).")
-    protected String checkingFile = "";
-
     /******PARSING PARAMETERS*****/
 
     @Option(name="-noCheck", usage="Activate this option to check database identifier format.")
@@ -113,19 +110,9 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             if(!this.inchiLayers.equals("c,h")) {
                 this.layerWarning = true;
             }
-        }else {
-            if(!this.checkingFile.equals("")){
-                writeLog("[WARNING] Checking format option has been disabled.\n" +
-                        "[WARNING] To prevent checking file to be empty, it has been activated by default.\n");
-                this.noFormatCheck = false;
-                if(!this.inchiLayers.equals("c,h")) {
-                    this.layerWarning = true;
-                }
-            }
-            if(this.layerWarning && this.noFormatCheck){
-                writeLog("[WARNING] Checking format option has been disabled.\n" +
+        }else if(this.layerWarning && this.noFormatCheck){
+            writeLog("[WARNING] Checking format option has been disabled.\n" +
                         "[WARNING] Without checking, layer warnings option will be useless.\n");
-            }
         }
 
         if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", this.inchiLayers)) {
@@ -224,7 +211,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 (this.keggColumn - 1), (this.hmdbColumn - 1), (this.csidColumn - 1), (this.weightColumn - 1)};
 
         try {
-            fingerprint = new Fingerprint(this.logContent, this.layerWarning, this.noFormatCheck, this.checkingFile,
+            fingerprint = new Fingerprint(this.logContent, this.layerWarning, this.noFormatCheck,
                     this.inFileFingerprint, this.ifNoHeader, this.columnSeparator,
                     this.IDSeparator, (this.nameColumn - 1), mappingColumns, tab_inchiLayers,
                     (this.colFiltered - 1));

@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 public class Launcher_mapping extends Launcher_Fingerprint {
 
-    @Option(name = "-o1", aliases = "-outMap", usage = "Output file name for mapping result (by default: mapping.tsv).")
+    @Option(name = "-o2", aliases = "-outMap", usage = "Output file name for mapping result (by default: mapping.tsv).")
     protected String outFileMapping = "mapping.tsv";
 
     @Option(name = "-s", aliases = "-sbml", usage = "SBML file name (by default: Recon v2.02).")

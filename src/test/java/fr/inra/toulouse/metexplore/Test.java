@@ -59,7 +59,7 @@ public class Test extends TestCase implements WritingComportment {
         (new File("temp")).mkdir();
         this.setDefaultInChILayers();
         this.setDefaultMappingColumn();
-        this.noFormatCheck = false;
+        this.noFormatCheck = true;
         this.nameMapping = -1;
         this.fingerprint = null;
         this.mapping = null;
@@ -181,7 +181,7 @@ public class Test extends TestCase implements WritingComportment {
             dummyFile.write(inputLine);
             dummyFile.close();
             this.fingerprint = new Fingerprint(this.logContent,this.layerWarning, this.noFormatCheck, this.dummyFile, this.ifNoHeader, this.separator, ";", 0,
-                    this.mappingColumn, this.inchiLayers, this.filteredColumn);
+                    this.mappingColumn, this.inchiLayers, this.filteredColumn, "checking_format.tsv");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -13,7 +13,7 @@ public class Fingerprint implements WritingComportment {
 
     protected int nameColumn, filteredColumn, nbLine = 2, nbWarningPerLine, nbSelectedDatabases;
     protected int[] columnNumbers, nbWarningPerDatabases;
-    protected String separator, IDSeparator, warnings ="", logContent;
+    protected String separator, IDSeparator, warnings ="", logContent, checkingFile;
     protected String[] inchiLayers;
     protected Boolean ifNoHeader, noFormatCheck, layerWarning;
     protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
@@ -32,9 +32,10 @@ public class Fingerprint implements WritingComportment {
     //TODO: parsing for Excel files
 
     public Fingerprint (String logContent, Boolean layerWarning, Boolean noFormatCheck, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
-                        int[] mappingColumns, String[] inchiLayers, int filteredColumn) throws IOException {
+                        int[] mappingColumns, String[] inchiLayers, int filteredColumn, String checkingFile) throws IOException {
 
         this.logContent = logContent;
+        this.checkingFile = checkingFile;
         this.inBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));
         this.layerWarning=layerWarning;
         this.noFormatCheck=noFormatCheck;
@@ -59,7 +60,7 @@ public class Fingerprint implements WritingComportment {
     }
     
     public void setFileChecking(){
-        File f = new File("checking_format.tsv");
+        File f = new File(this.checkingFile);
         if (f.isFile()) {
             //write a new file if already exists
             f.delete();
@@ -145,7 +146,8 @@ public class Fingerprint implements WritingComportment {
         }
 
         if (nbWrongDatabase == nbSelectedDatabases) {
-            System.err.println("[FATAL] All the values of the selected database(s) are badly formatted. Please check the column number set for these databases.\n-noCheck to avoid checking step verification.");
+            System.err.println("[FATAL] All the values of the selected database(s) are badly formatted. Please check the column number set for these databases.\n" +
+                    "-noCheck to ignore the bad format exit and run the analysis anyway.");
             exit(11);
         }
         if(nbWrongDatabase>0) this.logContent = writeLog(this.logContent, wrongDatabaseWarning);

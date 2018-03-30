@@ -16,6 +16,9 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name="-i", aliases="-inFile", usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
     protected String inFileFingerprint ;
 
+    @Option(name="-o1", aliases = "--outCheck", usage="Output file name for checking format process (by default: disabled).")
+    protected String checkingFile = "";
+
     /******PARSING PARAMETERS*****/
 
     @Option(name="-noCheck", usage="Activate this option to check database identifier format.")
@@ -249,7 +252,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             fingerprint = new Fingerprint(this.logContent, this.layerWarning, this.noFormatCheck,
                     this.inFileFingerprint, this.ifNoHeader, this.columnSeparator,
                     this.IDSeparator, (this.nameColumn - 1), mappingColumns, tab_inchiLayers,
-                    (this.colFiltered - 1));
+                    (this.colFiltered - 1), this.checkingFile);
             this.logContent = fingerprint.getLogContent();
         } catch (IOException e) {
             e.printStackTrace();

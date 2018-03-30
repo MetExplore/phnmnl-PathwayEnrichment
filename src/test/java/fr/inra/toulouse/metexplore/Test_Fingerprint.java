@@ -44,13 +44,11 @@ public class Test_Fingerprint extends Test{
     }
 
     public void testCheckingFormat() {
-        this.checkingFile="temp/format_checking.tsv";
+        this.checkingFile="temp/checking_format.tsv";
+        this.noFormatCheck=false;
         this.layerWarning = true;
         this.setInChILayers("c", "h", "t");
-        this.createDummyFileWithMultipleColumns("randomEntity\t\t\t\tInChI=1S/C25H36O8/c1-24-9-7-13(26)1/h11,14-21,23");
-        this.setBufferTest(this.checkingFile,
-                "Line number\tBioentity name\tDatabase\tInChI layer\tWrong value",
-                "1\trandomEntity\tInChI\ttetraStereo (t)\tInChI=1S/C25H36O8/c1-24-9-7-13(26)1/h11,14-21,23");
+        this.createDummyFileWithMultipleColumns("randomEntity\t\t\t\tInChI=1S/C25H36O8/c1-24-9-7-13(26)1/h11,14-21,23/t...");
     }
 
 }

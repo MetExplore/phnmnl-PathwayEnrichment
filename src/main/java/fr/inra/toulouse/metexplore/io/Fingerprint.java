@@ -10,7 +10,7 @@ import static java.lang.System.exit;
 
 public class Fingerprint implements WritingComportment {
 
-    protected int nameColumn, filteredColumn, nbLine = 2;
+    protected int nameColumn, filteredColumn, nbLine = 2, nbWarningPerLine;
     protected int[] columnNumbers, nbWarningPerDatabases;
     protected String separator, IDSeparator, warnings ="", logContent;
     protected String[] inchiLayers;
@@ -109,6 +109,7 @@ public class Fingerprint implements WritingComportment {
             } catch (ArrayIndexOutOfBoundsException e) {
                 //avoid errors with filtering functionality containing empty values
             }
+            //System.out.println(nbLine);
             nbLine++;
         }
         if (inBuffer != null) inBuffer.close();
@@ -134,8 +135,8 @@ public class Fingerprint implements WritingComportment {
     public Boolean testWrongColumn() {
         Boolean ifWrongCol = false;
         for (int i = 0; i < databases.length; i++) {
-            if (nbWarningPerDatabases[i] >= nbLine) {
-                System.out.println("[WARNING] For " + databases[i] + " values, all the lines are badly formatted. Check your column number for this parameter.\n");
+            if (nbWarningPerDatabases[i] == nbLine-1) {
+                this.logContent = writeLog(this.logContent,"[WARNING] For " + databases[i] + " values, all the lines are badly formatted. Check your column number for this parameter.\n");
                 ifWrongCol = true;
             }
         }
@@ -147,6 +148,7 @@ public class Fingerprint implements WritingComportment {
             try {
                 String[] tab_ids = lineInFile[columnInFile].split(IDSeparator);
                 ArrayList <String> ids = new ArrayList<>();
+                nbWarningPerLine = 0;
                 for (String id : tab_ids) {
 
                     id = id.replace("\\s$", "").replace("^\\s","").replaceAll("\\s{2,}", "");
@@ -192,12 +194,16 @@ public class Fingerprint implements WritingComportment {
             InChI inchi = new InChI(id, this.inchiLayers);
             if(!inchi.validity) {
                 database = "InChI";
-                if (this.layerWarning) layer+= inchi.wrongLayer;
+                if (this.layerWarning) layer+= String.join("; ", inchi.wrongLayer);
             }
         }
 
         if(!database.equals("")) {
             setWarnings(id, lineInFile,database,layer,columnInTable);
+            if(nbWarningPerLine == 0) {
+                nbWarningPerDatabases[columnInTable - 2] = nbWarningPerDatabases[columnInTable - 2] + 1;
+            }
+            nbWarningPerLine++;
         }
     }
 
@@ -209,7 +215,7 @@ public class Fingerprint implements WritingComportment {
             this.warnings += this.nbLine + "\t" + lineInFile[this.nameColumn] + "\t" + database + "\t" + id + "\n";
         }
 
-        nbWarningPerDatabases[columnInTable - 2] = nbWarningPerDatabases[columnInTable - 2] + 1;
+
 
     }
 

@@ -51,6 +51,10 @@ public class Launcher_mapping extends Launcher_Fingerprint {
             }
         }
 
+        if (this.weightPrecision > 100) {
+            throw new CmdLineException("Weight precision must be lower than 100.");
+        }
+
         for (String arg : args) {
             if (Pattern.matches("-+prec.*", arg)) {
                 if (this.weightColumn < 0){

@@ -17,7 +17,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     protected String inFileFingerprint ;
 
     @Option(name="-o1", aliases = "--outCheck", usage="Output file name for checking format process (by default: disabled).")
-    protected String checkingFile = "";
+    protected String checkingFile = "checking_format.tsv";
 
     /******PARSING PARAMETERS*****/
 

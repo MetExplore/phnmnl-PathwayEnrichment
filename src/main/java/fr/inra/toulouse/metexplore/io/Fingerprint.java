@@ -4,13 +4,14 @@ import fr.inra.toulouse.metexplore.biodata.InChI;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import static java.lang.System.exit;
 
 public class Fingerprint implements WritingComportment {
 
-    protected int nameColumn, filteredColumn, nbLine = 2, nbWarningPerLine;
+    protected int nameColumn, filteredColumn, nbLine = 2, nbWarningPerLine, nbSelectedDatabases;
     protected int[] columnNumbers, nbWarningPerDatabases;
     protected String separator, IDSeparator, warnings ="", logContent;
     protected String[] inchiLayers;
@@ -82,8 +83,9 @@ public class Fingerprint implements WritingComportment {
         Boolean isFiltered = this.filteredColumn >= 0;
         String line;
 
-        //if (debug) System.out.println(Arrays.toString(columnNumbers));
-
+        //get the number of positive values (i.e., the number of used database)
+        int[] datasesColumnNumbers = Arrays.copyOfRange(columnNumbers, 2, columnNumbers.length);
+        nbSelectedDatabases = datasesColumnNumbers.length - Arrays.toString(datasesColumnNumbers).replaceAll("[^-]+", "").length();
         if(!this.ifNoHeader){
             inBuffer.readLine(); //skip the header
             this.nbLine--;
@@ -114,9 +116,9 @@ public class Fingerprint implements WritingComportment {
         }
         if (inBuffer != null) inBuffer.close();
         if (this.list_entities.size() < 1) {//no extraction = error generation
-            System.err.println("File badly formatted");
-            exit(1);
-        }else if(!noFormatCheck && !testWrongColumn()){
+            System.err.println("[FATAL] File badly formatted");
+            exit(10);
+        }else if(!noFormatCheck && !ifWrongDatabase()){
             if (warnings.isEmpty()) this.logContent = writeLog(this.logContent,"All your databases identifiers seem valid.\n");
             else{
                 setFileChecking();
@@ -132,15 +134,22 @@ public class Fingerprint implements WritingComportment {
 
     }
 
-    public Boolean testWrongColumn() {
-        Boolean ifWrongCol = false;
+    public Boolean ifWrongDatabase() {
+        int nbWrongDatabase = 0;
+        String wrongDatabaseWarning = "";
         for (int i = 0; i < databases.length; i++) {
             if (nbWarningPerDatabases[i] == nbLine-1) {
-                this.logContent = writeLog(this.logContent,"[WARNING] For " + databases[i] + " values, all the lines are badly formatted. Check your column number for this parameter.\n");
-                ifWrongCol = true;
+                wrongDatabaseWarning +="[WARNING] For " + databases[i] + " values, all the lines are badly formatted. Check your column number for this parameter.\n";
+                nbWrongDatabase++;
             }
         }
-        return ifWrongCol;
+
+        if (nbWrongDatabase == nbSelectedDatabases) {
+            System.err.println("[FATAL] All the values of the selected database(s) are badly formatted. Please check the column number set for these databases.\n-noCheck to avoid checking step verification.");
+            exit(11);
+        }
+        if(nbWrongDatabase>0) this.logContent = writeLog(this.logContent, wrongDatabaseWarning);
+        return (nbWrongDatabase>0);
     }
 
     public void putValueIfExists (String[] lineFormatted, String[] lineInFile, int columnInTable, int columnInFile){

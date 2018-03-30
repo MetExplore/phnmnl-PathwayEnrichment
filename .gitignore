@@ -24,3 +24,5 @@ src/main/java/fr/inra/toulouse/metexplore/tests/
 resultRuns*
 
 temp*
+
+checking_format\.tsv

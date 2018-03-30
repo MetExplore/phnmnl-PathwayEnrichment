@@ -45,6 +45,8 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name = "-nameCol", usage = "Number of the file's column containing the bio-entity name (by default: 1st column).")
     protected int nameColumn = -1;
 
+    protected int nameMapping = -1;
+
     @Option(name = "-l", aliases = "-layers", usage = "List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
             " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
     protected String inchiLayers = "c,h";
@@ -92,33 +94,66 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     }
 
     @SuppressWarnings("deprecation")
-    public void printInfo(CmdLineParser parser, String[] args) throws CmdLineException{
+    public void printInfo(CmdLineParser parser, String[] args) throws CmdLineException {
 
         super.printInfo(parser);
 
         //required=true in @option required -i with -h and -v !
-        if(this.inFileFingerprint==null){
+        if (this.inFileFingerprint == null) {
             throw new CmdLineException("-i parameter required");
         }
 
-        if(!this.noFormatCheck && !this.inchiLayers.equals("c,h")){
-            this.layerWarning = true;
+        //check for name Column settings
+        int i = 0;
+        Boolean ifMappingParameter = false;
+        //case for nameCol with negative values
+        for (String arg : args) {
+            if (Pattern.matches("-name.*", arg)){
+                if(Pattern.matches("-.*", args[i + 1])) {
+                    writeLog("[WARNING] "+  arg + " column parameter must be positive.\n");
+                }
+            } else {
+                i++;
+            }
         }
 
-        //Error messages for bad parameters
-        if (!this.noFormatCheck){
-            if(!this.inchiLayers.equals("c,h")) {
+
+           i = 0;
+           for (String arg : args) {
+               if (Pattern.matches("-name$", arg)) {
+                   ifMappingParameter = true;
+                   if (Pattern.matches("^-.*", args[i + 1])) {
+                       this.nameColumn = 1;
+                       writeLog("[WARNING] No name column has been chosen; by default it was set to the 1rst column.");
+                   } else {
+                       i++;
+                   }
+               }
+           }
+           if (!ifMappingParameter) {
+                   this.nameColumn = 1;
+                   writeLog("[WARNING] No name column has been chosen; by default it was set to the 1rst column.");
+               }
+
+        //Check inchi Layers format
+        if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", this.inchiLayers)) {
+            throw new CmdLineException("-l parameter badly formatted: it must be a list containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping " +
+                    "(by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter)");
+        }
+
+
+        //Case for format Checking
+        if (!this.noFormatCheck) {
+            //The user has set inchi layers and has not disabled the checking step
+            if (!this.inchiLayers.equals("c,h")) {
                 this.layerWarning = true;
             }
-        }else if(this.layerWarning && this.noFormatCheck){
+        } else if (this.layerWarning && this.noFormatCheck) {
             writeLog("[WARNING] Checking format option has been disabled.\n" +
-                        "[WARNING] Without checking, layer warnings option will be useless.\n");
+                    "[WARNING] Without checking, layer warnings option will be useless.\n");
         }
 
-        if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", this.inchiLayers)) {
-            throw new CmdLineException("-l parameter badly formatted");
-        }
-
+        //Case for layers settings without InChI
         Boolean ifLayerMappingParameter = false, ifInchiMappingParameter = false;
         for (String arg : args) {
             if (Pattern.matches("-l[ ]*", arg)) {
@@ -130,62 +165,52 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             this.inchiColumn = 2;
             writeLog("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
                     "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
-        } else {
+        }
 
-            //The user have use any mapping parameters
-            int i = 0;
-            Boolean ifMappingParameter = false;
+
+        //Mapping parameters
+        i = 0;
+        ifMappingParameter = false;
+        for (String arg : args) {
+            if (Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|mass)$", arg)) {
+                ifMappingParameter = true;
+                if (Pattern.matches("-.*", args[i + 1])) {
+                    writeLog("[WARNING] " + arg + " column parameter must be positive.");
+                }
+            }
+            i++;
+        }
+        if (!ifMappingParameter) {
+            this.idSBMLColumn = 2;
+            writeLog("[WARNING] No mapping parameters has been chosen." + mappingWarnings);
+        }
+
+        //All mapping parameters are disabled (case with all set to negative values)
+        ifMappingParameter = false;
+        i = 0;
+        if (this.chebiColumn < 1 && this.inchiColumn < 1 && this.idSBMLColumn < 1 &&
+                this.smilesColumn < 1 && this.pubchemColumn < 1 && this.inchikeyColumn < 1
+                && this.keggColumn < 1 && this.hmdbColumn < 1 && this.csidColumn < 1
+                && this.weightColumn < 1) {
+            //case for name mapping in corresponding Launcher and avoid a -name option in Fingerprint launcher
             for (String arg : args) {
-                if (Pattern.matches("-(nameCol|name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|mass)$", arg)) {
+                if (Pattern.matches("-name$", arg)) {
                     ifMappingParameter = true;
-                    break;
+                    if (Pattern.matches("^-.*", args[i + 1])) {
+                        this.idSBMLColumn = 2;
+                        writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled." + mappingWarnings);
+                    }
+                } else {
+                    i++;
                 }
-                i++;
             }
-            if (!ifMappingParameter && weightColumn < 1) {
+            if (!ifMappingParameter) {
                 this.idSBMLColumn = 2;
-                writeLog("[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
-            }
-
-            //All mapping parameters are disabled
-            ifMappingParameter = false;
-            i = 0;
-            if (this.nameColumn < 1 && this.chebiColumn < 1 && this.inchiColumn < 1 && this.idSBMLColumn < 1 &&
-                    this.smilesColumn < 1 && this.pubchemColumn < 1 && this.inchikeyColumn < 1
-                    && this.keggColumn < 1 && this.hmdbColumn < 1 && this.csidColumn < 1
-                    && this.weightColumn < 1) {
-                //case for name mapping in corresponding Launcher and avoid a -name option in Fingerprint launcher
-                for (String arg : args) {
-                    if (Pattern.matches("-name$", arg)) {
-                        ifMappingParameter = true;
-                        if (Pattern.matches("^-.*", args[i + 1])) {
-                            this.nameColumn = 1;
-                            this.idSBMLColumn = 2;
-                            writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
-                        }
-                    }else {
-                        i++;
-                    }
-                }
-                if (!ifMappingParameter){
-                    this.nameColumn = 1;
-                    this.idSBMLColumn = 2;
-                    writeLog( "[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
-                }
-            } else {
-                i = 0;
-                for (String arg : args) {
-                    //this.nameColumn < 0 : case for name mapping in corresponding Launcher
-                    if (this.nameColumn < 1 && Pattern.matches("-nameCol", arg) && Pattern.matches("-.*", args[i + 1])) {
-                        writeLog( "[WARNING] Name parameter must be positive. By default, it was set to the 1rst column.\n");
-                        this.nameColumn = 1;
-                    } else {
-                        i++;
-                    }
-                }
+                writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled." + mappingWarnings);
             }
         }
     }
+
 
     public void printError(CmdLineParser parser, CmdLineException e, String[] args) {
         if (e.getMessage().equals("Option \"-l (-layers)\" takes an operand")) {

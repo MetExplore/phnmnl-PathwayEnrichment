@@ -5,13 +5,14 @@ import metabolome.util.MolecularFormula;
 import parsebionet.utils.chemicalStructures.ChemicalStructure;
 import parsebionet.utils.chemicalStructures.InchiLayer;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class InChI extends ChemicalStructure {
-    public String wrongLayer = "";
+    public ArrayList <String> wrongLayer = new ArrayList<>();
     public String inchiString;
     public int version;
     public boolean standard;
@@ -79,10 +80,12 @@ public class InChI extends ChemicalStructure {
 
         this.setValidInchi(true);
         String trunckedInchi = this.getInchiString();
+        int beginList = 0;
 
         if (!trunckedInchi.startsWith("InChI=")) {
             this.setValidInchi(false);
-            this.wrongLayer = "InChI=";
+            this.wrongLayer.add("InChI=");
+            beginList++;
         } else {
             trunckedInchi = trunckedInchi.substring(6);
 
@@ -90,7 +93,8 @@ public class InChI extends ChemicalStructure {
                 this.setVersion(Integer.parseInt(trunckedInchi.substring(0, 1)));
             } catch (Exception var4) {
                 this.setValidInchi(false);
-                this.wrongLayer="version";
+                this.wrongLayer.add("version");
+                beginList++;
                 return;
             }
 
@@ -100,7 +104,8 @@ public class InChI extends ChemicalStructure {
             } else {
                 this.setStandard(false);
                 trunckedInchi = trunckedInchi.substring(1);
-                this.wrongLayer="S";
+                this.wrongLayer.add("S");
+                beginList++;
             }
 
             String[] tmp;
@@ -110,7 +115,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[8]) {
                 if (tmp.length != 2) {
                     this.setValidInchi(false);
-                    this.wrongLayer="reconnected (r)";
+                    this.wrongLayer.add(beginList,"reconnected (r)");
                     return;
                 }
                 connect = new InchiLayer('r', tmp[1]);
@@ -122,7 +127,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[7]) {
                 if (tmp.length != 2) {
                     this.setValidInchi(false);
-                    this.wrongLayer="fixed (f)";
+                    this.wrongLayer.add(beginList,"fixed (f)");
                     return;
                 }
                 connect = new InchiLayer('f', tmp[1]);
@@ -134,7 +139,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[6]) {
                 if (tmp.length != 2) {
                     this.setValidInchi(false);
-                    this.wrongLayer="isotopic (i)";
+                    this.wrongLayer.add(beginList,"isotopic (i)");
                     return;
                 }
                 connect = new InchiLayer('i', tmp[1]);
@@ -146,7 +151,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[5]) {
                 if (tmp.length != 2) {
                     this.setValidInchi(false);
-                    this.wrongLayer="tetraStereo (t)";
+                    this.wrongLayer.add(beginList,"tetraStereo (t)");
                     return;
                 }
                 connect = new InchiLayer('t', tmp[1]);
@@ -158,7 +163,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[4]) {
                 if (tmp.length != 2) {
                     this.setValidInchi(false);
-                    this.wrongLayer="dbStereo (b)";
+                    this.wrongLayer.add(beginList,"dbStereo (b)");
                     return;
                 }
                 connect = new InchiLayer('b', tmp[1]);
@@ -170,7 +175,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[3]) {
                 if (tmp.length != 2 || tmp[1].contains("/")) {
                     this.setValidInchi(false);
-                    this.wrongLayer="protonation (p)";
+                    this.wrongLayer.add(beginList,"protonation (p)");
                     return;
                 }
                 connect = new InchiLayer('p', tmp[1]);
@@ -183,7 +188,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[2]) {
                 if (tmp.length != 2 || tmp[1].contains("/")) {
                     this.setValidInchi(false);
-                    this.wrongLayer="charge (q)";
+                    this.wrongLayer.add(beginList,"charge (q)");
                     return;
                 }
                 connect = new InchiLayer('q', tmp[1]);
@@ -196,7 +201,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[1]) {
                 if (tmp.length != 2 || tmp[1].contains("/")) {
                     this.setValidInchi(false);
-                    this.wrongLayer="h";
+                    this.wrongLayer.add(beginList,"hydrogen (h)");
                     return;
                 }
                 connect = new InchiLayer('h', tmp[1]);
@@ -208,7 +213,7 @@ public class InChI extends ChemicalStructure {
             if (boolInchiLayers[0]) {
                 if (tmp.length != 2 || tmp[1].contains("/")) {
                     this.setValidInchi(false);
-                    this.wrongLayer="connectivity (c)";
+                    this.wrongLayer.add(beginList,"connectivity (c)");
                     return;
                 }
                 connect = new InchiLayer('c', tmp[1]);
@@ -219,6 +224,8 @@ public class InChI extends ChemicalStructure {
             if (!trunckedInchi.equals("/")) {
                 String formula = trunckedInchi.replaceAll("/", "");
                 this.setFormula(formula);
+            }else {
+                this.wrongLayer.add(beginList,"formula");
             }
         }
     }

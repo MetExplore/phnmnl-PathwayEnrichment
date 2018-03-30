@@ -9,6 +9,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import parsebionet.biodata.BioNetwork;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class Launcher_mapping extends Launcher_Fingerprint {
@@ -41,11 +42,13 @@ public class Launcher_mapping extends Launcher_Fingerprint {
             throw new CmdLineException("Type of mapped entity must be between 1 and 6.");
         }
 
-        if(this.nameColumn != this.nameMapping && this.nameMapping > 0) {
+        if(this.nameColumn != this.nameMapping && this.nameMapping > 0 ) {
             this.nameColumn = this.nameMapping;
-        this.logContent = writeLog(this.logContent,"[WARNING] You have set both name column"
-        + " and name mapping parameters and with different parameters.\n" +
-                "[WARNING] By default, the name mapping is activated with the column number of this parameter.\n");
+            if (Arrays.asList(args).contains("-nameCol")) {
+                this.logContent = writeLog(this.logContent, "[WARNING] You have set both name column"
+                        + " and name mapping parameters and with different parameters.\n" +
+                        "[WARNING] By default, the name mapping is activated with the column number of this parameter.\n");
+            }
         }
 
         for (String arg : args) {

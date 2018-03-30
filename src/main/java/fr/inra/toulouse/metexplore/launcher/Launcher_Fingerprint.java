@@ -45,8 +45,6 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name = "-nameCol", usage = "Number of the file's column containing the bio-entity name (by default: 1st column).")
     protected int nameColumn = -1;
 
-    protected int nameMapping = -1;
-
     @Option(name = "-l", aliases = "-layers", usage = "List containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping" +
             " (by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter).")
     protected String inchiLayers = "c,h";
@@ -103,37 +101,8 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             throw new CmdLineException("-i parameter required");
         }
 
-        //check for name Column settings
-        int i = 0;
-        Boolean ifMappingParameter = false;
-        //case for nameCol with negative values
-        for (String arg : args) {
-            if (Pattern.matches("-name.*", arg)){
-                if(Pattern.matches("-.*", args[i + 1])) {
-                    writeLog("[WARNING] "+  arg + " column parameter must be positive.\n");
-                }
-            } else {
-                i++;
-            }
-        }
 
 
-           i = 0;
-           for (String arg : args) {
-               if (Pattern.matches("-name$", arg)) {
-                   ifMappingParameter = true;
-                   if (Pattern.matches("^-.*", args[i + 1])) {
-                       this.nameColumn = 1;
-                       writeLog("[WARNING] No name column has been chosen; by default it was set to the 1rst column.");
-                   } else {
-                       i++;
-                   }
-               }
-           }
-           if (!ifMappingParameter) {
-                   this.nameColumn = 1;
-                   writeLog("[WARNING] No name column has been chosen; by default it was set to the 1rst column.");
-               }
 
         //Check inchi Layers format
         if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", this.inchiLayers)) {
@@ -169,12 +138,13 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
 
 
         //Mapping parameters
-        i = 0;
-        ifMappingParameter = false;
+        int i = 0;
+        Boolean ifMappingParameter = false;
         for (String arg : args) {
             if (Pattern.matches("-(name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|mass)$", arg)) {
                 ifMappingParameter = true;
-                if (Pattern.matches("-.*", args[i + 1])) {
+                if (Pattern.matches("-.*", args[i + 1]) && (!arg.equals("-name") || (arg.equals("-name") && this.nameColumn < 1))) {
+                    System.out.println(arg);
                     writeLog("[WARNING] " + arg + " column parameter must be positive.");
                 }
             }
@@ -207,6 +177,47 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             if (!ifMappingParameter) {
                 this.idSBMLColumn = 2;
                 writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled." + mappingWarnings);
+            }
+        }
+
+
+        //check name column setting
+        i = 0;
+        Boolean ifNameColumn = false;
+        // check if name parameters have been called with negative values
+        for (String arg : args) {
+            if (Pattern.matches("-name.*", arg)){
+                ifNameColumn = true;
+                /*if(Pattern.matches("-.*", args[i + 1])) {
+                    writeLog("[WARNING] "+  arg + " column parameter must be positive.\n");
+                }*/
+            } else {
+                i++;
+            }
+        }
+        if(!ifNameColumn){
+            //no name parameters have been called
+            this.nameColumn = 1;
+            writeLog("[WARNING] No column number has been chosen for the name of the chemicals; by default it was set to the 1rst column.");
+        }else {
+            //name parameters have been called but all with negative column
+            i = 0;
+            ifNameColumn = false;
+            for (String arg : args) {
+                if (Pattern.matches("-name$", arg)) {
+                    ifNameColumn = true;
+                    if (Pattern.matches("^-\\d", args[i + 1]) && this.nameColumn < 1) {
+                        this.nameColumn = 1;
+                        writeLog("[WARNING] Your column number for the name of the chemicals is negative; by default it was set to the 1rst column.");
+                    }
+                } else {
+                    i++;
+                }
+            }
+            //no nameMapping parameters have been called but only nameColum with negative values
+            if (!ifNameColumn && this.nameColumn < 1) {
+                this.nameColumn = 1;
+                writeLog("[WARNING] Your column number for the name of the chemicals is negative; by default it was set to the 1rst column.");
             }
         }
     }

@@ -41,7 +41,7 @@ public class Launcher_mapping extends Launcher_Fingerprint {
             throw new CmdLineException("Type of mapped entity must be between 1 and 6.");
         }
 
-        if(this.nameColumn != this.nameMapping && this.nameColumn > 0) {
+        if(this.nameColumn != this.nameMapping && this.nameMapping > 0) {
             this.nameColumn = this.nameMapping;
         this.logContent = writeLog(this.logContent,"[WARNING] You have set both name column"
         + " and name mapping parameters and with different parameters.\n" +

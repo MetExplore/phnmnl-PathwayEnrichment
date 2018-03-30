@@ -130,10 +130,10 @@ public class Mapping extends Omics {
                         "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
                         "enter the number of this added column into your program settings.");
             else
-                System.err.println("There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
+                System.err.println("[FATAL] There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
                         "(by default on the SBML ID and the name of the metabolites), wrong number of column from the dataset" +
                         " or wrong type of bioEntity (or bad SBML).\nPlease check your settings and rerun the analysis.");
-            exit(1);
+            exit(20);
         }
 
         if (!this.outFileMapping.equals("")) {
@@ -344,8 +344,8 @@ public class Mapping extends Omics {
         }
 
         if (this.list_mappedEntities.size() == 0) {
-            System.err.println("No metabolite have been extracted from the network. \nPlease, check the format of database identifier validity.");
-            exit(1);
+            System.err.println("[FATAL] No metabolite have been extracted from the network. \nPlease, check the format of database identifier validity.");
+            exit(21);
         }
     }
 }

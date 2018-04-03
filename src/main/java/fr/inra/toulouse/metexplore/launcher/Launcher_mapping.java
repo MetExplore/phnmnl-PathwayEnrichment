@@ -33,33 +33,34 @@ public class Launcher_mapping extends Launcher_Fingerprint {
 
     protected BioNetwork network;
     protected Fingerprint fingerprint;
+    protected String[] warn_type = {"Type of ", " entity must be comprise between 1 and 6."};
 
     @SuppressWarnings("deprecation")
     public void printInfo(CmdLineParser parser, String[] args) throws CmdLineException {
 
 
         if (this.entityType2Map < 1 || this.entityType2Map > 6) {
-            throw new CmdLineException("Type of mapped entity must be between 1 and 6.");
+            throw new CmdLineException(warn_type[0] + "mapped" + warn_type[1]);
         }
 
         if(this.nameColumn != this.nameMapping && this.nameMapping > 0 ) {
             this.nameColumn = this.nameMapping;
             if (Arrays.asList(args).contains("-nameCol")) {
-                this.logContent = writeLog(this.logContent, "[WARNING] You have set both name column"
+                writeLog("[WARNING] You have set both name column"
                         + " and name mapping parameters and with different parameters.\n" +
                         "[WARNING] By default, the name mapping is activated with the column number of this parameter.\n");
             }
         }
 
-        if (this.weightPrecision > 100) {
-            throw new CmdLineException("Weight precision must be lower than 100.");
+        if (this.weightPrecision > 100 || this.weightPrecision < 1) {
+            throw new CmdLineException("Weight precision must be comprise between 1 and 100.");
         }
 
         for (String arg : args) {
             if (Pattern.matches("-+prec.*", arg)) {
                 if (this.weightColumn < 0){
                     this.weightColumn = 2;
-                    writeLog("[WARNING] Precision has been set without specify isotopic mass column in the fingerprint.\n" +
+                    writeLog("[WARNING] Weigt precision has been set without specify isotopic mass column in the fingerprint.\n" +
                             "[WARNING] By default, it has been set to the 2nd column.");
                 }
                 break;

@@ -23,7 +23,7 @@ public class Launcher_PathEnr extends Launcher_mapping implements WritingComport
         super.printInfo(parser, args);
 
         if (this.entityType2Enrich < 1 || this.entityType2Enrich > 6) {
-            throw new CmdLineException("Type of enriched entity be between 1 and 6.");
+            throw new CmdLineException(warn_type[0] + "enriched" + warn_type[1]);
         }
     }
 

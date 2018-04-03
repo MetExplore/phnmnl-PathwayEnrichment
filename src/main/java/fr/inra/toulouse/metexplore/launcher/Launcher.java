@@ -19,9 +19,6 @@ public abstract class Launcher implements WritingComportment{
     @Option(name = "-gal", aliases = "-galaxy", usage = "For galaxy compliance: formatting pathway output and creating a new one containing log information.")
     protected String galaxyFile = "";
 
-    protected String mappingWarnings = " By default, it was set on the SBML identifiers at the 2nd column of your dataset." +
-            " Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem, isotopic mass and HMDB (check -help).\n";
-
     protected static File logFile;
     protected String logContent;
 

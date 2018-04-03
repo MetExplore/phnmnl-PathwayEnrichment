@@ -270,15 +270,13 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
 
         try {
             parser.parseArgument(args);
+            if (!launch.galaxyFile.equals("")) {
+                launch.logContent = "";
+                logFile = launch.createFile(launch.galaxyFile);
+            }
             launch.printInfo(parser, args);
         } catch (CmdLineException e) {
             launch.printError(parser, e, args);
-        }
-
-
-        if (!launch.galaxyFile.equals("")) {
-            logFile = launch.createFile(launch.galaxyFile);
-            launch.logContent = "";
         }
 
         try {

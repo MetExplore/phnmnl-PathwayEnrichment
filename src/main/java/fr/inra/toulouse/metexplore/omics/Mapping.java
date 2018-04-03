@@ -214,7 +214,7 @@ public class Mapping extends Omics {
                         for (String id : list_id) {
                             for (BioRef val : key.getValue()) {
                                 if (id.equals(val.id)) {
-                                    this.matchedValuesSBML.add(associatedValueInSbml);
+                                    this.matchedValuesSBML.add(val.id);
                                     this.matchedValues.add(id);
                                     this.isMappedBpe = true;
                                     return;
@@ -253,7 +253,6 @@ public class Mapping extends Omics {
                 query = query.substring(0, query.length() - 2);
             }
         }
-        //System.out.println(query + ": " + hit);
         return query.equals(hit);
     }
 
@@ -264,18 +263,24 @@ public class Mapping extends Omics {
                 query = query.substring(0, query.length() - 2);
             }
         }
-        //System.out.println(query + ": " + hit);
         return query.equals(hit);
     }
 
     public Boolean compareProtEnz(String query, String hit) {
+
+        //two format could be encounter in Recon2:
+        //(i) first case: where the id from SBML begin by  "_HSA" (e.g. "_HSA:AL038231")
+        // the motif (AL038231) would not include the splicing version (e.g., 1, 2 or 3)
+        // from the Metexplore website ID (e.g. "_AL038231_1_c")
+        //(ii) second one: where it begin by "_" only (e.g. "_514_2")
+        //the motif (514_2) would take account to splicing version (e.g. "_514_2_c")
+
         Matcher m = Pattern.compile("_HSA:(.+)").matcher(hit);
         if (m.matches()) {
             hit = m.group(1);
             m = Pattern.compile("_(.+)(_\\w){2}").matcher(query);
             if (m.matches()) {
                 query = m.group(1);
-                //System.out.println(query + ": " + hit);
                 return query.equals(hit);
             }
 
@@ -286,7 +291,6 @@ public class Mapping extends Omics {
                     m = Pattern.compile("_(.+)_\\w$").matcher(query);
                     if (m.matches()) {
                         query = m.group(1);
-                        //System.out.println(query + ": " + hit);
                         return query.equals(hit);
                     }
                 }

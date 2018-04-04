@@ -198,7 +198,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 i++;
             }
         }
-        String nameWarning = "; by default it was set to the 1rst column.";
+        String nameWarning = "; by default it was set to the 1rst column.\n";
         if(!ifNameColumn){
             //no name parameters have been called
             this.nameColumn = 1;

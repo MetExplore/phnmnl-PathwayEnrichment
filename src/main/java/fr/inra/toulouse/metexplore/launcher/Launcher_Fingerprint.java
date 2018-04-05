@@ -152,7 +152,8 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             }
             i++;
         }
-        if (!ifMappingParameter) {
+        //also catch "-prec" only default setting with weight column
+        if (this.weightColumn < 1 && !ifMappingParameter) {
             this.idSBMLColumn = 2;
             writeLog("[WARNING] No mapping parameters has been chosen." + mappingWarnings);
         }

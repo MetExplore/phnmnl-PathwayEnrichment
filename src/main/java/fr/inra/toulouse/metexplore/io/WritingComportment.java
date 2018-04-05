@@ -46,10 +46,13 @@ public interface WritingComportment {
     }
 
     default void sysExit(String log, String message, String galaxy, int exitCode){
+
         writeLog(log,message);
         try{
-            File galaxyFile = new File(galaxy);
-            writeOutput(log+message, galaxyFile);
+            if(!galaxy.isEmpty()) {
+                File galaxyFile = new File(galaxy);
+                writeOutput(log + message, galaxyFile);
+            }
         }catch (IOException e) {
             e.printStackTrace();
         }

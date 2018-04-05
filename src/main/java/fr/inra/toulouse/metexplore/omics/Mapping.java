@@ -124,16 +124,18 @@ public class Mapping extends Omics {
         }
 
         if (this.list_mappedEntities.size() == 0) {
-            if (!warningsDoublets.equals(""))
-                System.err.println("There is multiple possible match for your whole list of metabolites !\n " +
+            String message="";
+            if (!warningsDoublets.equals("")) {
+                message = "[FATAL] There is multiple possible match for your whole list of metabolites !\n " +
                         "Please, choose the ID of the desired metabolites among those proposed in the output file.\n " +
                         "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
-                        "enter the number of this added column into your program settings.");
-            else
-                System.err.println("[FATAL] There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
+                        "enter the number of this added column into your program settings.";
+            }else {
+                message = "[FATAL] There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
                         "(by default on the SBML ID and the name of the metabolites), wrong number of column from the dataset" +
-                        " or wrong type of bioEntity (or bad SBML).\nPlease check your settings and rerun the analysis.");
-            exit(20);
+                        " or wrong type of bioEntity (or bad SBML).\nPlease check your settings and rerun the analysis.";
+            }
+            sysExit(this.logContent,message,galaxy,20);
         }
 
         if (!this.outFileMapping.equals("")) {
@@ -348,8 +350,8 @@ public class Mapping extends Omics {
         }
 
         if (this.list_mappedEntities.size() == 0) {
-            System.err.println("[FATAL] No metabolite have been extracted from the network. \nPlease, check the format of database identifier validity.");
-            exit(21);
+            String message ="[FATAL] No metabolite have been extracted from the network. \nPlease, check the format of database identifier validity.";
+            sysExit(this.logContent,message,galaxy,21);
         }
     }
 }

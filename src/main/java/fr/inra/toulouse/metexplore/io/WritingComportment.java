@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import static java.lang.System.exit;
+
 public interface WritingComportment {
 
     default File createFile (String galaxyFile) {
@@ -34,13 +36,24 @@ public interface WritingComportment {
 
     default String writeLog(String log, String message) {
         //Avoid to skip a line
-        if (message.contains("[WARNING]")) {
+        if (message.contains("[WARNING]") || message.contains("[FATAL]")) {
             System.err.println(message.replaceAll("\n$", ""));
         }else{
             System.out.println(message.replaceAll("\n$", ""));
         }
         log += message;
         return log;
+    }
+
+    default void sysExit(String log, String message, String galaxy, int exitCode){
+        writeLog(log,message);
+        try{
+            File galaxyFile = new File(galaxy);
+            writeOutput(log+message, galaxyFile);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        exit(exitCode);
     }
 
     default String removeSciNot(double value) {

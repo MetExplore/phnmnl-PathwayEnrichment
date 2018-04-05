@@ -180,7 +180,7 @@ public class Test extends TestCase implements WritingComportment {
             dummyFile.write(header + "\n");
             dummyFile.write(inputLine);
             dummyFile.close();
-            this.fingerprint = new Fingerprint(this.logContent,this.layerWarning, this.noFormatCheck, this.dummyFile, this.ifNoHeader, this.separator, ";", 0,
+            this.fingerprint = new Fingerprint(this.logContent,this.galaxy,this.layerWarning, this.noFormatCheck, this.dummyFile, this.ifNoHeader, this.separator, ";", 0,
                     this.mappingColumn, this.inchiLayers, this.filteredColumn, "checking_format.tsv");
         } catch (IOException e) {
             e.printStackTrace();

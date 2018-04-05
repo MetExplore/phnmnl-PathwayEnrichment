@@ -6,6 +6,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.File;
+import java.io.IOException;
 
 import static java.lang.System.exit;
 
@@ -32,10 +33,10 @@ public abstract class Launcher implements WritingComportment{
     }
 
     public void printError(CmdLineParser parser, CmdLineException e){
-        System.err.println(e.getMessage());
+        writeLog("[FATAL] " + e.getMessage());
         System.err.println("Options:");
         parser.printUsage(System.err);
-        exit(1);
+        sysExit(this.logContent,"", this.galaxyFile,1);
     }
 
     public void printInfo(CmdLineParser parser){

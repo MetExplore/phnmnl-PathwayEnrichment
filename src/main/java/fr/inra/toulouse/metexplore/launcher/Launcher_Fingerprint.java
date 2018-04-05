@@ -252,7 +252,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 (this.keggColumn - 1), (this.hmdbColumn - 1), (this.csidColumn - 1), (this.weightColumn - 1)};
 
         try {
-            fingerprint = new Fingerprint(this.logContent, this.layerWarning, this.noFormatCheck,
+            fingerprint = new Fingerprint(this.logContent, this.galaxyFile, this.layerWarning, this.noFormatCheck,
                     this.inFileFingerprint, this.ifNoHeader, this.columnSeparator,
                     this.IDSeparator, (this.nameColumn - 1), mappingColumns, tab_inchiLayers,
                     (this.colFiltered - 1), this.checkingFile);

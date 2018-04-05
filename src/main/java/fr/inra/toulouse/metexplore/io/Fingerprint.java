@@ -13,7 +13,7 @@ public class Fingerprint implements WritingComportment {
 
     protected int nameColumn, filteredColumn, nbLine = 2, nbWarningPerLine, nbSelectedDatabases;
     protected int[] columnNumbers, nbWarningPerDatabases;
-    protected String separator, IDSeparator, warnings ="", logContent, checkingFile;
+    protected String galaxy, separator, IDSeparator, warnings ="", logContent, checkingFile;
     protected String[] inchiLayers;
     protected Boolean ifNoHeader, noFormatCheck, layerWarning;
     protected ArrayList<String[]> list_entities = new ArrayList<String[]>(); //input file after formatting and filtering
@@ -31,10 +31,11 @@ public class Fingerprint implements WritingComportment {
 
     //TODO: parsing for Excel files
 
-    public Fingerprint (String logContent, Boolean layerWarning, Boolean noFormatCheck, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
+    public Fingerprint (String logContent, String galaxy, Boolean layerWarning, Boolean noFormatCheck, String inFileFingerprint, Boolean ifNoHeader, String separator, String IDSeparator, int nameColumn,
                         int[] mappingColumns, String[] inchiLayers, int filteredColumn, String checkingFile) throws IOException {
 
         this.logContent = logContent;
+        this.galaxy = galaxy;
         this.checkingFile = checkingFile;
         this.inBuffer=new BufferedReader(new FileReader(new File(inFileFingerprint)));
         this.layerWarning=layerWarning;
@@ -118,8 +119,8 @@ public class Fingerprint implements WritingComportment {
         }
         if (inBuffer != null) inBuffer.close();
         if (this.list_entities.size() < 1) {//no extraction = error generation
-            System.err.println("[FATAL] File badly formatted");
-            exit(10);
+            String message="[FATAL] File badly formatted";
+            sysExit(this.logContent,message,this.galaxy,10);
         }else if(!noFormatCheck && !ifWrongDatabase()){
             if (warnings.isEmpty()) this.logContent = writeLog(this.logContent,"All your databases identifiers seem valid.\n");
             else{
@@ -154,9 +155,9 @@ public class Fingerprint implements WritingComportment {
         //if all the selected database have all there values wrong, exit
         // (if they are > 0, meaning they are not included only name or sbml id mapping)
         if (nbSelectedDatabases > 0 && nbWrongDatabase == nbSelectedDatabases) {
-            System.err.println("[FATAL] All the values of the selected database(s) are badly formatted. Please check the column number set for these databases.\n" +
-                    "-noCheck to ignore the bad format exit and run the analysis anyway.");
-            exit(11);
+            String message="[FATAL] All the values of the selected database(s) are badly formatted. Please check the column number set for these databases.\n" +
+                    "-noCheck to ignore the bad format exit and run the analysis anyway.";
+            sysExit(this.logContent,message,this.galaxy,11);
         }
         //else write errors
         if(nbWrongDatabase>0) this.logContent = writeLog(this.logContent, wrongDatabaseWarning);

@@ -60,7 +60,7 @@ public class Launcher_mapping extends Launcher_Fingerprint {
             if (Pattern.matches("-+prec.*", arg)) {
                 if (this.weightColumn < 0){
                     this.weightColumn = 2;
-                    writeLog("[WARNING] Weigt precision has been set without specify isotopic mass column in the fingerprint.\n" +
+                    writeLog("[WARNING] Weight precision has been set without specify isotopic mass column in the fingerprint.\n" +
                             "[WARNING] By default, it has been set to the 2nd column.");
                 }
                 break;

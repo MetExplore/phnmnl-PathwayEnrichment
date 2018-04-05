@@ -146,7 +146,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
         for (String arg : args) {
             if (Pattern.matches("-(name|chebi|inchi|idsbml|id|smiles|pubchem|inchikey|key|kegg|hmdb|csid|mass|weight)$", arg.toLowerCase())) {
                 ifMappingParameter = true;
-                if (Pattern.matches("-.*", args[i + 1]) && !arg.equals("-name")) {
+                if (Pattern.matches("(^-.*|0)", args[i + 1]) && !arg.equals("-name")) {
                     writeLog("[WARNING] " + arg + " column parameter must be positive.\n");
                 }
             }
@@ -170,7 +170,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             for (String arg : args) {
                 if (Pattern.matches("-name$", arg)) {
                     ifMappingParameter = true;
-                    if (Pattern.matches("^-.*", args[i + 1])) {
+                    if (Pattern.matches("(^-.*|0)", args[i + 1])) {
                         this.idSBMLColumn = 2;
                         writeLog(mappingNegativeWarnings);
                     }

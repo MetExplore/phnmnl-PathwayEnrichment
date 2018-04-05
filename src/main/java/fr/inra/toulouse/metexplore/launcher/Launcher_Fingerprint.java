@@ -144,7 +144,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 " Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem, isotopic mass and HMDB (check -help).\n";
 
         for (String arg : args) {
-            if (Pattern.matches("-(name|chebi|inchi|idSBML|id|smiles|pubchem|inchikey|key|kegg|hmdb|csid|mass|weight)$", arg.toLowerCase())) {
+            if (Pattern.matches("-(name|chebi|inchi|idsbml|id|smiles|pubchem|inchikey|key|kegg|hmdb|csid|mass|weight)$", arg.toLowerCase())) {
                 ifMappingParameter = true;
                 if (Pattern.matches("-.*", args[i + 1]) && !arg.equals("-name")) {
                     writeLog("[WARNING] " + arg + " column parameter must be positive.");

@@ -18,13 +18,13 @@ public class Launcher_PathEnr extends Launcher_mapping implements WritingComport
     protected int entityType2Enrich = 3;
 
     @SuppressWarnings("deprecation")
-    public void printInfo(CmdLineParser parser, String[] args) throws CmdLineException {
+    public void testParameters(String[] args) throws CmdLineException2 {
 
         if (this.entityType2Enrich < 1 || this.entityType2Enrich > 6) {
-            throw new CmdLineException(warn_type[0] + "enriched" + warn_type[1]);
+            throw new CmdLineException2(warn_type[0] + "enriched" + warn_type[1]);
         }
 
-        super.printInfo(parser, args);
+        super.testParameters(args);
     }
 
     public Omics analyse(CmdLineParser parser, String[] args) throws IOException{

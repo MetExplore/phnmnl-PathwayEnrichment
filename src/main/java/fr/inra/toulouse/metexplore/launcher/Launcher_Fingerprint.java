@@ -9,38 +9,38 @@ import org.kohsuke.args4j.Option;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-public class Launcher_Fingerprint extends Launcher implements WritingComportment{
+public class Launcher_Fingerprint extends Launcher implements WritingComportment {
 
     /******FILES PARAMETERS*****/
 
-    @Option(name="-i", aliases="-inFile", usage="[REQUIRED] Input file containing a fingerprint (in tsv file format).")
-    protected String inFileFingerprint ;
+    @Option(name = "-i", aliases = "-inFile", usage = "[REQUIRED] Input file containing a fingerprint (in tsv file format).")
+    protected String inFileFingerprint;
 
-    @Option(name="-o1", aliases = "--outCheck", usage="Output file name for checking format process (by default: disabled).")
+    @Option(name = "-o1", aliases = "--outCheck", usage = "Output file name for checking format process (by default: disabled).")
     protected String checkingFile = "checking_format.tsv";
 
     /******PARSING PARAMETERS*****/
 
-    @Option(name="-noCheck", usage="Activate this option to check database identifier format.")
+    @Option(name = "-noCheck", usage = "Activate this option to check database identifier format.")
     protected boolean noFormatCheck = false;
 
-    @Option(name="-header", usage="Activate this option if the fingerprint dataset contains no header.")
+    @Option(name = "-header", usage = "Activate this option if the fingerprint dataset contains no header.")
     protected boolean ifNoHeader = false;
 
-    @Option(name="-sep", aliases="-separator", usage="Character used as separator for columns in the dataset (by default: tabulation).")
+    @Option(name = "-sep", aliases = "-separator", usage = "Character used as separator for columns in the dataset (by default: tabulation).")
     protected String columnSeparator = "\t";
     //TODO: --adv without interface
     //TODO: Check separator
 
-    @Option(name="-sepID", aliases="-separatorID", usage="Character used as separator if there are multiple values in a database column of the dataset (by default: ,).")
+    @Option(name = "-sepID", aliases = "-separatorID", usage = "Character used as separator if there are multiple values in a database column of the dataset (by default: ,).")
     protected String IDSeparator = ";";
     //TODO: warning if ',' separator because of the InChI
     //TODO: remove this separator in Fingerprint class for InChI only
 
-    @Option(name="-f", aliases="-filter", usage="Number of the filtered column")
+    @Option(name = "-f", aliases = "-filter", usage = "Number of the filtered column")
     protected int colFiltered = -1;
 
-    @Option(name="-lWarn", aliases="-layersWarning", usage="When format checking option is activated, points out badly formatted InChI layers")
+    @Option(name = "-lWarn", aliases = "-layersWarning", usage = "When format checking option is activated, points out badly formatted InChI layers")
     protected Boolean layerWarning = false;
 
     /*****MAPPING PARAMETERS*****/
@@ -57,7 +57,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     @Option(name = "-inchi", aliases = "-InChI", usage = "Number of the file's column containing the InChI data.")
     protected int inchiColumn = -1;
 
-    @Option(name = "-chebi",  aliases = {"-ChEBI", "-CHEBI"}, usage = "Number of the file's column containing the ChEBI data.")
+    @Option(name = "-chebi", aliases = {"-ChEBI", "-CHEBI"}, usage = "Number of the file's column containing the ChEBI data.")
     protected int chebiColumn = -1;
 
     @Option(name = "-idSBML", aliases = {"-id", "-idSbml", "-idsbml"}, usage = "Number of the file's column containing the SBML identifier (by default: 2nd column).")
@@ -110,17 +110,6 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                     "(by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter)");
         }
 
-
-        //Case for format Checking
-        if (!this.noFormatCheck) {
-            //The user has set inchi layers and has not disabled the checking step
-            if (!this.inchiLayers.equals("c,h")) {
-                this.layerWarning = true;
-            }
-        } else if (this.layerWarning && this.noFormatCheck) {
-            writeLog("[WARNING] Checking format option has been disabled.\n" +
-                    "[WARNING] Without checking, layer warnings option will be useless.\n");
-        }
 
         //Case for layers settings without InChI
         Boolean ifLayerMappingParameter = false, ifInchiMappingParameter = false;
@@ -184,13 +173,18 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             }
         }
 
+        testParameters(args);
+
+    }
+
+    public void testParameters(String[] args) throws CmdLineException2{
 
         //check name column setting
-        i = 0;
+        int i = 0;
         Boolean ifNameColumn = false;
         // check if name parameters have been called with negative values
         for (String arg : args) {
-            if (Pattern.matches("-name.*", arg)){
+            if (Pattern.matches("-name.*", arg)) {
                 ifNameColumn = true;
                 /*if(Pattern.matches("-.*", args[i + 1])) {
                     writeLog("[WARNING] "+  arg + " column parameter must be positive.\n");
@@ -200,11 +194,11 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             }
         }
         String nameWarning = "; by default it was set to the 1rst column.\n";
-        if(!ifNameColumn){
+        if (!ifNameColumn) {
             //no name parameters have been called
             this.nameColumn = 1;
             writeLog("[WARNING] No column number has been chosen for the name of the chemicals" + nameWarning);
-        }else {
+        } else {
             //name parameters have been called but all with negative column
             i = 0;
             ifNameColumn = false;
@@ -226,11 +220,32 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 writeLog(nameNegativeWarning);
             }
         }
+
+        if (!this.noFormatCheck) {
+            //The user has set inchi layers and has not disabled the checking step
+            if (!this.inchiLayers.equals("c,h")) {
+                this.layerWarning = true;
+            }
+        } else if (this.layerWarning && this.noFormatCheck) {
+            writeLog("[WARNING] Checking format option has been disabled.\n" +
+                    "[WARNING] Without checking, layer warnings option will be useless.\n");
+        }
     }
 
+    class CmdLineException2 extends CmdLineException{
+
+        public CmdLineException2(String message){
+            super(message);
+            System.out.println("Vous essayez d'instancier une classe Ville avec un nombre d'habitants négatif !");
+
+        }
+
+    }
 
     public void printError(CmdLineParser parser, CmdLineException e, String[] args) {
-        if (e.getMessage().equals("Option \"-l (-layers)\" takes an operand")) {
+        if (!e.getMessage().equals("Option \"-l (-layers)\" takes an operand")) {
+            super.printError(parser, e);
+        } else {
             this.inchiLayers = "";
             Boolean ifInchiMappingParameter = testInchiParameter(args);
             if (!ifInchiMappingParameter) {
@@ -238,8 +253,11 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 writeLog("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
                         "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
             }
-        } else {
-            super.printError(parser, e);
+            try {
+                testParameters(args);
+            }catch (CmdLineException2 e2){
+                    super.printError(parser, e2);
+            }
         }
     }
 
@@ -265,18 +283,24 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
         return fingerprint;
     }
 
+    public void setFile(){
+        if (!this.galaxyFile.equals("")) {
+            this.logContent = "";
+            logFile = this.createFile(this.galaxyFile);
+        }
+    }
+
     public static void exec(Launcher_Fingerprint launch, String[] args) {
         startTime = System.nanoTime();
         CmdLineParser parser = new CmdLineParser(launch);
 
         try {
             parser.parseArgument(args);
-            if (!launch.galaxyFile.equals("")) {
-                launch.logContent = "";
-                logFile = launch.createFile(launch.galaxyFile);
-            }
+            launch.setFile();
             launch.printInfo(parser, args);
         } catch (CmdLineException e) {
+            //setFile here because of -l parameter catch
+            launch.setFile();
             launch.printError(parser, e, args);
         }
 

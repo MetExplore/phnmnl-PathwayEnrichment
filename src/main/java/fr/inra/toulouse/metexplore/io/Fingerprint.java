@@ -119,7 +119,7 @@ public class Fingerprint implements WritingComportment {
         }
         if (inBuffer != null) inBuffer.close();
         if (this.list_entities.size() < 1) {//no extraction = error generation
-            String message="[FATAL] File badly formatted";
+            String message="[FATAL] File badly formatted. Please, check the column number of your -f parameter if enable. Otherwise, check your column separator (default: tabulated file, set with -sep parameter).";
             sysExit(this.logContent,message,this.galaxy,10);
         }else if(!noFormatCheck && !ifWrongDatabase()){
             if (warnings.isEmpty()) this.logContent = writeLog(this.logContent,"All your databases identifiers seem valid.\n");

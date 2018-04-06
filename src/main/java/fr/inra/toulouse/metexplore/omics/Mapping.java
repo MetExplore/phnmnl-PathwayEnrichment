@@ -131,7 +131,7 @@ public class Mapping extends Omics {
                         "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
                         "enter the number of this added column into your program settings.";
             }else {
-                message = "[FATAL] There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
+                message = "[FATAL] There is no match for this network !\nCommon mistakes: wrong type of mapping " +
                         "(by default on the SBML ID and the name of the metabolites), wrong number of column from the dataset" +
                         " or wrong type of bioEntity (or bad SBML).\nPlease check your settings and rerun the analysis.";
             }

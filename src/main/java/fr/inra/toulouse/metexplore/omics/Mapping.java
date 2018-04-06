@@ -124,16 +124,18 @@ public class Mapping extends Omics {
         }
 
         if (this.list_mappedEntities.size() == 0) {
-            if (!warningsDoublets.equals(""))
-                System.err.println("There is multiple possible match for your whole list of metabolites !\n " +
+            String message="";
+            if (!warningsDoublets.equals("")) {
+                message = "[FATAL] There is multiple possible match for your whole list of metabolites !\n " +
                         "Please, choose the ID of the desired metabolites among those proposed in the output file.\n " +
                         "Then you can re-run the analysis by adding them into a new column of your input dataset and " +
-                        "enter the number of this added column into your program settings.");
-            else
-                System.err.println("There is no match for this network ! \nCommon mistakes: wrong type of mapping " +
+                        "enter the number of this added column into your program settings.";
+            }else {
+                message = "[FATAL] There is no match for this network !\nCommon mistakes: wrong type of mapping " +
                         "(by default on the SBML ID and the name of the metabolites), wrong number of column from the dataset" +
-                        " or wrong type of bioEntity (or bad SBML).\nPlease check your settings and rerun the analysis.");
-            exit(1);
+                        " or wrong type of bioEntity (or bad SBML).\nPlease check your settings and rerun the analysis.";
+            }
+            sysExit(this.logContent,message,galaxy,20);
         }
 
         if (!this.outFileMapping.equals("")) {
@@ -214,7 +216,7 @@ public class Mapping extends Omics {
                         for (String id : list_id) {
                             for (BioRef val : key.getValue()) {
                                 if (id.equals(val.id)) {
-                                    this.matchedValuesSBML.add(associatedValueInSbml);
+                                    this.matchedValuesSBML.add(val.id);
                                     this.matchedValues.add(id);
                                     this.isMappedBpe = true;
                                     return;
@@ -253,7 +255,6 @@ public class Mapping extends Omics {
                 query = query.substring(0, query.length() - 2);
             }
         }
-        //System.out.println(query + ": " + hit);
         return query.equals(hit);
     }
 
@@ -264,18 +265,24 @@ public class Mapping extends Omics {
                 query = query.substring(0, query.length() - 2);
             }
         }
-        //System.out.println(query + ": " + hit);
         return query.equals(hit);
     }
 
     public Boolean compareProtEnz(String query, String hit) {
+
+        //two format could be encounter in Recon2:
+        //(i) first case: where the id from SBML begin by  "_HSA" (e.g. "_HSA:AL038231")
+        // the motif (AL038231) would not include the splicing version (e.g., 1, 2 or 3)
+        // from the Metexplore website ID (e.g. "_AL038231_1_c")
+        //(ii) second one: where it begin by "_" only (e.g. "_514_2")
+        //the motif (514_2) would take account to splicing version (e.g. "_514_2_c")
+
         Matcher m = Pattern.compile("_HSA:(.+)").matcher(hit);
         if (m.matches()) {
             hit = m.group(1);
             m = Pattern.compile("_(.+)(_\\w){2}").matcher(query);
             if (m.matches()) {
                 query = m.group(1);
-                //System.out.println(query + ": " + hit);
                 return query.equals(hit);
             }
 
@@ -286,7 +293,6 @@ public class Mapping extends Omics {
                     m = Pattern.compile("_(.+)_\\w$").matcher(query);
                     if (m.matches()) {
                         query = m.group(1);
-                        //System.out.println(query + ": " + hit);
                         return query.equals(hit);
                     }
                 }
@@ -344,8 +350,8 @@ public class Mapping extends Omics {
         }
 
         if (this.list_mappedEntities.size() == 0) {
-            System.err.println("No metabolite have been extracted from the network. \nPlease, check the format of database identifier validity.");
-            exit(1);
+            String message ="[FATAL] No metabolite have been extracted from the network. \nPlease, check the format of database identifier validity.";
+            sysExit(this.logContent,message,galaxy,21);
         }
     }
 }

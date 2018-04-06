@@ -17,7 +17,7 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     protected String inFileFingerprint ;
 
     @Option(name="-o1", aliases = "--outCheck", usage="Output file name for checking format process (by default: disabled).")
-    protected String checkingFile = "";
+    protected String checkingFile = "checking_format.tsv";
 
     /******PARSING PARAMETERS*****/
 
@@ -95,43 +95,34 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
     }
 
     @SuppressWarnings("deprecation")
-    public void printInfo(CmdLineParser parser, String[] args) throws CmdLineException{
+    public void printInfo(CmdLineParser parser, String[] args) throws CmdLineException {
 
         super.printInfo(parser);
 
         //required=true in @option required -i with -h and -v !
-        if(this.inFileFingerprint==null){
+        if (this.inFileFingerprint == null) {
             throw new CmdLineException("-i parameter required");
         }
 
-        if(!this.noFormatCheck && !this.inchiLayers.equals("c,h")){
-            this.layerWarning = true;
+        //Check inchi Layers format
+        if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", this.inchiLayers)) {
+            throw new CmdLineException("-l parameter badly formatted: it must be a list containing the number - separated by comma without blank spaces - of the InChi's layer concerned by the mapping " +
+                    "(by default: c,h; for a mapping including all the layers, enter c,h,q,p,b,t,i,f,r; for a mapping on formula layer only, enter the -l option with no parameter)");
         }
 
-        //Error messages for bad parameters
-        if (!this.noFormatCheck){
-            if(!this.inchiLayers.equals("c,h")) {
+
+        //Case for format Checking
+        if (!this.noFormatCheck) {
+            //The user has set inchi layers and has not disabled the checking step
+            if (!this.inchiLayers.equals("c,h")) {
                 this.layerWarning = true;
             }
-        }else {
-            if(!this.checkingFile.equals("")){
-                writeLog("[WARNING] Checking format option has been disabled.\n" +
-                        "[WARNING] To prevent checking file to be empty, it has been activated by default.\n");
-                this.noFormatCheck = false;
-                if(!this.inchiLayers.equals("c,h")) {
-                    this.layerWarning = true;
-                }
-            }
-            if(this.layerWarning && this.noFormatCheck){
-                writeLog("[WARNING] Checking format option has been disabled.\n" +
-                        "[WARNING] Without checking, layer warnings option will be useless.\n");
-            }
+        } else if (this.layerWarning && this.noFormatCheck) {
+            writeLog("[WARNING] Checking format option has been disabled.\n" +
+                    "[WARNING] Without checking, layer warnings option will be useless.\n");
         }
 
-        if (!Pattern.matches("([chqpbtifr],)*[chqpbtifr]", this.inchiLayers)) {
-            throw new CmdLineException("-l parameter badly formatted");
-        }
-
+        //Case for layers settings without InChI
         Boolean ifLayerMappingParameter = false, ifInchiMappingParameter = false;
         for (String arg : args) {
             if (Pattern.matches("-l[ ]*", arg)) {
@@ -143,62 +134,100 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
             this.inchiColumn = 2;
             writeLog("[WARNING] InChI layers parameters set without having specified the InChI column (-inchi).\n" +
                     "[WARNING] By default, the column used for InChI mapping is the 2nd of your dataset.\n");
-        } else {
+        }
 
-            //The user have use any mapping parameters
-            int i = 0;
-            Boolean ifMappingParameter = false;
-            for (String arg : args) {
-                if (Pattern.matches("-(nameCol|name|chebi|inchi|idSBML|smiles|pubchem|inchikey|kegg|hmdb|csid|mass)$", arg)) {
-                    ifMappingParameter = true;
-                    break;
+
+        //Mapping parameters
+        int i = 0;
+        Boolean ifMappingParameter = false;
+        String mappingWarnings = " By default, it was set on the SBML identifiers at the 2nd column of your dataset." +
+                " Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem, isotopic mass and HMDB (check -help).\n";
+
+        for (String arg : args) {
+            if (Pattern.matches("-(name|chebi|inchi|idsbml|id|smiles|pubchem|inchikey|key|kegg|hmdb|csid|mass|weight)$", arg.toLowerCase())) {
+                ifMappingParameter = true;
+                if (Pattern.matches("(^-.*|0)", args[i + 1]) && !arg.equals("-name")) {
+                    writeLog("[WARNING] " + arg + " column parameter must be positive.\n");
                 }
+            }
+            i++;
+        }
+        //also catch "-prec" only default setting with weight column
+        if (this.weightColumn < 1 && !ifMappingParameter) {
+            this.idSBMLColumn = 2;
+            writeLog("[WARNING] No mapping parameters has been chosen." + mappingWarnings);
+        }
+
+        //All mapping parameters are disabled (case with all set to negative values)
+        ifMappingParameter = false;
+        i = 0;
+        String mappingNegativeWarnings = "[WARNING] All your mapping parameters have negative column." + mappingWarnings;
+        if (this.chebiColumn < 1 && this.inchiColumn < 1 && this.idSBMLColumn < 1 &&
+                this.smilesColumn < 1 && this.pubchemColumn < 1 && this.inchikeyColumn < 1
+                && this.keggColumn < 1 && this.hmdbColumn < 1 && this.csidColumn < 1
+                && this.weightColumn < 1) {
+            //case for name mapping in corresponding Launcher and avoid a -name option in Fingerprint launcher
+            for (String arg : args) {
+                if (Pattern.matches("-name$", arg)) {
+                    ifMappingParameter = true;
+                    if (Pattern.matches("(^-.*|0)", args[i + 1])) {
+                        this.idSBMLColumn = 2;
+                        writeLog(mappingNegativeWarnings);
+                    }
+                } else {
+                    i++;
+                }
+            }
+            if (!ifMappingParameter) {
+                this.idSBMLColumn = 2;
+                writeLog(mappingNegativeWarnings);
+            }
+        }
+
+
+        //check name column setting
+        i = 0;
+        Boolean ifNameColumn = false;
+        // check if name parameters have been called with negative values
+        for (String arg : args) {
+            if (Pattern.matches("-name.*", arg)){
+                ifNameColumn = true;
+                /*if(Pattern.matches("-.*", args[i + 1])) {
+                    writeLog("[WARNING] "+  arg + " column parameter must be positive.\n");
+                }*/
+            } else {
                 i++;
             }
-            if (!ifMappingParameter && weightColumn < 1) {
-                this.idSBMLColumn = 2;
-                writeLog("[WARNING] No mapping parameters have been chosen.\n" + mappingWarnings);
-            }
-
-            //All mapping parameters are disabled
-            ifMappingParameter = false;
+        }
+        String nameWarning = "; by default it was set to the 1rst column.\n";
+        if(!ifNameColumn){
+            //no name parameters have been called
+            this.nameColumn = 1;
+            writeLog("[WARNING] No column number has been chosen for the name of the chemicals" + nameWarning);
+        }else {
+            //name parameters have been called but all with negative column
             i = 0;
-            if (this.nameColumn < 1 && this.chebiColumn < 1 && this.inchiColumn < 1 && this.idSBMLColumn < 1 &&
-                    this.smilesColumn < 1 && this.pubchemColumn < 1 && this.inchikeyColumn < 1
-                    && this.keggColumn < 1 && this.hmdbColumn < 1 && this.csidColumn < 1
-                    && this.weightColumn < 1) {
-                //case for name mapping in corresponding Launcher and avoid a -name option in Fingerprint launcher
-                for (String arg : args) {
-                    if (Pattern.matches("-name$", arg)) {
-                        ifMappingParameter = true;
-                        if (Pattern.matches("^-.*", args[i + 1])) {
-                            this.nameColumn = 1;
-                            this.idSBMLColumn = 2;
-                            writeLog("[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
-                        }
-                    }else {
-                        i++;
-                    }
-                }
-                if (!ifMappingParameter){
-                    this.nameColumn = 1;
-                    this.idSBMLColumn = 2;
-                    writeLog( "[WARNING] All parameters for mapping your dataset on the SBML are disabled.\n" + mappingWarnings);
-                }
-            } else {
-                i = 0;
-                for (String arg : args) {
-                    //this.nameColumn < 0 : case for name mapping in corresponding Launcher
-                    if (this.nameColumn < 1 && Pattern.matches("-nameCol", arg) && Pattern.matches("-.*", args[i + 1])) {
-                        writeLog( "[WARNING] Name parameter must be positive. By default, it was set to the 1rst column.\n");
+            ifNameColumn = false;
+            String nameNegativeWarning = "[WARNING] Your column number for the name of the chemicals is negative" + nameWarning;
+            for (String arg : args) {
+                if (Pattern.matches("-name$", arg)) {
+                    ifNameColumn = true;
+                    if (Pattern.matches("^-\\d", args[i + 1]) && this.nameColumn < 1) {
                         this.nameColumn = 1;
-                    } else {
-                        i++;
+                        writeLog(nameNegativeWarning);
                     }
+                } else {
+                    i++;
                 }
+            }
+            //no nameMapping parameters have been called but only nameColum with negative values
+            if (!ifNameColumn && this.nameColumn < 1) {
+                this.nameColumn = 1;
+                writeLog(nameNegativeWarning);
             }
         }
     }
+
 
     public void printError(CmdLineParser parser, CmdLineException e, String[] args) {
         if (e.getMessage().equals("Option \"-l (-layers)\" takes an operand")) {
@@ -224,10 +253,10 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
                 (this.keggColumn - 1), (this.hmdbColumn - 1), (this.csidColumn - 1), (this.weightColumn - 1)};
 
         try {
-            fingerprint = new Fingerprint(this.logContent, this.layerWarning, this.noFormatCheck, this.checkingFile,
+            fingerprint = new Fingerprint(this.logContent, this.galaxyFile, this.layerWarning, this.noFormatCheck,
                     this.inFileFingerprint, this.ifNoHeader, this.columnSeparator,
                     this.IDSeparator, (this.nameColumn - 1), mappingColumns, tab_inchiLayers,
-                    (this.colFiltered - 1));
+                    (this.colFiltered - 1), this.checkingFile);
             this.logContent = fingerprint.getLogContent();
         } catch (IOException e) {
             e.printStackTrace();
@@ -242,15 +271,13 @@ public class Launcher_Fingerprint extends Launcher implements WritingComportment
 
         try {
             parser.parseArgument(args);
+            if (!launch.galaxyFile.equals("")) {
+                launch.logContent = "";
+                logFile = launch.createFile(launch.galaxyFile);
+            }
             launch.printInfo(parser, args);
         } catch (CmdLineException e) {
             launch.printError(parser, e, args);
-        }
-
-
-        if (!launch.galaxyFile.equals("")) {
-            logFile = launch.createFile(launch.galaxyFile);
-            launch.logContent = "";
         }
 
         try {

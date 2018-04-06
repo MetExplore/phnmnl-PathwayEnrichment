@@ -6,6 +6,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.File;
+import java.io.IOException;
 
 import static java.lang.System.exit;
 
@@ -18,9 +19,6 @@ public abstract class Launcher implements WritingComportment{
 
     @Option(name = "-gal", aliases = "-galaxy", usage = "For galaxy compliance: formatting pathway output and creating a new one containing log information.")
     protected String galaxyFile = "";
-
-    protected String mappingWarnings = "[WARNING] By default, a mapping has been set with the name and the SBML id respectively on the 1st and the 2nd column of your dataset.\n" +
-            "[WARNING] Other mapping available: ChEBI, InChI, InChIKey, SMILES, CSID, PubChem and HMDB (check -help).\n";
 
     protected static File logFile;
     protected String logContent;
@@ -35,10 +33,10 @@ public abstract class Launcher implements WritingComportment{
     }
 
     public void printError(CmdLineParser parser, CmdLineException e){
-        System.err.println(e.getMessage());
+        writeLog("[FATAL] " + e.getMessage());
         System.err.println("Options:");
         parser.printUsage(System.err);
-        exit(1);
+        sysExit(this.logContent,"", this.galaxyFile,1);
     }
 
     public void printInfo(CmdLineParser parser){

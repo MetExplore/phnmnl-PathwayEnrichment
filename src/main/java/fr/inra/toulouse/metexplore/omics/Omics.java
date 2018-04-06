@@ -19,20 +19,12 @@ public abstract class Omics implements WritingComportment{
     protected HashMap<BioEntity, String> list_mappedEntities; //list of mapped metabolites used for analysis
     protected BioNetwork network;
 
-    public WritingComportment getWrite() {
-        return write;
-    }
-
-    protected WritingComportment write;
     protected int entityType2Map;
-    protected String typeOfMappedEntity;
-    protected String galaxy;
+    protected String typeOfMappedEntity, galaxy, logContent;
 
     public String getLogContent() {
         return logContent;
     }
-
-    protected String logContent;
 
     public Omics (String logContent, String galaxy, ArrayList<String[]> list_fingerprint,
                        HashMap<BioEntity, String> list_mappedEntities, BioNetwork network, int entityType2Map){

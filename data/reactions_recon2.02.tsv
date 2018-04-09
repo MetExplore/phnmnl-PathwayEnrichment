@@ -1,0 +1,23 @@
+Name	Identifier
+fumarase	R_FUM
+fumarase, mitochondrial	R_FUMm
+2-aminoadipate transaminase, irreversible	R_AATAi
+aspartate transaminase	R_ASPTAm
+aspartate transaminase	R_ASPTA
+isoleucine transaminase	R_ILETA
+isoleucine transaminase, mitochondrial	R_ILETAm
+L-2-Aminoadipate:2-oxoglutarate aminotransferase Lysine biosynthesis / Lysine degradation EC:2.6.1.39	R_r0450
+L-alanine transaminase	R_ALATA_L
+L-Alanine:2-oxoglutarate aminotransferase Glutamate metabolism / Alanine and aspartate metabolism EC:2.6.1.2	R_r0081
+leucine transaminase	R_LEUTA
+leucine transaminase, mitochondrial	R_LEUTAm
+N-Acetyl-L-aspartate amidohydrolase	R_NACASPAH
+aconitase	R_ACONT
+Aconitate hydratase	R_ACONTm
+aspartate N-acetyltransferase, mitochondrial	R_ASPNATm
+malic enzyme (NAD), mitochondrial	R_ME1m
+malic enzyme (NADP)	R_ME2
+malic enzyme (NADP), mitochondrial	R_ME2m
+RE1233	R_RE1233M
+RE1233	R_RE1233C
+RE2127	R_RE2127C

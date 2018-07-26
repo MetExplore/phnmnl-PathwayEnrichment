@@ -1,3 +1,34 @@
+/*******************************************************************************
+ * Copyright INRA
+ *
+ *  Contact: ludovic.cottret@toulouse.inra.fr
+ *
+ *
+ * This software is governed by the CeCILL license under French law and
+ * abiding by the rules of distribution of free software.  You can  use,
+ * modify and/ or redistribute the software under the terms of the CeCILL
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability.
+ *  In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *  The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license and that you accept its terms.
+ *******************************************************************************/
+
 package fr.inra.toulouse.metexplore.omics;
 
 import fr.inra.toulouse.metexplore.omicsComponents.EnrichedEntity;
@@ -369,46 +400,58 @@ public class PathwayEnrichment extends Omics{
     }
 
     public HashMap<BioEntity, Double> benjaminiHochbergCorrection(HashMap<BioEntity, Double> pvalues) {
+
         ArrayList<BioEntity> orderedEnrichedEntities = this.sortPval(pvalues);
         HashMap<BioEntity, Double> adjPvalues = new HashMap<>();
         BioEntity e, e_next;
         double pval, adjPval;
         Boolean wasAlreadyEqual = false;
-        HashSet <BioEntity> entityWithEqualsPval = new HashSet<>();
+        HashSet <BioEntity> entityWithEqualsPval = new HashSet<>(); //temp for pathway with the same p-value
         int k_adj = 0;
 
+        //loop on each ranked p-values
         for(int k = 0; k < orderedEnrichedEntities.size(); ++k) {
             e = orderedEnrichedEntities.get(k);
-            entityWithEqualsPval.add(e);
             pval = pvalues.get(e);
-            //System.out.println("Pval : " + e.getName() + ": " + pval);
 
-            //case of probability equality
+            //calculation below are made on the next iteration, could not be longer than the list
             if (k + 1 < orderedEnrichedEntities.size()) {
+                //System.out.println("Pval : " + e.getName() + ": " + pval);
                 e_next = orderedEnrichedEntities.get(k + 1);
                 double pval_next = pvalues.get(e_next);
+
+                //case of probability equality, they should have the same BF rank
                 if (pval_next == pval) {
                     entityWithEqualsPval.add(e_next);
+                    //if it is the first pathway to have an equal p-value
                     if (!wasAlreadyEqual) {
+                        entityWithEqualsPval.add(e);
+                        //the chosen rank is this one
                         k_adj = k;
                     }
-                    wasAlreadyEqual = true;
-                    continue;
+                    wasAlreadyEqual = true; //then, the boolean is changed to used the rank only once
+                    continue; //go to another pathway
                 } else if (wasAlreadyEqual) {
+                    //case where the next pathway p-value is not equal to the previous one and
+                    //the adjusted of these pathways with equal p-values must be calculated
                     adjPval = pval * (double) pvalues.size() / (double) (k_adj + 1);
+                    //affected each pathways with equal p-values with this p-value adjusted
                     for (BioEntity e2 : entityWithEqualsPval) {
                         adjPvalues.put(e2, adjPval);
                     }
+                    //re-initialize the variables for other equality
                     entityWithEqualsPval = new HashSet<>();
                     wasAlreadyEqual = false;
-                    continue;
                 }
 
             }
-            //default case
+            //default case, no p-value equality
+            //the pathway have been passed through the last conditions and no one match
             adjPval = pval * (double) pvalues.size() / (double) (k + 1);
+            //adding to the dictionary of pathway and p-values
             adjPvalues.put(e, adjPval);
         }
+
         return adjPvalues;
     }
 
